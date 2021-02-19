@@ -1,0 +1,38 @@
+1. Basic settings:
+
+  username = os.environ['USER']
+  buildHome = '/Users/' + username + '/JEDI_OPT'
+  compilerName = 'gnu'
+  compilerVersion = '7.5.0'
+  mpiName = 'openmpi'
+  mpiVersion = '4.0.3'
+  software_file = 'software.txt'
+  debug = 1
+  currdir = os.getcwd()
+  self.workdir = currdir + '/pkg'
+
+2. Run with default:
+
+  python bld.py
+
+3. Run with own settings:
+
+  python bld.py \
+    --debug = 1 \
+    --buildHome = my-set \
+    --compilerName = my-set \
+    --compilerVersion = my-set \
+    --mpiName = my-set \
+    --mpiVersion = my-set \
+    --software_file = my-set \
+    --workdir = my-set
+
+  Only change the part need to set.
+
+4. Issues:
+
+  a. "jasper" has to use pre-2.0 releases.
+  b. "odc" did not compile
+  c. "baselibs" could not access
+  d. "tau2" failed:
+
