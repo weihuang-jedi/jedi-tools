@@ -72,7 +72,33 @@
         ${method}.getkf_gfs_np${npes}_nens${mems}.yaml \
         > log.${method}.np${npes}_nens${mems}
 
- sleep 5
+ n=1
+ while [ $n -le ${mems} ]
+ do
+   if [ $n -lt 10 ]
+   then
+     member_str=00${n}
+   elif [ $n -lt 100 ]
+   then
+     member_str=0${n}
+   else
+     member_str=${n}
+   fi
+
+   rm -rf output/mem${member_str}
+
+   n=$(( $n + 1 ))
+ done
+
+ n=1
+ while [ $n -lt ${npes} ]
+ do
+   rm -f stdoutNerr/std.*${n}
+
+   n=$(( $n + 1 ))
+ done
+
+#sleep 5
 #sacct --format="JobID,Elapsed,AveVMSize" | grep $SLURM_JOB_ID
  sacct --format=JobID,CPUTime,Elapsed,AveVMSize,MaxRSS,NodeList%30 --units=M -j $SLURM_JOBID
 

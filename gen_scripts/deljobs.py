@@ -28,7 +28,7 @@ class Profiler:
       num_lines = len(lines)
       print('Total number of lines: ', num_lines)
 
-      nl = 1
+      nl = 2
       while(nl < num_lines):
         item = lines[nl].strip().split(' ')
         jobid = item[0]

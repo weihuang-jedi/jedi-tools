@@ -98,8 +98,9 @@
 
        cd ${workdir}
 
-      #rm -rf output/mem000/*
-      #rm -rf observations/*
+       rm -f log*
+       rm -rf output/mem000/*
+       rm -rf observations/*
 
       #--------------------------------------------------------------------------
        for method in ${methodlist}
@@ -122,6 +123,27 @@
              ${curr_dir}/template.script.omp > ${runscript}
 
          sed -e "s/LAYOUT/${layout}/" ${curr_dir}/${method}.letkf_gfs.template > ${yaml_filename}
+
+         n=1
+         while [ $n -le ${num_member} ]
+         do
+           if [ $n -lt 10 ]
+           then
+             member_str=00${n}
+           elif [ $n -lt 100 ]
+           then
+             member_str=0${n}
+           else
+             member_str=${n}
+           fi
+
+           datapath=${data_dir}/mem${member_str}/INPUT
+           sed -e "s?DATAPATH?${datapath}?" ${curr_dir}/member.template >> ${yaml_filename}
+   
+           mkdir -p ${workdir}/output/mem${member_str}
+
+           n=$(( $n + 1 ))
+         done
        done
 
       #--------------------------------------------------------------------------
