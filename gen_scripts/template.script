@@ -1,0 +1,78 @@
+#!/bin/bash
+#SBATCH -N NUMNODE
+#SBATCH --ntasks-per-node=TASKS_PER_NODE
+#SBATCH -n MPITASKS
+#SBATCH -t 01:10:00
+#SBATCH -A gsienkf
+#SBATCH --partition=QUEUENAME
+#SBATCH --exclusive
+#SBATCH -J JOBNAME
+
+ set -x
+
+ ulimit -s unlimited
+
+ module use /work/noaa/gsienkf/weihuang/JEDI_OPT/modulefiles
+ module purge
+ module load cmake/3.18.1 python/3.7.5
+ module load gcc/8.3.0 openmpi/4.0.4
+ module load gnu8.3.0_openmpi4.0.4
+#module load armforge/20.1.1
+ module load vtune/2020.2
+ vtune_options="vtune -collect hotspots --"
+
+ export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/less_print/lib:$LD_LIBRARY_PATH
+ executable=/work/noaa/gsienkf/weihuang/jedi/src/less_print/bin/fv3jedi_letkf.x
+
+ basedir=/work/noaa/gsienkf/weihuang/data/basecase1
+
+ cd WORKDIR
+
+#for dir in observations output test
+#do
+#  ln -sf ${basedir}/${dir} .
+#done
+ rm -f core.*
+
+ map_opts="time"
+#map_opts="time map --profile"
+
+#other_opts="--cpu-bind=core"
+#other_opts="--cpu-bind=core numactl -m 1"
+ other_opts=${vtune_options}
+
+ npes=MPITASKS
+ mems=NUMBER_MEMBER
+ nodes=NUMNODE
+ method=METHOD
+
+ n=1
+ while [ $n -le ${mems} ]
+ do
+   if [ $n -lt 10 ]
+   then
+     member_str=00${n}
+   elif [ $n -lt 100 ]
+   then
+     member_str=0${n}
+   else
+     member_str=${n}
+   fi
+
+   mkdir -p output/mem${member_str}
+
+   n=$(( $n + 1 ))
+ done
+
+#export OMP_NUM_THREADS=OMPTHREADSNUMBER
+
+ ${map_opts} srun -n ${npes} -N ${nodes} \
+        ${other_opts} \
+        ${executable} \
+        ${method}.getkf_gfs_np${npes}_nens${mems}.yaml \
+        > log.${method}.np${npes}_nens${mems}
+
+ sleep 5
+#sacct --format="JobID,Elapsed,AveVMSize" | grep $SLURM_JOB_ID
+ sacct --format=JobID,CPUTime,Elapsed,AveVMSize,MaxRSS,NodeList%30 --units=M -j $SLURM_JOBID
+

@@ -1,0 +1,70 @@
+geometry:
+  nml_file_mpp: /work/noaa/gsienkf/weihuang/data/basedata/fix/fmsmpp.nml
+  trc_file: /work/noaa/gsienkf/weihuang/data/basedata/fix/field_table
+  akbk: /work/noaa/gsienkf/weihuang/data/basedata/fix/akbk64.nc4
+  layout: LAYOUT
+  io_layout: [1,1]
+  npx: 193
+  npy: 193
+  npz: 64
+  ntiles: 6
+  fieldsets:
+    - fieldset: /work/noaa/gsienkf/weihuang/data/basedata/fix/dynamics.yaml
+    - fieldset: /work/noaa/gsienkf/weihuang/data/basedata/fix/ufo.yaml
+
+window begin: &date '2019-12-02T21:00:00Z'
+window length: PT6H
+
+observations:
+- obs space:
+    name: Radiosonde
+    distribution: InefficientDistribution
+    obsdatain:
+      obsfile: ../observations/hofx_scatwind_obs_2019120300.nc4
+    obsdataout:
+      obsfile: ./observations/hofx_scatwind_obs_2019120300.nc4
+    simulated variables: [northward_wind, eastward_wind]
+  obs operator:
+    name: VertInterp
+  obs error: 
+    covariance model: localized diagonal
+    localization:
+      localization method: Gaspari-Cohn
+      max_nobs: 1000
+      lengthscale: 200e3
+      search method: kd_tree
+
+prints:
+  frequency: PT3H
+
+driver: 
+  do posterior observer: false
+  run as observer only: true
+# read HX from disk: true
+
+local ensemble DA:
+  solver: GETKF
+  vertical localization:
+    fraction of retained variance: .8
+    lengthscale: 1.5
+    lengthscale units: logp
+  inflation:
+    rtps: 0.5
+    rtpp: 0.6
+    mult: 1.1
+
+output:
+  filetype: gfs
+  datapath: ./output/mem%{member}%/
+  filename_core: letkf.fv_core.res.nc
+  filename_trcr: letkf.fv_tracer.res.nc
+  filename_sfcd: letkf.sfc_data.nc
+  filename_sfcw: letkf.fv_srf_wnd.res.nc
+  first: PT0H
+  frequency: PT1H
+  type: ens
+  date: *date
+
+background:
+ date: *date
+ members:

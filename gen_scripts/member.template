@@ -1,0 +1,8 @@
+   - filetype: gfs
+     state variables: [u,v,T,DELP,sphum,ice_wat,liq_wat,o3mr]
+     datapath: DATAPATH
+     filename_core: 20191203.000000.fv_core.res.nc
+     filename_trcr: 20191203.000000.fv_tracer.res.nc
+     filename_sfcd: 20191203.000000.sfc_data.nc
+     filename_sfcw: 20191203.000000.fv_srf_wnd.res.nc
+     filename_cplr: 20191203.000000.coupler.res

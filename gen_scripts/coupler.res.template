@@ -1,0 +1,3 @@
+     0        (Calendar: no_calendar=0, thirty_day_months=1, julian=2, gregorian=3, noleap=4)
+  SYEAR    SMONTH     SDAY     SHOUR     SMINUTE     SSECOND        Model start time:  year, month, day, hour, minute, second
+  CYEAR    CMONTH     CDAY     CHOUR     CMINUTE     CSECOND        Current model time: year, month, day, hour, minute, second
