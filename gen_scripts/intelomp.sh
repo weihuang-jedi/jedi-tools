@@ -16,12 +16,14 @@
  obs_name=hofx_scatwind_obs_2019120300
  obs_file=/work/noaa/gsienkf/weihuang/data/basecase1/observations/${obs_name}.nc4
 
- base_dir=/work/noaa/gsienkf/weihuang/jedi/base
+#base_dir=/work/noaa/gsienkf/weihuang/jedi/base
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case1
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case2
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case3
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase
- case_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
+#case_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
+ base_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
+ case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase1
 
  for ompthread in ${threadlist}
  do
@@ -33,17 +35,17 @@
       mkdir -p ${omp_base}
    fi
 
-   cd ${omp_base}
-   if [ ! -d observations ]
-   then
-      if [ -d ${base_dir}/omp${ompthread}/observations ]
-      then
-        ln -sf ${base_dir}/omp${ompthread}/observations .
-      else
-        mkdir -p ${obs_dir}
-        cp ${obs_file} observations/.
-      fi
-   fi
+  #cd ${omp_base}
+  #if [ ! -d observations ]
+  #then
+  #   if [ -d ${base_dir}/omp${ompthread}/observations ]
+  #   then
+  #     ln -sf ${base_dir}/omp${ompthread}/observations .
+  #   else
+  #     mkdir -p ${obs_dir}
+  #     cp ${obs_file} observations/.
+  #   fi
+  #fi
 
    for cores in ${corelist}
    do
@@ -52,26 +54,32 @@
        240)
          numnode=6
          layout="[5,8]"
+         queuename=orion
          ;;
        120)
          numnode=6
          layout="[5,4]"
+         queuename=orion
          ;;
        60)
          numnode=6
          layout="[5,2]"
+         queuename=orion
          ;;
        24)
          numnode=1
          layout="[2,2]"
+         queuename=bigmem
          ;;
        12)
          numnode=1
          layout="[1,2]"
+         queuename=bigmem
          ;;
        6)
          numnode=1
          layout="[1,1]"
+         queuename=bigmem
          ;;
        *)
          numnode=1
@@ -87,12 +95,13 @@
 
        mkdir -p ${workdir}/stdoutNerr
        mkdir -p ${workdir}/output/mem000
-       mkdir -p ${workdir}/observations
+      #mkdir -p ${workdir}/observations
 
        cd ${workdir}
 
       #rm -rf output/mem000/*
       #rm -rf observations/*
+       ln -sf ${base_dir}/omp${ompthread}/${jobname}/observations .
 
       #--------------------------------------------------------------------------
        for method in ${methodlist}
@@ -139,13 +148,13 @@
          done
        done
 
-       if [ ! -f observations/${obs_name}_0000.nc4 ]
-       then
-         RES=$(sbatch obs.sh) && sbatch --dependency=afterok:${RES##* } run.sh
-         echo "${jobname} JobID: ${RES##* }"
-       else
+      #if [ ! -f observations/${obs_name}_0000.nc4 ]
+      #then
+      #  RES=$(sbatch obs.sh) && sbatch --dependency=afterok:${RES##* } run.sh
+      #  echo "${jobname} JobID: ${RES##* }"
+      #else
          sbatch run.sh
-       fi
+      #fi
 
        cd ${curr_dir}
      done
