@@ -7,7 +7,7 @@
  threadlist="1 2 4"
 
 #caselist="base case1 case2 case3 intelbase intelcase"
- caselist="case4"
+ caselist="case4 intelcase1"
 
  for case in ${caselist}
  do

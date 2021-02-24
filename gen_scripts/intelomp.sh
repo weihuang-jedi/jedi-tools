@@ -23,7 +23,8 @@
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
  base_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
- case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase1
+#case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase1
+ case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase0
 
  for ompthread in ${threadlist}
  do

@@ -25,8 +25,8 @@
  module use $JEDI_OPT/modulefiles/core
  module load jedi/intel-impi
  module load mkl/2020.2
- module use /work/noaa/gsienkf/weihuang/JEDI_INTEL_OPT/modulefiles
- module load plasma19.8.1-intel2020.2
+#module use /work/noaa/gsienkf/weihuang/JEDI_INTEL_OPT/modulefiles
+#module load plasma19.8.1-intel2020.2
 #module load vtune/2020.2
 
 #export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/default/lib:$LD_LIBRARY_PATH
@@ -35,8 +35,11 @@
 #export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel/lib:$LD_LIBRARY_PATH
 #executable=/work/noaa/gsienkf/weihuang/jedi/src/intel/bin/fv3jedi_letkf.x
 
- export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/lib:$LD_LIBRARY_PATH
- executable=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/bin/fv3jedi_letkf.x
+#export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/lib:$LD_LIBRARY_PATH
+#executable=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/bin/fv3jedi_letkf.x
+
+ export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel0/lib:$LD_LIBRARY_PATH
+ executable=/work/noaa/gsienkf/weihuang/jedi/src/intel0/bin/fv3jedi_letkf.x
 
  cd WORKDIR
 
@@ -76,6 +79,11 @@
 
  echo "Nodelist: $SLURM_JOB_NODELIST"
  echo "CoerPerTask: $SLURM_CPUS_PER_TASK"
+
+ export KMP_AFFINITY=compact
+ export MKL_DYNAMIC=FALSE 
+ export MKL_NUM_THREADS=$OMP_NUM_THREADS
+ export I_MPI_PIN_DOMAIN="core"
 
 #other_opts="--cpu-bind=core"
 #other_opts="--cpu-bind=core"

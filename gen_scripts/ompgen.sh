@@ -20,7 +20,8 @@
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case1
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case2
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case3
- case_dir=/work/noaa/gsienkf/weihuang/jedi/case4
+#case_dir=/work/noaa/gsienkf/weihuang/jedi/case4
+ case_dir=/work/noaa/gsienkf/weihuang/jedi/case0
 
  for ompthread in ${threadlist}
  do

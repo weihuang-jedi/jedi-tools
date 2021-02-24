@@ -35,7 +35,7 @@ class Profiler:
       print('workdir not defined. Exit.')
       sys.exit(-1)
 
-    self.color_list = ['red', 'orange', 'magenta', 'blue', 'cyan', 'darkgreen']
+    self.colorlist = ['red', 'orange', 'magenta', 'blue', 'cyan', 'darkgreen']
     self.namelist = ['GNU-0', 'GNU-1', 'GNU-PLASMA', 'Intel-0', 'Intel-1', 'Intel-PLASMA']
 
   def process(self):
@@ -107,10 +107,10 @@ class Profiler:
         tstr = tstr.replace('  ', ' ')
       nlist = tstr.split(' ')
 
-      for funcname in self.fullfunction_list:
-        if(name == funcname):
-          avgtime.append(float(nlist[2]))
-         #print('      ' + name + ':' + nlist[2])
+     #for funcname in self.fullfunction_list:
+     #  if(name == funcname):
+     #    avgtime.append(float(nlist[2]))
+     #   #print('      ' + name + ':' + nlist[2])
 
       if(name == 'util::Timers::Total'):
         ttltime = float(nlist[2])
@@ -141,7 +141,9 @@ class Profiler:
       core = self.corelist[nc]
       for nm in range(len(self.enslist)):
         member = self.enslist[nm]
-        self.plot_total(axes[nm, nc], core, member)
+        self.plot_bar(axes[nm, nc], core, member)
+
+    plt.legend(self.namelist)
 
     fig.tight_layout()
 
@@ -156,30 +158,39 @@ class Profiler:
   def plot_bar(self, ax, core, member):
     title = '%d Cores, %d members Total time' %(core, member)
 
+    print('Start ', title)
+
     x = np.array(self.threadlist)
     ts = {}
 
     ymin = 1.0e+36
     ymax = 0.0
 
-    for i in range(len(self.threadlist)):
-      thread = self.threadlist[i]
-      ts[i] = []
-      for thread in self.threadlist:
-        t = 0.001*self.stats_list[core][member][thread][case]
-        ts[i].append(t)
+    threadname = []
+    for thread in self.threadlist:
+      threadname.append(str(thread))
+
+    for n in range(len(self.caselist)):
+      ts[n] = []
+      for i in range(len(self.threadlist)):
+        thread = self.threadlist[i]
+       #print('working in thread ' + str(thread) + ', case: ' + self.caselist[n])
+        t = 0.001*self.stats_list[core][member][thread][n]
+        ts[n].append(t)
         if(t > ymax):
           ymax = t
         if(t < ymin):
           ymin = t
 
     if(self.linear):
-      tmin = 10.0*int(ymin/10.0) - 10.0
+      tmin = -1.0
+     #tmin = 10.0*int(ymin/10.0) - 10.0
       tmax = 10.0 + 10.0*int(ymax/10.0)
     else:
-      tmin = 8192.0
-      while(tmin > ymin):
-        tmin /= 2.0
+      tmin = -1.0
+     #tmin = 8192.0
+     #while(tmin > ymin):
+     #  tmin /= 2.0
       tmax = 1.0
       while(tmax < ymax):
         tmax *= 2.0
@@ -187,18 +198,25 @@ class Profiler:
    #ax.set_xlim([x[0], x[-1]])
    #ax.set_ylim([tmin, tmax])
 
-    idx = np.asarray([i for i in range(len(self.caselist))])
+    idx = np.asarray([i for i in range(len(self.threadlist))])
 
-    width = 0.2
+    width = 0.1
 
-    ax.bar(idx, ts[0], width, color='r')
-    ax.bar(idx+width, ts[1], width, color='b')
+    ax.bar(idx-2.0*width, ts[0], width, color=self.colorlist[0])
+    ax.bar(idx-width, ts[1], width, color=self.colorlist[1])
+    ax.bar(idx, ts[2], width, color=self.colorlist[2])
+    ax.bar(idx+width, ts[3], width, color=self.colorlist[3])
+    ax.bar(idx+2.0*width, ts[4], width, color=self.colorlist[4])
+    ax.bar(idx+3.0*width, ts[5], width, color=self.colorlist[5])
 
     ax.set_xticks(idx)
-    ax.set_xticklabels(self.namelist, rotation=65)
+   #ax.set_xticklabels(threadname, rotation=65)
+    ax.set_xticklabels(threadname)
    #ax.legend(self.namelist)
-    ax.set_xlabel('Cases')
+    ax.set_xlabel('Threads')
     ax.set_ylabel('Time (second)')
+
+    print('Finished ', title)
 
   def set_linear(self, linear=1):
     self.linear = linear
@@ -210,7 +228,8 @@ class Profiler:
 if __name__== '__main__':
   debug = 1
   workdir = '/work/noaa/gsienkf/weihuang/jedi'
-  caselist = ['base', 'case1', 'case4', 'intelbase', 'intelcase', 'intelcase1']
+ #caselist = ['base', 'case1', 'case4', 'intelbase', 'intelcase', 'intelcase1']
+  caselist = ['base', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
   enslist = [10, 20, 40, 80]
   threadlist = [1, 2, 4]
   linear = 1
