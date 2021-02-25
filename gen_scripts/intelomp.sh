@@ -8,8 +8,10 @@
  cores_per_node=40
  methodlist="obs run"
  memberlist="10 20 40 80"
- corelist="24 240"
- threadlist="1 2 4"
+#corelist="24 240"
+ corelist="240"
+#threadlist="1 2 4"
+ threadlist="8"
 
  curr_dir=`pwd`
  data_dir=/work/noaa/gsienkf/weihuang/data/basedata/ensemble
@@ -20,11 +22,10 @@
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case1
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case2
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/case3
-#case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase
-#case_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
- base_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
+#base_dir=/work/noaa/gsienkf/weihuang/jedi/intelbase
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase1
- case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase0
+#case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase0
+ case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase
 
  for ompthread in ${threadlist}
  do
@@ -36,17 +37,17 @@
       mkdir -p ${omp_base}
    fi
 
-  #cd ${omp_base}
-  #if [ ! -d observations ]
-  #then
-  #   if [ -d ${base_dir}/omp${ompthread}/observations ]
-  #   then
-  #     ln -sf ${base_dir}/omp${ompthread}/observations .
-  #   else
-  #     mkdir -p ${obs_dir}
-  #     cp ${obs_file} observations/.
-  #   fi
-  #fi
+   cd ${omp_base}
+   if [ ! -d observations ]
+   then
+      if [ -d ${base_dir}/omp${ompthread}/observations ]
+      then
+        ln -sf ${base_dir}/omp${ompthread}/observations .
+      else
+        mkdir -p ${obs_dir}
+        cp ${obs_file} observations/.
+      fi
+   fi
 
    for cores in ${corelist}
    do
@@ -65,6 +66,11 @@
        60)
          numnode=6
          layout="[5,2]"
+         queuename=orion
+         ;;
+       30)
+         numnode=6
+         layout="[5,1]"
          queuename=orion
          ;;
        24)
@@ -149,13 +155,13 @@
          done
        done
 
-      #if [ ! -f observations/${obs_name}_0000.nc4 ]
-      #then
-      #  RES=$(sbatch obs.sh) && sbatch --dependency=afterok:${RES##* } run.sh
-      #  echo "${jobname} JobID: ${RES##* }"
-      #else
+       if [ ! -f observations/${obs_name}_0000.nc4 ]
+       then
+         RES=$(sbatch obs.sh) && sbatch --dependency=afterok:${RES##* } run.sh
+         echo "${jobname} JobID: ${RES##* }"
+       else
          sbatch run.sh
-      #fi
+       fi
 
        cd ${curr_dir}
      done

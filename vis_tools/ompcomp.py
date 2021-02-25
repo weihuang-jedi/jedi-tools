@@ -35,8 +35,8 @@ class Profiler:
       print('workdir not defined. Exit.')
       sys.exit(-1)
 
-    self.colorlist = ['red', 'orange', 'magenta', 'blue', 'cyan', 'darkgreen']
-    self.namelist = ['GNU-0', 'GNU-1', 'GNU-PLASMA', 'Intel-0', 'Intel-1', 'Intel-PLASMA']
+    self.colorlist = ['red', 'orange', 'magenta', 'yellow', 'blue', 'cyan', 'darkgreen']
+    self.namelist = ['GNU', 'GNU+omp', 'GNU+MKL', 'GNU+PLASMA', 'Intel', 'Intel+omp', 'Intel+PLASMA']
 
   def process(self):
     self.stats_list = {}
@@ -132,10 +132,7 @@ class Profiler:
    #plt.xlabel('Threads')
    #plt.ylabel('Time (sencond)')
 
-    if(self.linear):
-      imgname = 'lin_total.png'
-    else:
-      imgname = 'log_total.png'
+    imgname = 'totalTime.png'
 
     for nc in range(len(self.corelist)):
       core = self.corelist[nc]
@@ -202,17 +199,18 @@ class Profiler:
 
     width = 0.1
 
-    ax.bar(idx-2.0*width, ts[0], width, color=self.colorlist[0])
-    ax.bar(idx-width, ts[1], width, color=self.colorlist[1])
-    ax.bar(idx, ts[2], width, color=self.colorlist[2])
-    ax.bar(idx+width, ts[3], width, color=self.colorlist[3])
-    ax.bar(idx+2.0*width, ts[4], width, color=self.colorlist[4])
-    ax.bar(idx+3.0*width, ts[5], width, color=self.colorlist[5])
+    ax.bar(idx-3.0*width, ts[0], width, color=self.colorlist[0])
+    ax.bar(idx-2.0*width, ts[1], width, color=self.colorlist[1])
+    ax.bar(idx-width,     ts[2], width, color=self.colorlist[2])
+    ax.bar(idx,           ts[3], width, color=self.colorlist[3])
+    ax.bar(idx+width,     ts[4], width, color=self.colorlist[4])
+    ax.bar(idx+2.0*width, ts[5], width, color=self.colorlist[5])
+    ax.bar(idx+3.0*width, ts[6], width, color=self.colorlist[6])
 
     ax.set_xticks(idx)
    #ax.set_xticklabels(threadname, rotation=65)
     ax.set_xticklabels(threadname)
-   #ax.legend(self.namelist)
+    ax.set_yscale("log", base=2)
     ax.set_xlabel('Threads')
     ax.set_ylabel('Time (second)')
 
@@ -229,7 +227,9 @@ if __name__== '__main__':
   debug = 1
   workdir = '/work/noaa/gsienkf/weihuang/jedi'
  #caselist = ['base', 'case1', 'case4', 'intelbase', 'intelcase', 'intelcase1']
-  caselist = ['base', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
+ #caselist = ['base', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
+ #caselist = ['case0', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
+  caselist = ['base', 'case2', 'case0', 'case4', 'intelbase', 'intelcase', 'intelcase1']
   enslist = [10, 20, 40, 80]
   threadlist = [1, 2, 4]
   linear = 1

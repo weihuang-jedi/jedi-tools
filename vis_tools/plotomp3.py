@@ -517,8 +517,8 @@ if __name__== '__main__':
                 enslist=enslist, workdir=workdir, show=show)
   pr.process()
 
-  for show in [1, 0]:
- #for show in [0]:
+ #for show in [1, 0]:
+  for show in [0]:
     pr.set_show(show=show)
     for linear in [0, 1]:
       pr.set_linear(linear=linear)

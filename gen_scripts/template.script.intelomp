@@ -32,14 +32,14 @@
 #export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/default/lib:$LD_LIBRARY_PATH
 #executable=/work/noaa/gsienkf/weihuang/jedi/src/default/bin/fv3jedi_letkf.x
 
-#export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel/lib:$LD_LIBRARY_PATH
-#executable=/work/noaa/gsienkf/weihuang/jedi/src/intel/bin/fv3jedi_letkf.x
-
 #export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/lib:$LD_LIBRARY_PATH
 #executable=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma/bin/fv3jedi_letkf.x
 
- export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel0/lib:$LD_LIBRARY_PATH
- executable=/work/noaa/gsienkf/weihuang/jedi/src/intel0/bin/fv3jedi_letkf.x
+ export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel/lib:$LD_LIBRARY_PATH
+ executable=/work/noaa/gsienkf/weihuang/jedi/src/intel/bin/fv3jedi_letkf.x
+
+#export LD_LIBRARY_PATH=/work/noaa/gsienkf/weihuang/jedi/src/intel0/lib:$LD_LIBRARY_PATH
+#executable=/work/noaa/gsienkf/weihuang/jedi/src/intel0/bin/fv3jedi_letkf.x
 
  cd WORKDIR
 
