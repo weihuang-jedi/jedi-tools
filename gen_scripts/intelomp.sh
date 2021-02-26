@@ -26,6 +26,8 @@
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase1
 #case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase0
  case_dir=/work/noaa/gsienkf/weihuang/jedi/intelcase
+#exec_dir=/work/noaa/gsienkf/weihuang/jedi/src/intel-plasma
+ exec_dir=/work/noaa/gsienkf/weihuang/jedi/src/intel
 
  for ompthread in ${threadlist}
  do
@@ -124,6 +126,7 @@
              -e "s/MPITASKS/${mpitasks}/" \
              -e "s/QUEUENAME/${queuename}/" \
              -e "s/JOBNAME/${jobname}/" \
+             -e "s?FV3BLDDIR?${exec_dir}?" \
              -e "s?WORKDIR?${workdir}?" \
              -e "s/NUMBER_MEMBER/${num_member}/" \
              -e "s/METHOD/${method}/" \

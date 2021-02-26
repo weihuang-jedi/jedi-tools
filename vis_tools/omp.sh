@@ -5,7 +5,7 @@
  workbase=/work/noaa/gsienkf/weihuang/jedi
 
 #caselist="base case1 case2 case3 case4 intelbase intelcase"
- caselist="case0 case2 case4 intelcase0 intelcase intelcase1"
+ caselist="base case2 case0 case4 intelcase0 intelcase intelcase1"
 
  rm -f *.tar
 
@@ -15,7 +15,8 @@
 
    workdir=${workbase}/${case}
 
-   python plotomp3.py --workdir=${workdir}
+  #python plotomp3.py --workdir=${workdir}
+   python plotact.py  --workdir=${workdir}
 
    tar cvf ${case}_png.tar *.png
  done
