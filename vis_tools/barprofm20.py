@@ -68,7 +68,7 @@ class Profiler:
      #self.print_par_time(nc)
 
       self.print_gen(nc)
-      self.print_par(nc)
+     #self.print_par(nc)
 
   def print_gen_name(self, nc):
     print('\nTiming Statistics: Name')
@@ -633,7 +633,10 @@ if __name__== '__main__':
   debug = 1
   workdir = '.'
   corelist = [24, 240]
-  filelist = ['n24m20/log.run.np24_nens20', 'n240m20/log.run.np240_nens20']
+  rundir = '/work/noaa/gsienkf/weihuang/jedi/run'
+  file1 = rundir + '/n24m10_wei/stdoutNerr/std.out.0000'
+  file2 = rundir + '/n240m10/stdoutNerr/std.out.0000'
+  filelist = [file1, file2]
   linear = 0
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'linear='])
@@ -649,5 +652,5 @@ if __name__== '__main__':
   pr = Profiler(debug=debug, linear=linear, corelist=corelist, filelist=filelist)
   pr.process()
  #pr.plot_total()
-  pr.plot_par_bar(10)
+  pr.plot_par_bar(6)
 

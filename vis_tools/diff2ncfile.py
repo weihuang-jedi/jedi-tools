@@ -34,6 +34,7 @@ class CompareNCfile:
     self.corevars = ['u', 'v', 'T', 'DELP']
     self.tracervars = ['sphum', 'ice_wat', 'liq_wat', 'o3mr']
     self.fileheader = 'mem000/20191203.000000.letkf.'
+   #self.fileheader = 'mem000/20191203.000000.increment.'
 
   def process(self):
     corebase = '%s/%sfv_core.res.tile' %(self.dir1, self.fileheader)
@@ -126,10 +127,14 @@ class CompareNCfile:
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
   debug = 0
-  dir1 = '/work/noaa/gsienkf/weihuang/jedi/run/n24m10o1/output.ori'
- #dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/n24m10o1/output.rr'
-  dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/n24m10o1/output.sergey.rr'
- #dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/n24m10o1/output'
+
+ #dir1 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix/output'
+ #dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix240/output'
+
+ #dir1 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix/output.inef'
+  dir1 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix/output.whl'
+  dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix/output'
+ #dir2 = '/work/noaa/gsienkf/weihuang/jedi/run/bugfix/output.halo'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'dir1=', 'dir2='])
 
