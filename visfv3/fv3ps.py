@@ -20,6 +20,7 @@ if __name__ == '__main__':
   debug = 1
   output = 0
   addobs = 0
+  prefix = 'ori'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs='])
 
@@ -30,6 +31,8 @@ if __name__ == '__main__':
       output = int(a)
     elif o in ('--addobs'):
       addobs = int(a)
+    elif o in ('--prefix'):
+      prefix = a
    #else:
    #  assert False, 'unhandled option'
 
@@ -39,11 +42,10 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
  #griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
-  griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
+  griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
- #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.psOnly/increment/'
- #datadir = '/work/noaa/gsienkf/weihuang/jedi/surface/analysis.getkf.80members.36procs/increment/'
-  datadir = '/work/noaa/gsienkf/weihuang/jedi/surface/analysis.getkf.5members.36procs/increment/'
+  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes'
+  datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
 
   datafiles = []
   gridspecfiles = []
@@ -71,14 +73,18 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
-  clevs = np.arange(-0.5, 0.51, 0.01)
-  cblevs = np.arange(-0.5, 0.6, 0.1)
+ #clevs = np.arange(-0.5, 0.51, 0.01)
+ #cblevs = np.arange(-0.5, 0.6, 0.1)
+  clevs = np.arange(-0.02, 0.021, 0.001)
+  cblevs = np.arange(-0.02, 0.03, 0.01)
+  gp.set_precision(precision=2)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
 #------------------------------------------------------------------------------
   if(addobs):
-    filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
+   #filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
+    filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres/ioda_v2_data/obs/surfpres.nc4'
     rio = ReadIODA2Obs(debug=debug, filename=filename)
    #lat, lon = rio.get_latlon()
     lat, lon = rio.get_latlon4var(varname='/ObsValue/surface_pressure')

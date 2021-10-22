@@ -42,8 +42,8 @@ if __name__ == '__main__':
  #dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/manual-obs'
  #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/manual-obs/analysis.getkf.80members.36procs.ori/increment/'
  #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/manual-obs/analysis.getkf.80members.36procs.new/increment/'
- #dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
-  dirname = '/work/noaa/gsienkf/weihuang/jedi/surface'
+  dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
+ #dirname = '/work/noaa/gsienkf/weihuang/jedi/surf'
   datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(dirname, prefix)
 
   datafiles = []
@@ -75,8 +75,12 @@ if __name__ == '__main__':
 
   gp.set_label('Temperature (K)')
 
-  clevs = np.arange(-0.5, 0.51, 0.01)
-  cblevs = np.arange(-0.5, 0.6, 0.1)
+ #clevs = np.arange(-0.5, 0.51, 0.01)
+ #cblevs = np.arange(-0.5, 0.6, 0.1)
+
+  gp.set_precision(precision=3)
+  clevs = np.arange(-0.01, 0.011, 0.001)
+  cblevs = np.arange(-0.01, 0.015, 0.005)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
@@ -95,7 +99,8 @@ if __name__ == '__main__':
     gp.plot_meridional_section_logp(pvar)
 
  #------------------------------------------------------------------------------
-  levs = [0, 10, 13, 16, 24, 29, 36, 42, 52, 63]
+ #levs = [0, 10, 13, 16, 24, 29, 36, 42, 52, 63]
+  levs = [0, 1, 2, 61, 62, 63]
   for lev in levs:
     pvar = var[lev,:,:]
     imgname = '%s_getkf_sondes_lev_%d.png' %(image_prefix, lev)
