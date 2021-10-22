@@ -7,6 +7,11 @@
 
  set -x
 
+ ln -sf /work/noaa/gsienkf/weihuang/jedi/surface/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sfc.2021-01-08T21:00:00Z.nc4 sample_obs.nc4
+ createobs.exe
+
+ rm sample_obs.nc4
+
  if [ "$#" -lt 1 ]
  then
    fl=created_sample_obs.nc4
