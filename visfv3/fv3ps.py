@@ -20,9 +20,9 @@ if __name__ == '__main__':
   debug = 1
   output = 0
   addobs = 0
-  prefix = 'ori'
+  prefix = None
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs=', 'prefix='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -44,8 +44,12 @@ if __name__ == '__main__':
  #griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
   griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
-  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes'
-  datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
+  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
+
+  if(prefix is None):
+    datadir = '%s/analysis.getkf.80members.36procs/increment/' %(casedir)
+  else:
+    datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
 
   datafiles = []
   gridspecfiles = []
@@ -97,8 +101,12 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   gp.set_label('Surface Pressure (hPa)')
 
-  imgname = 'PSonly_jedi_sondes'
-  title = 'PSonly JEDI Sondes Surface Pressure'
+  if(prefix is None):
+    imgname = 'PSonly_jedi_sondes'
+    title = 'PSonly JEDI Sondes Surface Pressure'
+  else:
+    imgname = '%s_PSonly_jedi_sondes' %(prefix)
+    title = '%s PSonly JEDI Sondes Surface Pressure' %(prefix)
 
   var = 0.01*var #convert to hPa.
   gp.set_imagename(imgname)
