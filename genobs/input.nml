@@ -1,0 +1,22 @@
+&control_param
+ filename = 'sample_obs.nc4',
+ output_flnm = 'created_sample_obs.nc4',
+ date_time = '2021010900',
+
+ numobs = 5,
+ lat =  40.60365,    21.802921,    -0.5194437,  -22.767132,   -41.418915,
+ lon = 170.51949,    170.51947,    170.51947,    170.51947,    170.51949,
+ prs = 100394.09619, 101780.03503, 100780.02801, 101032.72589, 101187.30169,
+ omb = 500.0,        500.0,        500.0,        500.0,        500.0,
+ tmp = 100394.09619, 101780.03503, 100780.02801, 101032.72589, 101187.30169,
+ obserr = 600.0,     600.0,        600.0,        600.0,        600.0,
+ LaunchTime = '2021-01-09T00:00:00Z', '2021-01-09T00:00:00Z', '2021-01-09T00:00:00Z',
+              '2021-01-09T00:00:00Z', '2021-01-09T00:00:00Z',
+
+ numskipvars = 5,
+ skipvars = 'eastward_wind', 'northward_wind', 'virtual_temperature', 'air_temperature', 'specific_humidity',
+
+ numkeptvars = 1,
+ keptvars = 'surface_pressure',
+/
+

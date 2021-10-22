@@ -14,7 +14,6 @@ import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 def cmdout(command):
     result = run(command, stdout=PIPE, stderr=PIPE, universal_newlines=True, shell=True)
@@ -482,7 +481,10 @@ if __name__== '__main__':
  #workdir = '/work/noaa/gsienkf/weihuang/jedi/case1'
  #workdir = '/work/noaa/gsienkf/weihuang/jedi/case2'
  #workdir = '/work/noaa/gsienkf/weihuang/jedi/case3'
-  workdir = '/work/noaa/gsienkf/weihuang/jedi/intelcase'
+ #workdir = '/work/noaa/gsienkf/weihuang/jedi/case4'
+  workdir = '/work/noaa/gsienkf/weihuang/jedi/intelbase'
+ #workdir = '/work/noaa/gsienkf/weihuang/jedi/intelcase'
+ #workdir = '/work/noaa/gsienkf/weihuang/jedi/intelcase1'
   enslist = [10, 20, 40, 80]
  #enslist = [10, 20, 40]
   threadlist = [1, 2, 4]
@@ -515,8 +517,8 @@ if __name__== '__main__':
                 enslist=enslist, workdir=workdir, show=show)
   pr.process()
 
- #for show in [1, 0]:
-  for show in [0]:
+  for show in [1, 0]:
+ #for show in [0]:
     pr.set_show(show=show)
     for linear in [0, 1]:
       pr.set_linear(linear=linear)

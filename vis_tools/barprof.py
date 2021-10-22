@@ -633,7 +633,10 @@ if __name__== '__main__':
   debug = 1
   workdir = '.'
   corelist = [24, 240]
-  filelist = ['n24m10/log.run.np24_nens10', 'n240m10/log.run.np240_nens10']
+  rundir = '/work/noaa/gsienkf/weihuang/jedi/run'
+  file1 = rundir + '/n24m10_wei/stdoutNerr/std.out.0000'
+  file2 = rundir + '/n240m10/stdoutNerr/std.out.0000'
+  filelist = [file1, file2]
   linear = 0
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'linear='])

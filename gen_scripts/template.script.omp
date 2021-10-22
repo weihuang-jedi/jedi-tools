@@ -60,6 +60,11 @@
 #export OMP_PLACES={0}:${totalCoresPerNode}:OMPTHREADSNUMBER
 #export OMP_PLACES={0}:${totalCoresPerNode}:$SLURM_CPUS_PER_TASK
 
+ export KMP_AFFINITY=compact
+ export MKL_DYNAMIC=FALSE
+ export MKL_NUM_THREADS=$OMP_NUM_THREADS
+ export I_MPI_PIN_DOMAIN="core"
+
  echo "Nodelist: $SLURM_JOB_NODELIST"
  echo "CoerPerTask: $SLURM_CPUS_PER_TASK"
 

@@ -8,6 +8,10 @@
 
 import getopt
 import os, sys
+<<<<<<< HEAD
+=======
+import subprocess
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 import time
 import datetime
 
@@ -34,6 +38,7 @@ class Profiler:
       print('workdir not defined. Exit.')
       sys.exit(-1)
 
+<<<<<<< HEAD
     self.colorlist = ['red', 'orange', 'magenta', 'blue', 'cyan', 'darkgreen']
     self.namelist = ['GNU-0', 'GNU-1', 'GNU-PLASMA', 'Intel-0', 'Intel-1', 'Intel-PLASMA']
 
@@ -66,6 +71,34 @@ class Profiler:
         nt = len(self.stats_list[core][member][0])
         pinfo = 'Process %d core, %d member has cases: %d' %(core, member, nt)
         print(pinfo)
+=======
+    self.colorlist = ['red', 'orange', 'magenta', 'yellow', 'blue', 'cyan', 'darkgreen']
+    self.namelist = ['GNU', 'GNU+omp', 'GNU+MKL', 'GNU+PLASMA', 'Intel', 'Intel+omp', 'Intel+PLASMA']
+
+  def process(self):
+    self.stats_list = {}
+    for core in self.corelist:
+      self.stats_list[core] = {}
+      for member in self.enslist:
+        self.stats_list[core][member] = {}
+        for thread in self.threadlist:
+          self.stats_list[core][member][thread] = []
+          ncore = core / thread
+          for case in self.caselist:
+            casedir = '%s/%s/omp%d/n%dm%do%d' %(self.workdir, case, thread, ncore, member, thread)
+            flnm = '%s/log.run.np%d_nens%d' %(casedir, ncore, member)
+
+            if(os.path.exists(flnm)):
+              print('Processing file: ', flnm)
+              avgtime, ttltime = self.stats(flnm)
+              pinfo = 'Process %d core, %d member, thread: %d, case: %s' %(core, member, thread, case)
+            else:
+              ttltime = -1.0
+              pinfo = 'Non-exeist %d core, %d member, thread: %d, case: %s' %(core, member, thread, case)
+
+            print(pinfo)
+            self.stats_list[core][member][thread].append(ttltime)
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
   def stats(self, flnm):
     ttltime = -1.0
@@ -112,10 +145,17 @@ class Profiler:
         tstr = tstr.replace('  ', ' ')
       nlist = tstr.split(' ')
 
+<<<<<<< HEAD
       for funcname in self.fullfunction_list:
         if(name == funcname):
           avgtime.append(float(nlist[2]))
          #print('      ' + name + ':' + nlist[2])
+=======
+     #for funcname in self.fullfunction_list:
+     #  if(name == funcname):
+     #    avgtime.append(float(nlist[2]))
+     #   #print('      ' + name + ':' + nlist[2])
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
       if(name == 'util::Timers::Total'):
         ttltime = float(nlist[2])
@@ -137,19 +177,29 @@ class Profiler:
    #plt.xlabel('Threads')
    #plt.ylabel('Time (sencond)')
 
+<<<<<<< HEAD
     if(self.linear):
       imgname = 'lin_total.png'
     else:
       imgname = 'log_total.png'
+=======
+    imgname = 'totalTime.png'
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
     for nc in range(len(self.corelist)):
       core = self.corelist[nc]
       for nm in range(len(self.enslist)):
         member = self.enslist[nm]
+<<<<<<< HEAD
         nt = len(self.stats_list[core][member][0])
 
         if(nt > 1):
           self.plot_total(axes[nm, nc], core, member)
+=======
+        self.plot_bar(axes[nm, nc], core, member)
+
+    plt.legend(self.namelist)
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
     fig.tight_layout()
 
@@ -161,6 +211,7 @@ class Profiler:
     plt.cla()
     plt.clf()
 
+<<<<<<< HEAD
   def plot_total(self, ax, core, member):
     title = '%d Cores, %d members Total time' %(core, member)
 
@@ -169,10 +220,20 @@ class Profiler:
     nt = len(threads)
     x = np.array(threads)
     ts = []
+=======
+  def plot_bar(self, ax, core, member):
+    title = '%d Cores, %d members Total time' %(core, member)
+
+    print('Start ', title)
+
+    x = np.array(self.threadlist)
+    ts = {}
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
     ymin = 1.0e+36
     ymax = 0.0
 
+<<<<<<< HEAD
     for i in range(nt):
       t = 0.001*self.stats_list[core][member][1][i]
       ts.append(t)
@@ -188,10 +249,38 @@ class Profiler:
       tmin = 8192.0
       while(tmin > ymin):
         tmin /= 2.0
+=======
+    threadname = []
+    for thread in self.threadlist:
+      threadname.append(str(thread))
+
+    for n in range(len(self.caselist)):
+      ts[n] = []
+      for i in range(len(self.threadlist)):
+        thread = self.threadlist[i]
+       #print('working in thread ' + str(thread) + ', case: ' + self.caselist[n])
+        t = 0.001*self.stats_list[core][member][thread][n]
+        ts[n].append(t)
+        if(t > ymax):
+          ymax = t
+        if(t < ymin):
+          ymin = t
+
+    if(self.linear):
+      tmin = -1.0
+     #tmin = 10.0*int(ymin/10.0) - 10.0
+      tmax = 10.0 + 10.0*int(ymax/10.0)
+    else:
+      tmin = -1.0
+     #tmin = 8192.0
+     #while(tmin > ymin):
+     #  tmin /= 2.0
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
       tmax = 1.0
       while(tmax < ymax):
         tmax *= 2.0
 
+<<<<<<< HEAD
     ax.set_xlim([x[0], x[-1]])
     ax.set_ylim([tmin, tmax])
 
@@ -215,6 +304,31 @@ class Profiler:
    #Show the minor grid lines with very faint and almost transparent grey lines
     ax.minorticks_on()
     ax.grid(b=True, which='minor', color='#999999', linestyle='dotted', alpha=0.2)
+=======
+   #ax.set_xlim([x[0], x[-1]])
+   #ax.set_ylim([tmin, tmax])
+
+    idx = np.asarray([i for i in range(len(self.threadlist))])
+
+    width = 0.1
+
+    ax.bar(idx-3.0*width, ts[0], width, color=self.colorlist[0])
+    ax.bar(idx-2.0*width, ts[1], width, color=self.colorlist[1])
+    ax.bar(idx-width,     ts[2], width, color=self.colorlist[2])
+    ax.bar(idx,           ts[3], width, color=self.colorlist[3])
+    ax.bar(idx+width,     ts[4], width, color=self.colorlist[4])
+    ax.bar(idx+2.0*width, ts[5], width, color=self.colorlist[5])
+    ax.bar(idx+3.0*width, ts[6], width, color=self.colorlist[6])
+
+    ax.set_xticks(idx)
+   #ax.set_xticklabels(threadname, rotation=65)
+    ax.set_xticklabels(threadname)
+    ax.set_yscale("log", base=2)
+    ax.set_xlabel('Threads')
+    ax.set_ylabel('Time (second)')
+
+    print('Finished ', title)
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
   def set_linear(self, linear=1):
     self.linear = linear
@@ -226,13 +340,24 @@ class Profiler:
 if __name__== '__main__':
   debug = 1
   workdir = '/work/noaa/gsienkf/weihuang/jedi'
+<<<<<<< HEAD
   enslist = [10, 20, 40, 80]
  #enslist = [10, 20, 40]
+=======
+ #caselist = ['base', 'case1', 'case4', 'intelbase', 'intelcase', 'intelcase1']
+ #caselist = ['base', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
+ #caselist = ['case0', 'case1', 'case4', 'intelcase0', 'intelcase', 'intelcase1']
+  caselist = ['base', 'case2', 'case0', 'case4', 'intelbase', 'intelcase', 'intelcase1']
+  enslist = [10, 20, 40, 80]
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
   threadlist = [1, 2, 4]
   linear = 1
   corelist = [24, 240]
   show = 1
+<<<<<<< HEAD
   caselist = ['base', 'case2', 'case4', 'intelbase', 'intelcase', 'intelcase1']
+=======
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'workdir=',
     'corelist=', 'enslist=', 'threadlist=', 'ncore='])
@@ -259,8 +384,13 @@ if __name__== '__main__':
                 enslist=enslist, workdir=workdir, show=show, caselist=caselist)
   pr.process()
 
+<<<<<<< HEAD
  #for show in [1, 0]:
   for show in [0]:
+=======
+  for show in [1, 0]:
+ #for show in [0]:
+>>>>>>> 9c32b7372edc94bc8b19a585b774ff1fcc82f08b
     pr.set_show(show=show)
     for linear in [0, 1]:
       pr.set_linear(linear=linear)
