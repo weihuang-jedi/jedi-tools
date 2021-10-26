@@ -110,8 +110,8 @@ class GeneratePlot():
     self.nlat = len(lat)
     self.nlon = len(lon)
 
-    print('self.nlat = ', self.nlat)
-    print('self.nlon = ', self.nlon)
+   #print('self.nlat = ', self.nlat)
+   #print('self.nlon = ', self.nlon)
 
     lon2d = np.zeros((self.nlat, self.nlon), dtype=float)
     lat2d = np.zeros((self.nlat, self.nlon), dtype=float)
@@ -241,6 +241,44 @@ class GeneratePlot():
     self.ax.set_title(self.title)
 
     self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def simple_plot(self, pvar):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    (self.x, self.y) = self.basemap(self.lon1d, self.lat1d)
+    v1d = np.reshape(pvar, (pvar.size, ))
+
+    contfill = self.basemap.contourf(self.x, self.y, v1d, tri=True,
+                                     extend=self.extend,
+                                     alpha=self.alpha, cmap=self.cmapname)
+
+    cb = self.fig.colorbar(contfill, orientation=self.orientation,
+                           pad=self.pad)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
 
   def obsonly(self, obslat, obslon, obsvar):
     self.basemap = self.build_basemap()
