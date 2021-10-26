@@ -80,6 +80,8 @@ if __name__ == '__main__':
   varname = 'ps'
   var = rg.get_latlon_data(varname, nlon=nlon, nlat=nlat, method='linear')
 
+  print('var min = %f, var max = %f' %(np.min(var), np.max(var)))
+
   dlon = 360.0/nlon
   dlat = 180.0/(nlat - 1)
   lon = np.arange(0.0, 360.0, dlon)
@@ -90,6 +92,13 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
+<<<<<<< HEAD
+  clevs = np.arange(-0.5, 0.51, 0.01)
+  cblevs = np.arange(-0.5, 0.6, 0.1)
+ #clevs = np.arange(-0.02, 0.021, 0.001)
+ #cblevs = np.arange(-0.02, 0.03, 0.01)
+  gp.set_precision(precision=1)
+=======
  #clevs = np.arange(-1.0, 1.01, 0.01)
  #cblevs = np.arange(-1.0, 1.2, 0.2)
   clevs = np.arange(-2.0, 2.02, 0.02)
@@ -98,6 +107,7 @@ if __name__ == '__main__':
  #clevs = np.arange(-0.02, 0.021, 0.001)
  #cblevs = np.arange(-0.02, 0.03, 0.01)
  #gp.set_precision(precision=2)
+>>>>>>> ec1ca9abb2a995ed9cc13f9ae55e69d0bbc90a97
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
