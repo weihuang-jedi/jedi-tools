@@ -19,8 +19,13 @@ from readIODA2Obs import ReadIODA2Obs
 if __name__ == '__main__':
   debug = 1
   output = 0
+<<<<<<< HEAD
   addobs = 1
   prefix = 'new_psonly'
+=======
+  addobs = 0
+  prefix = None
+>>>>>>> 93015df6c0f3c4b621021787b8e02fe8f3cea3f1
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs=', 'prefix='])
 
@@ -44,11 +49,20 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
+<<<<<<< HEAD
  #casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
  #datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
 
   casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/'
   datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
+=======
+  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
+
+  if(prefix is None):
+    datadir = '%s/analysis.getkf.80members.36procs/increment/' %(casedir)
+  else:
+    datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
+>>>>>>> 93015df6c0f3c4b621021787b8e02fe8f3cea3f1
 
   datafiles = []
   gridspecfiles = []
@@ -104,8 +118,17 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   gp.set_label('Surface Pressure (hPa)')
 
+<<<<<<< HEAD
   imgname = '%s_jedi_sondes' %(prefix)
   title = '%s JEDI Sondes Surface Pressure' %(prefix)
+=======
+  if(prefix is None):
+    imgname = 'PSonly_jedi_sondes'
+    title = 'PSonly JEDI Sondes Surface Pressure'
+  else:
+    imgname = '%s_PSonly_jedi_sondes' %(prefix)
+    title = '%s PSonly JEDI Sondes Surface Pressure' %(prefix)
+>>>>>>> 93015df6c0f3c4b621021787b8e02fe8f3cea3f1
 
   var = 0.01*var #convert to hPa.
   gp.set_imagename(imgname)
