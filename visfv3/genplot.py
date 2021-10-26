@@ -33,6 +33,11 @@ class GeneratePlot():
     self.markpres = self.mvp.get_markpres()
     self.marklogp = self.mvp.get_marklogp()
 
+    self.precision = 1
+
+  def set_precision(self, precision=1):
+    self.precision = precision
+
   def get_markpres(self):
     return self.markpres
 
@@ -176,8 +181,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -218,8 +229,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -269,7 +286,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -313,8 +337,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -366,8 +396,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -421,8 +457,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 
@@ -477,8 +519,14 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-   #cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.ax.set_title(self.title)
 

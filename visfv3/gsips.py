@@ -17,7 +17,7 @@ from scipy_regridder import RegridFV3 as regridder
 from readGSIobs import ReadGSIobs
 
 #=========================================================================
-class PlotGaussian():
+class PlotGSISurfacePressure():
   def __init__(self, debug=0, output=0, bkg=None, anl=None):
     self.debug = debug
     self.output = output
@@ -87,7 +87,6 @@ class PlotGaussian():
     anl_file = netCDF4.Dataset(self.anl, 'r')
     lat = anl_file.variables['lat'][:, :]
     lon = anl_file.variables['lon'][:, :]
-   #anl = anl_file.variables[varname][0, :, :, :]
     anl = anl_file.variables[varname][0, :, :]
     anl_file.close()
 
@@ -95,7 +94,6 @@ class PlotGaussian():
     self.lons = lon.flatten()
 
     bkg_file = netCDF4.Dataset(self.bkg, 'r')
-   #bkg = bkg_file.variables[varname][0, :, :, :]
     bkg = bkg_file.variables[varname][0, :, :]
     bkg_file.close()
 
@@ -110,42 +108,6 @@ class PlotGaussian():
    #print('incr = ', incr)
 
     return self.lons, self.lats, incr
-
-  def get_diff(self, varname):
-    print('varname =', varname)
-
-    self.get_vardims(self.anl, varname)
-
-    lat = np.zeros((self.ny, self.nx))
-    lon = np.zeros((self.ny, self.nx))
-
-    fst = np.zeros((self.nz, self.ny, self.nx))
-    snd = np.zeros((self.nz, self.ny, self.nx))
-
-    fst_file = netCDF4.Dataset(self.anl, 'r')
-    lat = fst_file.variables['lat'][:, :]
-    lon = fst_file.variables['lon'][:, :]
-    fst = fst_file.variables[varname][0, :, :, :]
-    fst_file.close()
-
-    self.lats = lat.flatten()
-    self.lons = lon.flatten()
-
-    snd_file = netCDF4.Dataset(self.snd_file, 'r')
-    snd = snd_file.variables[varname][0, :, :, :]
-    snd_file.close()
-
-    if(self.debug):
-      msg = ('fst range for variable %s: (%s, %s).' % (varname, fst.min(), fst.max()))
-      print(msg)
-      msg = ('snd range for variable %s: (%s, %s).' % (varname, snd.min(), snd.max()))
-      print(msg)
-
-    diff = snd - fst
-
-   #print('incr = ', incr)
-
-    return self.lons, self.lats, diff
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -170,10 +132,10 @@ if __name__ == '__main__':
   print('addobs = ', addobs)
 
   bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
-  anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
+  anl = 'jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean'
 
 #------------------------------------------------------------------------------
-  pg = PlotGaussian(debug=debug, output=output, bkg=bkg, anl=anl)
+  pg = PlotGSISurfacePressure(debug=debug, output=output, bkg=bkg, anl=anl)
 
   lon1d, lat1d, invar = pg.get_var('pressfc')
 
@@ -190,13 +152,8 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
-  clevs = np.arange(-0.5, 0.51, 0.01)
-  cblevs = np.arange(-0.5, 0.6, 0.1)
-  gp.set_clevs(clevs=clevs)
-  gp.set_cblevs(cblevs=cblevs)
-
-#------------------------------------------------------------------------------
   if(addobs):
+   #filename = 'jeff-runs/uvsondeobs/diag_conv_uv_ges.2021010900_ensmean.nc4'
     filename = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
     rgo = ReadGSIobs(debug=debug, filename=filename)
     obslat, obslon = rgo.get_latlon()
@@ -204,18 +161,28 @@ if __name__ == '__main__':
     gp.set_obs_latlon(obslat=obslat, obslon=obslon)
 
 #------------------------------------------------------------------------------
-  gp.set_label('Temperature (K)')
+  gp.set_label('Surface Pressure')
 
-  imgname = 'PSonly_gsi_sondes_ps'
-  title = 'PS only GSI Sondes Surface Pressure'
+ #imageprefix = 'uvOnly_gsi_sondes'
+ #titleprefix = 'uvOnly GSI Sondes Surface Pressure'
+  imageprefix = 'PSonly_gsi_sondes'
+  titleprefix = 'PS only GSI Sondes Surface Pressure'
 
-  pvar = 0.01*var #Convert to hPa
+#------------------------------------------------------------------------------
+ #clevs = np.arange(-0.5, 0.51, 0.01)
+ #cblevs = np.arange(-0.5, 0.6, 0.1)
+ #clevs = np.arange(-1.0, 1.01, 0.01)
+ #cblevs = np.arange(-1.0, 1.2, 0.2)
+  clevs = np.arange(-2.0, 2.02, 0.02)
+  cblevs = np.arange(-2.0, 2.5, 0.5)
+  gp.set_clevs(clevs=clevs)
+  gp.set_cblevs(cblevs=cblevs)
+
+  imgname = '%s_ps.png' %(imageprefix)
+  title = '%s Surface Pressure' %(titleprefix)
   gp.set_imagename(imgname)
   gp.set_title(title)
+  pvar = 0.01*var
  #gp.plot(pvar, addmark=1, marker='x', size=3, color='green')
- #gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
-  if(addobs):
-    gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
-  else:
-    gp.plot(pvar)
+  gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
 

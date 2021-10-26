@@ -166,25 +166,18 @@ if __name__ == '__main__':
   print('uvOnly = ', uvOnly)
 
 #=======================================================================================================================
-  fv3_griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
+  fv3_griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
   if(uvOnly):
-    gsi_bkg = 'jeff-runs/uvOnly/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = 'jeff-runs/uvOnly/sanl_2021010900_fhr06_ensmean'
+    gsi_bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
+    gsi_anl = 'jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean'
 
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvOnly/increment/'
+    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_uvonly/increment/'
   else:
     gsi_bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
-   #gsi_anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
-   #gsi_bkg = 'jeff-runs/allsondeobs/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = 'jeff-runs/allsondeobs/sanl_2021010900_fhr06_ensmean'
+    gsi_anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
 
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.all/increment/'
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.all.1250km/increment/'
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.psOnly/increment/'
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTqnew/increment/'
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
+    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_psonly/increment/'
 
   datafiles = []
   gridspecfiles = []

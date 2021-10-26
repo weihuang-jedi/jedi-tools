@@ -57,9 +57,10 @@ with open('profile_data.txt', 'r') as filehandle:
            color='red',  
            linewidth=2.0)
 
- #plt.xlim((0, 0.10))  
+  plt.xlim((0, 0.10))  
+ #plt.xlim((0, 0.30))  
  #plt.xlim((0, 0.40))  
-  plt.xlim((0, 0.50))  
+ #plt.xlim((0, 0.50))  
   plt.ylim((0, nz-1))  
 
   ax = plt.gca()
@@ -68,9 +69,8 @@ with open('profile_data.txt', 'r') as filehandle:
 
  #plt.title('uvOnly Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
  #plt.title('PS Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
- #plt.title('Original uvTq Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
-  plt.title('New uvTq Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
- #plt.xlabel('Year', fontsize=14)
+ #plt.title('New uv Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
+  plt.title('New PS Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
   plt.ylabel('Level', fontsize=14)
   plt.grid(True)
 

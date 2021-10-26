@@ -19,10 +19,10 @@ from readIODA2Obs import ReadIODA2Obs
 if __name__ == '__main__':
   debug = 1
   output = 0
-  addobs = 0
-  prefix = 'ori'
+  addobs = 1
+  prefix = 'new_psonly'
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs=', 'prefix='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -39,12 +39,15 @@ if __name__ == '__main__':
   print('debug = ', debug)
   print('output = ', output)
   print('addobs = ', addobs)
+  print('prefix = ', prefix)
 
 #------------------------------------------------------------------------------
- #griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
   griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
-  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes'
+ #casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres'
+ #datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
+
+  casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/'
   datadir = '%s/analysis.getkf.80members.36procs.%s/increment/' %(casedir, prefix)
 
   datafiles = []
@@ -73,21 +76,25 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
- #clevs = np.arange(-0.5, 0.51, 0.01)
- #cblevs = np.arange(-0.5, 0.6, 0.1)
-  clevs = np.arange(-0.02, 0.021, 0.001)
-  cblevs = np.arange(-0.02, 0.03, 0.01)
-  gp.set_precision(precision=2)
+ #clevs = np.arange(-1.0, 1.01, 0.01)
+ #cblevs = np.arange(-1.0, 1.2, 0.2)
+  clevs = np.arange(-2.0, 2.02, 0.02)
+  cblevs = np.arange(-2.0, 2.5, 0.5)
+  gp.set_precision(precision=1)
+ #clevs = np.arange(-0.02, 0.021, 0.001)
+ #cblevs = np.arange(-0.02, 0.03, 0.01)
+ #gp.set_precision(precision=2)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
 #------------------------------------------------------------------------------
   if(addobs):
-   #filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
-    filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres/ioda_v2_data/obs/surfpres.nc4'
+    filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
+   #filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/surfpres/ioda_v2_data/obs/surfpres.nc4'
     rio = ReadIODA2Obs(debug=debug, filename=filename)
    #lat, lon = rio.get_latlon()
-    lat, lon = rio.get_latlon4var(varname='/ObsValue/surface_pressure')
+    lat, lon, ps = rio.get_latlon4var(varname='/ObsValue/surface_pressure')
+   #lat, lon, psQC = rio.get_latlon4var(varname='/PreQC/surface_pressure')
 
    #print('lat = ', lat)
    #print('lon = ', lon)
@@ -97,8 +104,8 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   gp.set_label('Surface Pressure (hPa)')
 
-  imgname = 'PSonly_jedi_sondes'
-  title = 'PSonly JEDI Sondes Surface Pressure'
+  imgname = '%s_jedi_sondes' %(prefix)
+  title = '%s JEDI Sondes Surface Pressure' %(prefix)
 
   var = 0.01*var #convert to hPa.
   gp.set_imagename(imgname)
