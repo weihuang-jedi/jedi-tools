@@ -174,12 +174,14 @@ class ReadIODA2Obs():
     mask = []
 
     for n in range(len(var)):
+     #if(math.isnan(var[n]) or var[n] > 12):
+     #  mask.append(n)
      #if(np.isnan(var[n])):
       if(math.isnan(var[n])):
         mask.append(n)
-      else:
-        if((var[n] < -2000.0) or (var[n] > 2000.0)):
-          mask.append(n)
+     #else:
+     #  if((var[n] < -2000.0) or (var[n] > 2000.0)):
+     #    mask.append(n)
      #else:
      #  print('var[%d] = %f' %(n, var[n]))
 
@@ -189,8 +191,8 @@ class ReadIODA2Obs():
     short_lon = np.delete(lon, mask)
     short_var = np.delete(var, mask)
 
-   #print('len(short_lat) = ', len(short_lat))
-   #print('len(short_lon) = ', len(short_lon))
+    print('len(short_lat) = ', len(short_lat))
+    print('len(short_lon) = ', len(short_lon))
 
     return short_lat, short_lon, short_var
 

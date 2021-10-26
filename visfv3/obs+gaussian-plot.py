@@ -151,12 +151,11 @@ if __name__ == '__main__':
   output = 0
 
   uvOnly = 0
-  plotdiff = 0
   addobs = 1
   uselogp = 1
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'uvOnly=',
-                             'plotdiff=', 'addobs=', 'uselogp='])
+                             'addobs=', 'uselogp='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -165,8 +164,6 @@ if __name__ == '__main__':
       output = int(a)
     elif o in ('--uvOnly'):
       uvOnly = int(a)
-    elif o in ('--plotdiff'):
-      plotdiff = int(a)
     elif o in ('--addobs'):
       addobs = int(a)
     elif o in ('--uselogp'):
@@ -176,30 +173,20 @@ if __name__ == '__main__':
 
   print('debug = ', debug)
   print('output = ', output)
-  print('plotdiff = ', plotdiff)
   print('uvOnly = ', uvOnly)
   print('addobs = ', addobs)
 
+  bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
   if(uvOnly):
-   #bkg = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/jeff-gsi-run/uv-only/sfg_2021010900_fhr06_ensmean'
-   #anl = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/jeff-gsi-run/uv-only/sanl_2021010900_fhr06_ensmean.uv'
-    bkg = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3/jeff-runs/uvOnly/sfg_2021010900_fhr06_ensmean'
-    anl = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3/jeff-runs/uvOnly/sanl_2021010900_fhr06_ensmean'
-    if(plotdiff):
-      snd_file = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/jeff-run/sanl_2021010900_fhr06_ensmean'
+    anl = 'jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean'
   else:
-    bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
-    anl = 'jeff-runs/allsondeobs/sanl_2021010900_fhr06_ensmean'
-   #anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
+   #anl = 'jeff-runs/allsondeobs/sanl_2021010900_fhr06_ensmean'
+    anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
 
 #------------------------------------------------------------------------------
   pg = PlotGaussian(debug=debug, output=output, bkg=bkg, anl=anl)
 
-  if(plotdiff):
-    pg.set_snd_file(snd_file)
-    lon1d, lat1d, invar = pg.get_diff('tmp')
-  else:
-    lon1d, lat1d, invar = pg.get_var('tmp')
+  lon1d, lat1d, invar = pg.get_var('tmp')
 
   rg = regridder(debug=debug, datafiles=[], gridspecfiles=[])
 
@@ -225,26 +212,22 @@ if __name__ == '__main__':
   gp.set_label('Temperature (K)')
 
   if(uvOnly):
-    if(plotdiff):
-      imageprefix = 'diff-uvOnly_gsi_sondes'
-      titleprefix = 'Diff uvOnly GSI Sondes Temperature at'
-    else:
-      imageprefix = 'uvOnly_gsi_sondes'
-      titleprefix = 'uvOnly GSI Sondes Temperature at'
+    imageprefix = 'uvOnly_gsi_sondes'
+    titleprefix = 'uvOnly GSI Sondes Temperature at'
   else:
-    imageprefix = 'uvTq_gsi_sondes'
-    titleprefix = 'uvTq GSI Sondes Temperature at'
-   #imageprefix = 'PSonly_gsi_sondes'
-   #titleprefix = 'PS only GSI Sondes Temperature at'
+    imageprefix = 'PSonly_gsi_sondes'
+    titleprefix = 'PS only GSI Sondes Temperature at'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
  #cblevs = np.arange(-0.5, 0.6, 0.1)
- #gp.set_clevs(clevs=clevs)
- #gp.set_cblevs(cblevs=cblevs)
+  clevs = np.arange(-1.0, 1.01, 0.01)
+  cblevs = np.arange(-1.0, 1.2, 0.2)
+  gp.set_clevs(clevs=clevs)
+  gp.set_cblevs(cblevs=cblevs)
 
- #levs = [30, 55]
-  levs = [1, 10, 23, 30, 52, 62]
+ #levs = [61, 62, 63]
+  levs = [60]
 
   for lev in levs:
     pvar = var[lev,:,:]
@@ -257,39 +240,41 @@ if __name__ == '__main__':
     gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
 
 #------------------------------------------------------------------------------
- #clevs = np.arange(-0.5, 0.51, 0.01)
- #cblevs = np.arange(-0.5, 0.6, 0.1)
-  clevs = np.arange(-1.0, 1.02, 0.01)
-  cblevs = np.arange(-1.0, 1.1, 0.1)
+  clevs = np.arange(-0.5, 0.51, 0.01)
+  cblevs = np.arange(-0.5, 0.6, 0.1)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
- #lons = [100, 115, 125, 140, 175, 190, 225]
-  lons = [40, 105, 170, 270, 300]
+ #lons = [40, 105, 170, 270, 300]
+  lons = [60]
 
   for lon in lons:
     pvar = var[:,:,lon]
-    imgname = '%s_lon_%d.png' %(imageprefix, lon)
     title = '%s longitude %d' %(titleprefix, lon)
-    gp.set_imagename(imgname)
     gp.set_title(title)
-    if(uselogp):
-      gp.plot_meridional_section_logp(pvar)
-    else:
-      gp.plot_meridional_section(pvar)
+
+    imgname = '%s_lon_%d_logp.png' %(imageprefix, lon)
+    gp.set_imagename(imgname)
+    gp.plot_meridional_section_logp(pvar)
+
+    imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
+    gp.set_imagename(imgname)
+    gp.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
- #lats = [-35, -20, 45, 55]
-  lats = [-30, 0, 45, 70]
+ #lats = [-30, 0, 45, 70]
+  lats = [50, 55]
 
   for lat in lats:
     pvar = var[:,90+lat,:]
-    imgname = '%s_lat_%d.png' %(imageprefix, lat)
-    title = '%s latitude %d' %(titleprefix, lat)
-    gp.set_imagename(imgname)
     gp.set_title(title)
-    if(uselogp):
-      gp.plot_zonal_section_logp(pvar)
-    else:
-      gp.plot_zonal_section(pvar)
+    title = '%s latitude %d' %(titleprefix, lat)
+
+    imgname = '%s_lat_%d_logp.png' %(imageprefix, lat)
+    gp.set_imagename(imgname)
+    gp.plot_zonal_section_logp(pvar)
+
+    imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
+    gp.set_imagename(imgname)
+    gp.plot_zonal_section(pvar)
 

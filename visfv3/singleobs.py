@@ -75,36 +75,39 @@ if __name__ == '__main__':
 
   gp.set_label('Temperature (K)')
 
- #clevs = np.arange(-0.5, 0.51, 0.01)
- #cblevs = np.arange(-0.5, 0.6, 0.1)
+ #clevs = np.arange(-0.01, 0.011, 0.001)
+ #cblevs = np.arange(-0.01, 0.015, 0.005)
 
-  gp.set_precision(precision=3)
-  clevs = np.arange(-0.01, 0.011, 0.001)
-  cblevs = np.arange(-0.01, 0.015, 0.005)
+  clevs = np.arange(-0.5, 0.51, 0.01)
+  cblevs = np.arange(-0.5, 0.6, 0.1)
+  gp.set_precision(precision=1)
+
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
-  image_prefix = '%s_PSonly_singleobs' %(prefix)
-  title_prefix = '%s_PSonly Single Obs' %(prefix)
+  image_prefix = '%s_JEDI_sondes_PSonly_singleobs' %(prefix)
+  title_prefix = '%s JEDI sondes PSonly Single Obs' %(prefix)
 
  #------------------------------------------------------------------------------
   lons = [170]
   for lon in lons:
     pvar = var[:,:,lon]
-    imgname = '%s_getkf_sondes_lon_%d.png' %(image_prefix, lon)
-    title = '%s GETKF Sondes Temperature at longitude %d' %(title_prefix, lon)
+    title = '%s Temperature at longitude %d' %(title_prefix, lon)
+    imgname = '%s_logp_lon_%d.png' %(image_prefix, lon)
     gp.set_imagename(imgname)
     gp.set_title(title)
-   #gp.plot_meridional_section(pvar)
     gp.plot_meridional_section_logp(pvar)
+    imgname = '%s_level_lon_%d.png' %(image_prefix, lon)
+    gp.set_imagename(imgname)
+    gp.plot_meridional_section(pvar)
 
  #------------------------------------------------------------------------------
  #levs = [0, 10, 13, 16, 24, 29, 36, 42, 52, 63]
   levs = [0, 1, 2, 61, 62, 63]
   for lev in levs:
     pvar = var[lev,:,:]
-    imgname = '%s_getkf_sondes_lev_%d.png' %(image_prefix, lev)
-    title = '%s GETKF Sondes Temperature at level %d' %(title_prefix, lev)
+    imgname = '%s_lev_%d.png' %(image_prefix, lev)
+    title = '%s Temperature at level %d' %(title_prefix, lev)
     gp.set_imagename(imgname)
     gp.set_title(title)
     gp.plot(pvar)
@@ -113,10 +116,12 @@ if __name__ == '__main__':
   lats = [-41, -22, 0, 22, 41]
   for lat in lats:
     pvar = var[:,90+lat,:]
-    imgname = '%s_getkf_sondes_lat_%d.png' %(image_prefix, lat)
-    title = '%s GETKF Sondes Temperature at latitude %d' %(title_prefix, lat)
+    title = '%s Temperature at latitude %d' %(title_prefix, lat)
+    imgname = '%s_logp_lat_%d.png' %(image_prefix, lat)
     gp.set_imagename(imgname)
     gp.set_title(title)
-   #gp.plot_zonal_section(pvar)
     gp.plot_zonal_section_logp(pvar)
+    imgname = '%s_level_lat_%d.png' %(image_prefix, lat)
+    gp.set_imagename(imgname)
+    gp.plot_zonal_section(pvar)
 

@@ -20,12 +20,11 @@ if __name__ == '__main__':
   debug = 1
   output = 0
   uvOnly = 0
-  plotdiff = 0
-  addobs = 0
+  addobs = 1
   uselogp = 1
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'uvOnly=',
-                             'plotdiff=', 'addobs=', 'uselogp='])
+                             'addobs=', 'uselogp='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -34,8 +33,6 @@ if __name__ == '__main__':
       output = int(a)
     elif o in ('--uvOnly'):
       uvOnly = int(a)
-    elif o in ('--plotdiff'):
-      plotdiff = int(a)
     elif o in ('--addobs'):
       addobs = int(a)
     elif o in ('--uselogp'):
@@ -45,24 +42,21 @@ if __name__ == '__main__':
 
   print('debug = ', debug)
   print('output = ', output)
-  print('plotdiff = ', plotdiff)
   print('uvOnly = ', uvOnly)
 
 #------------------------------------------------------------------------------
- #griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
-  griddir = '/work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
+ #griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
+  griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
   if(uvOnly):
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvOnly/increment/'
-    if(plotdiff):
-      snd_dir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.all/increment/'
+    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_uvonly/increment/'
   else:
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.all/increment/'
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
-   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.psOnly/increment/'
+    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_psonly/increment/'
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.psOnly.wrong/increment/'
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs/increment/'
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/surface/analysis.getkf.5members.36procs/increment/'
+   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs/increment/'
 
   datafiles = []
   snd_files = []
@@ -73,13 +67,8 @@ if __name__ == '__main__':
 
     datafile = '%s20210109.000000.fv_core.res.tile%s.nc' %(datadir, ntile)
     datafiles.append(datafile)
-    if(plotdiff):
-      snd_file = '%s20210109.000000.fv_core.res.tile%s.nc' %(snd_dir, ntile)
-      snd_files.append(snd_file)
 
   rg = regridder(debug=debug, datafiles=datafiles, gridspecfiles=gridspecfiles)
-  if(plotdiff):
-    rg.setSecondFiles(snd_files)
 
   nlon = 360
   nlat = nlon/2 + 1
@@ -100,7 +89,8 @@ if __name__ == '__main__':
     filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
     rio = ReadIODA2Obs(debug=debug, filename=filename)
    #lat, lon = rio.get_latlon()
-    lat, lon, prs = rio.get_latlon4var(varname='/ObsValue/surface_pressure')
+   #lat, lon, prs = rio.get_latlon4var(varname='/ObsValue/surface_pressure')
+    lat, lon, prs = rio.get_latlon4var(varname='/ObsValue/air_temperature')
 
    #print('lat = ', lat)
    #print('lon = ', lon)
@@ -111,28 +101,29 @@ if __name__ == '__main__':
   gp.set_label('Temperature (K)')
 
   if(uvOnly):
-    if(plotdiff):
-      image_prefix = 'diff_uvOnly_jedi_sondes'
-      title_preix = 'Diff uvOnly JEDI Sondes Temperature at'
-    else:
-      image_prefix = 'uvOnly'
-      title_preix = 'uvOnly JEDI Sondes Temperature at'
+    image_prefix = 'new_uvOnly'
+    title_preix = 'new uvOnly JEDI Sondes Temperature at'
   else:
-    image_prefix = 'uvTq_jedi_sondes'
-    title_preix = 'uvTq JEDI Sondes Temperature at'
+   #image_prefix = 'uvTq_jedi_sondes'
+   #title_preix = 'uvTq JEDI Sondes Temperature at'
    #image_prefix = 'PSonly_jedi_sondes'
    #title_preix = 'PSonly JEDI Sondes Temperature at'
-
- #levs = [30, 55]
-  levs = [1, 10, 23, 30, 52, 62]
+    image_prefix = 'new PSonly_jedi_sondes'
+    title_preix = 'new PSonly JEDI Sondes Temperature at'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
  #cblevs = np.arange(-0.5, 0.6, 0.1)
  #clevs = np.arange(-5.0, 5.1, 0.1)
  #cblevs = np.arange(-5.0, 6.0, 1.0)
- #gp.set_clevs(clevs=clevs)
- #gp.set_cblevs(cblevs=cblevs)
+  clevs = np.arange(-1.0, 1.01, 0.01)
+  cblevs = np.arange(-1.0, 1.2, 0.2)
+  gp.set_clevs(clevs=clevs)
+  gp.set_cblevs(cblevs=cblevs)
+
+#------------------------------------------------------------------------------
+ #levs = [61, 62, 63]
+  levs = [60]
   for lev in levs:
     pvar = var[lev,:,:]
     imgname = '%s_lev_%d.png' %(image_prefix, lev)
@@ -146,38 +137,39 @@ if __name__ == '__main__':
       gp.plot(pvar)
 
 #------------------------------------------------------------------------------
- #clevs = np.arange(-0.5, 0.51, 0.01)
- #cblevs = np.arange(-0.5, 0.6, 0.1)
-  clevs = np.arange(-1.0, 1.02, 0.01)
-  cblevs = np.arange(-1.0, 1.1, 0.1)
- #clevs = np.arange(-5.0, 5.1, 0.1)
- #cblevs = np.arange(-5.0, 6.0, 1.0)
+  clevs = np.arange(-0.5, 0.51, 0.01)
+  cblevs = np.arange(-0.5, 0.6, 0.1)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
- #lons = [100, 115, 125, 140, 175, 190, 225]
-  lons = [40, 105, 170, 270, 300]
 
+ #lons = [40, 105, 170, 270, 300]
+  lons = [60, 200]
   for lon in lons:
     pvar = var[:,:,lon]
-    imgname = '%s_lon_%d.png' %(image_prefix, lon)
     title = '%s longitude %d' %(title_preix, lon)
-    gp.set_imagename(imgname)
     gp.set_title(title)
-    if(uselogp):
-      gp.plot_meridional_section_logp(pvar)
-    else:
-      gp.plot_meridional_section(pvar)
+
+    imgname = '%s_lon_%d_logp.png' %(image_prefix, lon)
+    gp.set_imagename(imgname)
+    gp.plot_meridional_section_logp(pvar)
+
+    imgname = '%s_lon_%d_level.png' %(image_prefix, lon)
+    gp.set_imagename(imgname)
+    gp.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
-  lats = [-30, 0, 45, 70]
+ #lats = [-30, 0, 45, 70]
+  lats = [50, 55]
   for lat in lats:
     pvar = var[:,90+lat,:]
-    imgname = '%s_lat_%d.png' %(image_prefix, lat)
     title = '%s latitude %d' %(title_preix, lat)
-    gp.set_imagename(imgname)
     gp.set_title(title)
-    if(uselogp):
-      gp.plot_zonal_section_logp(pvar)
-    else:
-      gp.plot_zonal_section(pvar)
+
+    imgname = '%s_lat_%d_logp.png' %(image_prefix, lat)
+    gp.set_imagename(imgname)
+    gp.plot_zonal_section_logp(pvar)
+
+    imgname = '%s_lat_%d_level.png' %(image_prefix, lat)
+    gp.set_imagename(imgname)
+    gp.plot_zonal_section(pvar)
 
