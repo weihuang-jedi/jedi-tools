@@ -18,6 +18,8 @@ class GeneratePlot():
   def __init__(self, debug=0, output=0, lat=[], lon=[]):
     self.debug = debug
     self.output = output
+    self.lat = lat
+    self.lon = lon
 
     self.set_default()
     self.set_grid(lat, lon)
@@ -84,6 +86,15 @@ class GeneratePlot():
     self.label = 'Distance (km)'
     self.title = 'Distance to Patch/Tile Center'
 
+    self.scale=100
+    self.scale_units='inches'
+
+  def set_scale(self, scale=100):
+    self.scale = scale
+
+  def set_scale_units(self, scale_units='inches'):
+    self.scale_units = scale_units
+
   def set_clevs(self, clevs=[]):
     self.clevs = clevs
 
@@ -123,6 +134,48 @@ class GeneratePlot():
 
     self.lon1d = np.reshape(lon2d, (lon2d.size, ))
     self.lat1d = np.reshape(lat2d, (lat2d.size, ))
+
+  def set_vector_grid(self, u, v, intv=5):
+    nblat = int(intv/2)
+    nblon = int(intv/2)
+    nvlat = int(self.nlat/intv)
+    nvlon = int(self.nlon/intv)
+
+    print('self.nlat = %d, nvlat = %d' %(self.nlat, nvlat))
+    print('self.nlon = %d, nvlon = %d' %(self.nlon, nvlon))
+
+    lon = np.zeros((nvlat, nvlon), dtype=float)
+    lat = np.zeros((nvlat, nvlon), dtype=float)
+    u2d = np.zeros((nvlat, nvlon), dtype=float)
+    v2d = np.zeros((nvlat, nvlon), dtype=float)
+
+    for i in range(nvlat):
+      for n in range(nvlon):
+        lat[i, n] = self.lat[nblat+i*intv]
+    for n in range(nvlat):
+      for i in range(nvlon):
+        lon[n, i] = self.lon[nblon+i*intv]
+        u2d[n, i] = u[nblat+n*intv, nblon+i*intv]
+        v2d[n, i] = v[nblat+n*intv, nblon+i*intv]
+
+    lon1d = np.reshape(lon, (lon.size, ))
+    lat1d = np.reshape(lat, (lat.size, ))
+
+    u1d = np.reshape(u2d, (u2d.size, ))
+    v1d = np.reshape(v2d, (v2d.size, ))
+
+    return lat1d, lon1d, u1d, v1d
+
+  def set_stream_grid(self):
+    lon2d = np.zeros((self.nlat, self.nlon), dtype=float)
+    lat2d = np.zeros((self.nlat, self.nlon), dtype=float)
+
+    for n in range(self.nlat):
+      lon2d[n, :] = self.lon[:]
+    for n in range(self.nlon):
+      lat2d[:, n] = self.lat[:]
+
+    return lat2d, lon2d
 
   def build_basemap(self):
     basemap_dict = {'resolution': 'c', 'projection': 'cyl',
@@ -273,6 +326,97 @@ class GeneratePlot():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def simple_vector(self, u, v, intv=5):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('vector u min: %s, max: %s' % (u.min(), u.max()))
+    print(msg)
+    msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
+    print(msg)
+
+    lat1d, lon1d, u1d, v1d = self.set_vector_grid(u, v, intv=intv)
+
+    clevs = np.arange(-100, 105, 5)
+    blevs = np.arange(-100, 120, 20)
+
+    (x, y) = self.basemap(lon1d, lat1d)
+#   vector = self.plt.arrow(x, y, u1d, v1d)
+#   vector = self.plt.quiver(x, y, u1d, v1d)
+    vector = self.basemap.quiver(x, y, u1d, v1d, width=0.002,
+ 				 scale=self.scale, scale_units=self.scale_units,
+                                 alpha=self.alpha, cmap=self.cmapname)
+#                                levels=clevs, extend=self.extend,
+#                                alpha=self.alpha, cmap=self.cmapname)
+    vectorkey = self.plt.quiverkey(vector, 0.95, 1.02, 20, '20m/s', labelpos='N')
+
+    cb = self.fig.colorbar(vector, orientation=self.orientation,
+                           pad=self.pad, ticks=blevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.streamplot.html#matplotlib.pyplot.streamplot
+ #matplotlib.pyplot.streamplot(x, y, u, v, density=1, linewidth=None,
+ #    color=None, cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
+ #    minlength=0.1, transform=None, zorder=None, start_points=None,
+ #    maxlength=4.0, integration_direction='both', *, data=None)
+  def simple_stream(self, u, v, intv=5):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('vector u min: %s, max: %s' % (u.min(), u.max()))
+    print(msg)
+    msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
+    print(msg)
+
+    lat, lon = self.set_stream_grid()
+
+    clevs = np.arange(-100, 105, 5)
+    blevs = np.arange(-100, 120, 20)
+
+   #(x, y) = self.basemap(lon, lat)
+   #stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2)
+    stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2,
+ 				     arrowsize=1, arrowstyle='-|>',
+                                     cmap=self.cmapname)
+
+   #cb = self.fig.colorbar(stream, orientation=self.orientation,
+   #                       pad=self.pad, ticks=blevs)
+   #cb.set_label(label=self.label, size=self.size, weight=self.weight)
+   #cb.ax.tick_params(labelsize=self.labelsize)
 
     self.ax.set_title(self.title)
 
