@@ -186,6 +186,15 @@ class PlotTools():
 
     basemap = Basemap(**basemap_dict)
 
+   #basemap = Basemap(projection='ortho',lon_0=180,lat_0=0,resolution='c')
+
+   #if('N' == self.hemisphere):
+   #basemap = Basemap(projection='npstere', boundinglat=0, round=True,
+   #                  lon_0=0, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+   #else:
+   #basemap = Basemap(projection='spstere', boundinglat=0, round=True,
+   #                  lon_0=0, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
+
     return basemap
 
   def create_image(self, plt_obj, savename):
