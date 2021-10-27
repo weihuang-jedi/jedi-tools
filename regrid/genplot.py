@@ -409,9 +409,50 @@ class GeneratePlot():
 
    #(x, y) = self.basemap(lon, lat)
    #stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2)
-    stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2,
+    stream = self.basemap.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
  				     arrowsize=1, arrowstyle='-|>',
                                      cmap=self.cmapname)
+
+   #cb = self.fig.colorbar(stream, orientation=self.orientation,
+   #                       pad=self.pad, ticks=blevs)
+   #cb.set_label(label=self.label, size=self.size, weight=self.weight)
+   #cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #https://www.geeksforgeeks.org/matplotlib-pyplot-barbs-in-python/
+  def simple_barbs(self, u, v, intv=5):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('vector u min: %s, max: %s' % (u.min(), u.max()))
+    print(msg)
+    msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
+    print(msg)
+
+    lat, lon = self.set_stream_grid()
+
+    clevs = np.arange(-100, 105, 5)
+    blevs = np.arange(-100, 120, 20)
+
+   #(x, y) = self.basemap(lon, lat)
+    barbs = self.basemap.barbs(lon[::10, ::10], lat[::10, ::10], u[::10, ::10], v[::10, ::10])
+   #stream = self.basemap.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
+   #                                 arrowsize=1, arrowstyle='-|>',
+   #                                 cmap=self.cmapname)
 
    #cb = self.fig.colorbar(stream, orientation=self.orientation,
    #                       pad=self.pad, ticks=blevs)

@@ -13,7 +13,6 @@ from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
 from genplot import GeneratePlot as genplot
-#from readGSIobs import ReadGSIobs
 
 #=========================================================================
 class PlotFV3Model():
@@ -108,7 +107,8 @@ if __name__ == '__main__':
     gp.set_imagename(imgname)
     gp.set_title(title)
    #gp.simple_vector(u, v, intv=10)
-    gp.simple_stream(u, v, intv=5)
+   #gp.simple_stream(u, v, intv=5)
+    gp.simple_barbs(u, v, intv=5)
 
   sys.exit(-1)
 
