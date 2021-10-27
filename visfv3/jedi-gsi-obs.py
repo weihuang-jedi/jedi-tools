@@ -195,7 +195,7 @@ class CheckObsInfo():
   def writedata(self, flnm):
     OUTF = open(flnm, 'w')
     infostr = 'latitude, longitude, ObsValue, JEDI HofX, '
-    infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error'
+    infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
     infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
     OUTF.write('%s\n' %(infostr))
     nlat = len(self.gsilat)
@@ -216,7 +216,18 @@ class CheckObsInfo():
       infostr = '%f, %f, %f,' %(self.gsilat[n], self.gsilon[n], self.jediinfo['obs'][i])
       infostr = '%s %f,' %(infostr, self.jediinfo['hofx'][i])
       infostr = '%s %f, %f,' %(infostr, self.gsiinfo['omb'][n], self.jediombg[i])
-      infostr = '%s %f, %f,' %(infostr, self.gsiinfo['err'][n], self.jediinfo['err'][i])
+
+      if(math.isnan(self.gsiinfo['err'][n])):
+        gsierr = 999999.0
+      else:
+        gsierr = self.gsiinfo['err'][n]
+      jedierr = self.jediinfo['err'][i]
+      if(gsierr > 999999.0):
+        gsierr = 999999.0
+      if(jedierr > 999999.0):
+        jedierr = 999999.0
+     #infostr = '%s %f, %f,' %(infostr, self.gsiinfo['err'][n], self.jediinfo['err'][i])
+      infostr = '%s %f, %f,' %(infostr, gsierr, jedierr)
       infostr = '%s %f, %f,' %(infostr, self.jedihofx_y_mean_xb0[n], self.jediEffectiveError0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
@@ -254,7 +265,8 @@ if __name__ == '__main__':
 
 #=======================================================================================================================
   jediobsfile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
-  gsiobsfile = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
+  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
   jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
 
   coi = CheckObsInfo(debug=debug, jedifile=jediobsfile, gsifile=gsiobsfile, jediOutFile=jediOutFile)
