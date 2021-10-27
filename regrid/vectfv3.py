@@ -12,7 +12,8 @@ import matplotlib.pyplot
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
-from genplot import GeneratePlot as genplot
+sys.path.append('../plot-utils')
+from plottools import PlotTools
 
 #=========================================================================
 class PlotFV3Model():
@@ -78,22 +79,22 @@ if __name__ == '__main__':
  #print('v3d = ', v3d)
 
 #------------------------------------------------------------------------------
-  gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
+  pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
  #if(addobs):
  #  filename = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
  #  rgo = ReadGSIobs(debug=debug, filename=filename)
  #  obslat, obslon = rgo.get_latlon()
 
- #  gp.set_obs_latlon(obslat=obslat, obslon=obslon)
+ #  pt.set_obs_latlon(obslat=obslat, obslon=obslon)
 
 #------------------------------------------------------------------------------
-  gp.set_label('Vector')
+  pt.set_label('Vector')
 
   imageprefix = 'fv3_vector'
   titleprefix = 'FV3 vector at'
 
 #------------------------------------------------------------------------------
-  gp.set_cmapname('rainbow')
+  pt.set_cmapname('rainbow')
 
   nlev, nlat, nlon = v3d.shape
 
@@ -104,19 +105,19 @@ if __name__ == '__main__':
     v = v3d[lev,:,:]
     imgname = '%s_lev_%d.png' %(imageprefix, lev)
     title = '%s level %d' %(titleprefix, lev)
-    gp.set_imagename(imgname)
-    gp.set_title(title)
-   #gp.simple_vector(u, v, intv=10)
-   #gp.simple_stream(u, v, intv=5)
-    gp.simple_barbs(u, v, intv=10)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+   #pt.simple_vector(u, v, intv=10)
+   #pt.simple_stream(u, v, intv=5)
+    pt.simple_barbs(u, v, intv=10)
 
   sys.exit(-1)
 
 #------------------------------------------------------------------------------
   clevs = np.arange(-0.5, 0.51, 0.01)
   cblevs = np.arange(-0.5, 0.6, 0.1)
-  gp.set_clevs(clevs=clevs)
-  gp.set_cblevs(cblevs=cblevs)
+  pt.set_clevs(clevs=clevs)
+  pt.set_cblevs(cblevs=cblevs)
 
  #lons = [40, 105, 170, 270, 300]
   lons = [60]
@@ -124,11 +125,11 @@ if __name__ == '__main__':
   for lon in lons:
     pvar = var[:,:,lon]
     title = '%s longitude %d' %(titleprefix, lon)
-    gp.set_title(title)
+    pt.set_title(title)
 
     imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
-    gp.set_imagename(imgname)
-    gp.plot_meridional_section(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
  #lats = [-30, 0, 45, 70]
@@ -136,10 +137,10 @@ if __name__ == '__main__':
 
   for lat in lats:
     pvar = var[:,90+lat,:]
-    gp.set_title(title)
+    pt.set_title(title)
     title = '%s latitude %d' %(titleprefix, lat)
 
     imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
-    gp.set_imagename(imgname)
-    gp.plot_zonal_section(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_zonal_section(pvar)
 
