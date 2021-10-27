@@ -3,9 +3,26 @@ import sys
 import types
 import getopt
 
+from random import choice
+
+#from PyQt5.QtCore import QSize, Qt, QIcon
+#from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel
+#from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QToolBar, QAction
+
 from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import (
+    QAction,
+    QApplication,
+    QCheckBox,
+    QLabel,
+    QMainWindow,
+    QPushButton,
+    QStatusBar,
+    QTabWidget,
+    QToolBar,
+    QWidget,
+)
 
 #------------------------------------------------------------------------------
 class DisplayWindow(QWidget):
@@ -16,7 +33,7 @@ class DisplayWindow(QWidget):
   def __init__(self):
     super().__init__()
     layout = QVBoxLayout()
-    self.label = QLabel("Display Window")
+    self.label = QLabel('Display Window')
     layout.addWidget(self.label)
     self.setLayout(layout)
 
@@ -25,36 +42,44 @@ class DisplayWindow(QWidget):
 class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
-    self.setWindowTitle("My App")
+   #self.show_display_window()
 
-    self.button_is_checked = True
-    self.button = QPushButton("Press Me!")
-    self.button.setCheckable(True)
-    self.button.clicked.connect(self.the_button_was_clicked)
-    self.button.clicked.connect(self.the_button_was_toggled)
-    self.button.released.connect(self.the_button_was_released)
-    self.button.setChecked(self.button_is_checked)
+    self.setWindowTitle('My App')
 
-   #Set the central widget of the Window.
-    self.setCentralWidget(self.button)
+    label = QLabel('Hello!')
+    label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-    self.show_display_window()
+    self.setCentralWidget(label)
 
-  def the_button_was_clicked(self):
-    print("Clicked!")
+    toolbar = QToolBar('My main toolbar')
+    toolbar.setIconSize(QSize(16, 16))
+    self.addToolBar(toolbar)
 
-  def the_button_was_toggled(self, checked):
-   #print("Checked?", checked)
-    self.button_is_checked = checked 
-    print(self.button_is_checked)
+    button_action = QAction(QIcon('bug.png'), '&Your button', self)
+    button_action.setStatusTip('This is your button')
+    button_action.triggered.connect(self.onMyToolBarButtonClick)
+    button_action.setCheckable(True)
 
-  def the_button_was_released(self):
-    self.button_is_checked = self.button.isChecked()
-    print(self.button_is_checked)
+    toolbar.addAction(button_action)
+    toolbar.addSeparator()
 
-  def show_display_window(self):
-    self.display = DisplayWindow()
-    self.display.show()
+    button_action2 = QAction(QIcon('bug.png'), '&Your button2', self)
+    button_action2.setStatusTip('This is your button2')
+    button_action2.triggered.connect(self.onMyToolBarButtonClick)
+    button_action2.setCheckable(True)
+
+    toolbar.addAction(button_action2)
+    toolbar.addWidget(QLabel('Hello'))
+    toolbar.addWidget(QCheckBox())
+
+    self.setStatusBar(QStatusBar(self))
+
+    menu = self.menuBar()
+    file_menu = menu.addMenu('&File')
+    file_menu.addAction(button_action)
+
+  def onMyToolBarButtonClick(self, s):
+    print('click', s)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':

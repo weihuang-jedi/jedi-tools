@@ -1,0 +1,4 @@
+python3 -m venv ./venv
+source venv/bin/activate
+pip install pyqt5 pyqt5-tools
+
