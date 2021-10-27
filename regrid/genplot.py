@@ -425,7 +425,9 @@ class GeneratePlot():
     self.display(output=self.output, image_name=self.image_name)
 
  #https://www.geeksforgeeks.org/matplotlib-pyplot-barbs-in-python/
-  def simple_barbs(self, u, v, intv=5):
+ #https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.barbs.html#matplotlib.pyplot.barbs
+ #https://matplotlib.org/stable/gallery/images_contours_and_fields/barb_demo.html
+  def simple_barbs(self, u, v, intv=10):
     self.basemap = self.build_basemap()
 
     self.plt = matplotlib.pyplot
@@ -448,16 +450,31 @@ class GeneratePlot():
     clevs = np.arange(-100, 105, 5)
     blevs = np.arange(-100, 120, 20)
 
-   #(x, y) = self.basemap(lon, lat)
-    barbs = self.basemap.barbs(lon[::10, ::10], lat[::10, ::10], u[::10, ::10], v[::10, ::10])
-   #stream = self.basemap.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
-   #                                 arrowsize=1, arrowstyle='-|>',
-   #                                 cmap=self.cmapname)
+    ib = int(intv/2)
+    spd = np.sqrt(u**2 + v**2)
 
-   #cb = self.fig.colorbar(stream, orientation=self.orientation,
-   #                       pad=self.pad, ticks=blevs)
-   #cb.set_label(label=self.label, size=self.size, weight=self.weight)
-   #cb.ax.tick_params(labelsize=self.labelsize)
+    barbs = self.basemap.barbs(lon[ib::intv, ib::intv], lat[ib::intv, ib::intv],
+                               u[ib::intv, ib::intv], v[ib::intv, ib::intv],
+                               spd[ib::intv, ib::intv], fill_empty=False, rounding=False,
+                               flagcolor='r', barbcolor=['b', 'g'], flip_barb=True,
+                               barb_increments=dict(half=5, full=10, flag=50),
+                               sizes=dict(emptybarb=0.25, spacing=0.2, height=0.3))
+
+# Arbitrary set of vectors, make them longer and change the pivot point
+# (point around which they're rotated) to be the middle
+#axs1[0, 1].barbs(
+#    data['x'], data['y'], data['u'], data['v'], length=8, pivot='middle')
+
+# Showing colormapping with uniform grid.  Fill the circle for an empty barb,
+# don't round the values, and change some of the size parameters
+#axs1[1, 0].barbs(
+#    X, Y, U, V, np.sqrt(U ** 2 + V ** 2), fill_empty=True, rounding=False,
+#    sizes=dict(emptybarb=0.25, spacing=0.2, height=0.3))
+
+# Change colors as well as the increments for parts of the barbs
+#axs1[1, 1].barbs(data['x'], data['y'], data['u'], data['v'], flagcolor='r',
+#                 barbcolor=['b', 'g'], flip_barb=True,
+#                 barb_increments=dict(half=10, full=20, flag=100))
 
     self.ax.set_title(self.title)
 

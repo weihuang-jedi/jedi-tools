@@ -108,7 +108,7 @@ if __name__ == '__main__':
     gp.set_title(title)
    #gp.simple_vector(u, v, intv=10)
    #gp.simple_stream(u, v, intv=5)
-    gp.simple_barbs(u, v, intv=5)
+    gp.simple_barbs(u, v, intv=10)
 
   sys.exit(-1)
 
