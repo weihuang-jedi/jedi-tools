@@ -36,6 +36,8 @@ class PlotTools():
     self.marklogp = self.mvp.get_marklogp()
 
     self.precision = 1
+    self.hemisphere = 'N'
+    self.projection = 'cyl'
 
   def set_precision(self, precision=1):
     self.precision = precision
@@ -88,6 +90,11 @@ class PlotTools():
 
     self.scale=100
     self.scale_units='inches'
+
+    self.hemisphere = 'N'
+
+  def set_hemisphere(self, hemisphere='N'):
+    self.hemisphere = hemisphere
 
   def set_scale(self, scale=100):
     self.scale = scale
@@ -186,14 +193,24 @@ class PlotTools():
 
     basemap = Basemap(**basemap_dict)
 
-   #basemap = Basemap(projection='ortho',lon_0=180,lat_0=0,resolution='c')
+    return basemap
 
-   #if('N' == self.hemisphere):
-   #basemap = Basemap(projection='npstere', boundinglat=0, round=True,
-   #                  lon_0=0, lat_0=90, lat_1=60, lat_2=30, resolution='c')
-   #else:
-   #basemap = Basemap(projection='spstere', boundinglat=0, round=True,
-   #                  lon_0=0, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
+  def build_basemap4stereo_projection(self, hemisphere='N', projection='ortho'):
+    self.hemisphere = hemisphere
+    self.projection = projection
+
+    if('ortho' == projection):
+      if('N' == hemisphere):
+        basemap = Basemap(projection='ortho', lon_0=-105,lat_0=75, resolution='c')
+      else:
+        basemap = Basemap(projection='ortho', lon_0=-105,lat_0=-75, resolution='c')
+    else:
+      if('N' == hemisphere):
+        basemap = Basemap(projection='npstere', boundinglat=0, round=True,
+                          lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+      else:
+        basemap = Basemap(projection='spstere', boundinglat=0, round=True,
+                          lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
 
     return basemap
 
@@ -833,6 +850,43 @@ class PlotTools():
                                color=color, linewidth=linewidth,
                                dashes=dashes, fontsize=fontsize)
 
+  def plot_coast_lat_lon_line4hemisphere(self):
+   #https://matplotlib.org/basemap/users/geography.html
+   #map.drawmapboundary(fill_color='aqua')
+   #map.fillcontinents(color='#cc9955', lake_color='aqua')
+   #map.drawcounties()
+   #map.drawstates(color='0.5')
+
+   #draw coastlines
+    color = 'black'
+    linewidth = 0.5
+    self.basemap.drawcoastlines(color=color, linewidth=linewidth)
+
+   #draw parallels
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+
+    if('N' == self.hemisphere):
+      circles = np.arange(30,90,15)
+    else:
+      circles = np.arange(-75,-15,30)
+
+    self.basemap.drawparallels(circles, labels=[1,1,0,1],
+                               color=color, linewidth=linewidth,
+                               dashes=dashes, fontsize=fontsize)
+
+   #draw meridians
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+    meridians = np.arange(0,360,15)
+    self.basemap.drawmeridians(meridians, labels=[1,1,0,1],
+                               color=color, linewidth=linewidth,
+                               dashes=dashes, fontsize=fontsize)
+
   def scatter_plot(self, x, y, var):
     self.plt = matplotlib.pyplot
     try:
@@ -891,6 +945,50 @@ class PlotTools():
     ax = self.plt.gca()
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def plot4hemisphere(self, pvar, hemisphere='N'):
+    self.basemap = self.build_basemap4stereo_projection(hemisphere=hemisphere)
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    (self.x, self.y) = self.basemap(self.lon1d, self.lat1d)
+    v1d = np.reshape(pvar, (pvar.size, ))
+
+    contfill = self.basemap.contourf(self.x, self.y, v1d, tri=True,
+                                     levels=self.clevs, extend=self.extend,
+                                     alpha=self.alpha, cmap=self.cmapname)
+
+    cb = self.fig.colorbar(contfill, orientation=self.orientation,
+                           pad=self.pad, ticks=self.cblevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line4hemisphere()
 
     self.display(output=self.output, image_name=self.image_name)
 
