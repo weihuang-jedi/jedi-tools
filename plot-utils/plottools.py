@@ -524,9 +524,10 @@ class PlotTools():
       vm = 1.0
     size = np.zeros((len(obsvar)), dtype=float)
     for n in range(len(size)):
-      size[n] = 1.0 + 20.0*abs(obsvar[n])/vm
-   #obsplot = self.basemap.scatter(x, y, s=size, c=obsvar, cmap=self.cmapname, 
-    obsplot = self.basemap.scatter(x, y, s=size, c=obsvar, cmap='viridis',
+      size[n] = 1.0 + 100.0*abs(obsvar[n])/vm
+
+    print('self.cmapname = ', self.cmapname)
+    obsplot = self.basemap.scatter(x, y, s=size, c=obsvar, cmap=self.cmapname, 
                                    alpha=self.alpha)
 
     cb = self.plt.colorbar(orientation=self.orientation,
@@ -831,6 +832,67 @@ class PlotTools():
     self.basemap.drawmeridians(np.arange(0,360,30),labels=[1,1,0,1],
                                color=color, linewidth=linewidth,
                                dashes=dashes, fontsize=fontsize)
+
+  def scatter_plot(self, x, y, var):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (np.min(var), np.max(var)))
+    print(msg)
+
+   #print('len(var) = ', len(var))
+
+    vm = abs(np.min(var))
+    bm = abs(np.max(var))
+    if(bm > vm):
+      vm = bm
+  
+    if(vm < 1.0e-6):
+      vm = 1.0
+    size = np.zeros((len(var)), dtype=float)
+    for n in range(len(size)):
+      size[n] = 1.0 + 100.0*abs(var[n])/vm
+
+    print('self.cmapname = ', self.cmapname)
+    scatterplot = self.plt.scatter(x, y, s=size, c=var, cmap=self.cmapname, 
+                               alpha=self.alpha)
+
+    cb = self.plt.colorbar(orientation=self.orientation,
+                           pad=self.pad, ticks=self.cblevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+
+    self.ax.set_title(self.title)
+
+    self.plt.xlim((-7, 3))
+    self.plt.ylim((-7, 3))
+
+    self.plt.xlabel('JEDI_omb', fontsize=14)
+    self.plt.ylabel('GSI_omb', fontsize=14)
+    self.plt.grid(True)
+
+    ax = self.plt.gca()
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
+    self.display(output=self.output, image_name=self.image_name)
 
 # ----
 if __name__ == '__main__':

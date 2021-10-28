@@ -19,7 +19,8 @@ from scipy_regridder import RegridFV3 as regridder
 if __name__ == '__main__':
   debug = 1
   output = 0
-  filename = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
+  datadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  filename = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(datadir)
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filename='])
 

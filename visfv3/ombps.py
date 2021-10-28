@@ -5,22 +5,69 @@ import types
 import getopt
 
 import numpy as np
+
+sys.path.append('../plot-utils')
+from plottools import PlotTools
+
 import matplotlib
 import matplotlib.pyplot
 
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
-from genplot import GeneratePlot as genplot
-from scipy_regridder import RegridFV3 as regridder
-from readIODA2Obs import ReadIODA2Obs
+#=========================================================================
+class StatsHandler():
+  def __init__(self, debug=0, output=0, filename=None):
+    self.debug = debug
+    self.output = output
+    self.filename = filename
+
+    if(self.debug):
+      print('self.output = ', self.output)
+      print('self.filename = ', self.filename)
+
+    self.read_data(self.filename)
+
+  def read_data(self, filename):
+    with open(filename, 'r') as textreader:
+      lines = textreader.readlines()
+
+    self.latitude = []
+    self.longitude = []
+    self.ObsValue = []
+    self.GSI_HofX = []
+    self.JEDI_HofX = []
+    self.GSI_omb = []
+    self.JEDI_omb = []
+    self.GSI_ob_error = []
+    self.JEDI_ob_error = []
+    self.JEDI_hofx_y_mean_xb0 = []
+    self.EffectiveError0 = []
+
+    nlines = len(lines)
+    for i in range(1, nlines):
+      item = lines[i].split(', ')
+      self.latitude.append(float(item[0]))
+      self.longitude.append(float(item[1]))
+      self.ObsValue.append(float(item[2]))
+      self.GSI_HofX.append(float(item[3]))
+      self.JEDI_HofX.append(float(item[4]))
+      self.GSI_omb.append(float(item[5]))
+      self.JEDI_omb.append(float(item[6]))
+      self.GSI_ob_error.append(float(item[7]))
+      self.JEDI_ob_error.append(float(item[8]))
+      self.JEDI_hofx_y_mean_xb0.append(float(item[9]))
+      info = item[10].split(',')
+      self.EffectiveError0.append(float(info[0]))
+
+  def get_omb(self):
+    return self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
- #filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
-  filename = '/work/noaa/gsienkf/weihuang/jedi/surface/ioda_v2_data/out/ncdiag.oper.ob.PT6H.sfc.2021-01-08T21:00:00Z_0000.nc4'
   debug = 1
   output = 0
+  filename = 'gsiNjedi_stats.txt'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filename='])
 
@@ -38,6 +85,10 @@ if __name__ == '__main__':
   print('output = ', output)
   print('filename = ', filename)
 
+  sh = StatsHandler(debug=debug, output=output, filename=filename)
+
+  obslat, obslon, GSI_omb, JEDI_omb = sh.get_omb()
+
 #------------------------------------------------------------------------------
   nlon = 360
   nlat = nlon/2 + 1
@@ -46,45 +97,41 @@ if __name__ == '__main__':
   lon = np.arange(0.0, 360.0, dlon)
   lat = np.arange(-90.0, 90.0+dlat, dlat)
 
-  gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
+#------------------------------------------------------------------------------
+  pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
+
   clevs = np.arange(-20.0, 20.5, 0.5)
   cblevs = np.arange(-20.0, 22.0, 2.0)
-  gp.set_clevs(clevs=clevs)
-  gp.set_cblevs(cblevs=cblevs)
+  pt.set_clevs(clevs=clevs)
+  pt.set_cblevs(cblevs=cblevs)
+  pt.set_cmapname('bwr')
 
-#------------------------------------------------------------------------------
-  rio = ReadIODA2Obs(debug=debug, filename=filename)
+  pt.set_label('GSI omb - JEDI omb, Surface Pressure (hPa)')
 
-  nprocs = 36
-  full_lat = []
-  full_lon = []
-  full_var = []
+  imgname = 'GSIomb-JEDIomb_sondes_obs_ps_only'
+  title = 'GSIomb-JEDIomb Sondes Surface Pressure OBS (only)'
 
-  for n in range(nprocs):
-    flstr = '%04d' %(n)
-    flnm = filename.replace('0000', flstr)
-    rio.set_filename(filename=flnm)
-    lat, lon, var = rio.get_latlon4var(varname='/ombg/surface_pressure')
-    full_lat.extend(lat)
-    full_lon.extend(lon)
-    var = 0.01*var #convert to hPa.
-    full_var.extend(var)
-    print('len(var) = ', len(var))
-    print('len(full_var) = ', len(full_var))
+  obsvar = np.array(GSI_omb) - np.array(JEDI_omb)
 
- #print('lat = ', lat)
- #print('lon = ', lon)
-  print('len(full_lat) = ', len(full_lat))
-  print('len(full_var) = ', len(full_var))
-  print('var min: %f, var max: %f' %(np.min(full_var), np.max(full_var)))
+  meangsiomb = np.mean(np.abs(GSI_omb))
 
-#------------------------------------------------------------------------------
-  gp.set_label('Surface Pressure (hPa)')
+  title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
 
-  imgname = 'sondes_obs_ps_only'
-  title = 'Sondes Surface Pressure OBS (only)'
+  pt.set_imagename(imgname)
+  pt.set_title(title)
+  
+  pt.obsonly(obslat, obslon, obsvar)
 
-  gp.set_imagename(imgname)
-  gp.set_title(title)
-  gp.obsonly(full_lat, full_lon, full_var)
+  clevs = np.arange(-6.0, 2.1, 0.1)
+  cblevs = np.arange(-6.0, 4.0, 2.0)
+  pt.set_clevs(clevs=clevs)
+  pt.set_cblevs(cblevs=cblevs)
+
+  imgname = 'GSIomb-JEDIomb_sondes_obs_ps_only_scatter'
+  title = 'GSIomb-JEDIomb Sondes Surface Pressure OBS (only)'
+  pt.set_imagename(imgname)
+  pt.set_title(title)
+  pt.set_cmapname('rainbow')
+
+  pt.scatter_plot(JEDI_omb, GSI_omb, obsvar)
 

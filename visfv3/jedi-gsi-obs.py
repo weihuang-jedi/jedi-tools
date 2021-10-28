@@ -194,7 +194,7 @@ class CheckObsInfo():
 
   def writedata(self, flnm):
     OUTF = open(flnm, 'w')
-    infostr = 'latitude, longitude, ObsValue, JEDI HofX, '
+    infostr = 'latitude, longitude, ObsValue, GSI HofX, JEDI HofX, '
     infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
     infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
     OUTF.write('%s\n' %(infostr))
@@ -213,8 +213,10 @@ class CheckObsInfo():
      #   infostr = '%s jedi obs: %f. Exit.' %(infostr, self.jediinfo['obs'][i])
      #   print(infostr)
      #   sys.exit(-1)
+
       infostr = '%f, %f, %f,' %(self.gsilat[n], self.gsilon[n], self.jediinfo['obs'][i])
-      infostr = '%s %f,' %(infostr, self.jediinfo['hofx'][i])
+      gsihofx = self.gsiinfo['obs'][n] - self.gsiinfo['omb'][n]
+      infostr = '%s %f, %f,' %(infostr, gsihofx, self.jediinfo['hofx'][i])
       infostr = '%s %f, %f,' %(infostr, self.gsiinfo['omb'][n], self.jediombg[i])
 
       if(math.isnan(self.gsiinfo['err'][n])):
@@ -228,7 +230,7 @@ class CheckObsInfo():
         jedierr = 999999.0
      #infostr = '%s %f, %f,' %(infostr, self.gsiinfo['err'][n], self.jediinfo['err'][i])
       infostr = '%s %f, %f,' %(infostr, gsierr, jedierr)
-      infostr = '%s %f, %f,' %(infostr, self.jedihofx_y_mean_xb0[n], self.jediEffectiveError0[i])
+      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[n], self.jediEffectiveError0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
