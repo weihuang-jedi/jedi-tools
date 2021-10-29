@@ -105,7 +105,8 @@ if __name__ == '__main__':
    #pt.plot(pvar)
    #pt.simple_plot(pvar)
    #pt.plot4hemisphere(pvar, hemisphere='N')
-    pt.plot4hemisphere(pvar, hemisphere='S')
+   #pt.plot4hemisphere(pvar, hemisphere='S')
+    pt.panel2hemispheres(pvar)
 
   sys.exit(-1)
 

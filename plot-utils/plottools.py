@@ -508,7 +508,7 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
-  def obsonly(self, obslat, obslon, obsvar):
+  def obsonly(self, obslat, obslon, obsvar, inbound=False):
     self.basemap = self.build_basemap()
 
     self.plt = matplotlib.pyplot
@@ -543,8 +543,14 @@ class PlotTools():
     for n in range(len(size)):
       size[n] = 1.0 + 100.0*abs(obsvar[n])/vm
 
+    if(inbound):
+      midvar = np.where(obsvar > self.cblevs[0], obsvar, self.cblevs[0])
+      var = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      var = obsvar
+
     print('self.cmapname = ', self.cmapname)
-    obsplot = self.basemap.scatter(x, y, s=size, c=obsvar, cmap=self.cmapname, 
+    obsplot = self.basemap.scatter(x, y, s=size, c=var, cmap=self.cmapname, 
                                    alpha=self.alpha)
 
     cb = self.plt.colorbar(orientation=self.orientation,
@@ -561,6 +567,64 @@ class PlotTools():
       cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
     else:
       cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def set_format(self, cb):
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+
+  def obsonly2(self, obslat, obslon, obsvar, inbound=False, vm=5.0):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (np.min(obsvar), np.max(obsvar)))
+    print(msg)
+
+    x, y = self.basemap(obslon, obslat)
+
+    if(inbound):
+      midvar = np.where(obsvar > self.cblevs[0], obsvar, self.cblevs[0])
+      var = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      var = obsvar
+
+    size = np.zeros((len(obsvar)), dtype=float)
+    for n in range(len(size)):
+      size[n] = 1.0 + 100.0*abs(obsvar[n])/vm
+      if(size[n] > 150.0):
+        size[n] = 150.0
+
+    print('self.cmapname = ', self.cmapname)
+    obsplot = self.basemap.scatter(x, y, s=size, c=var, cmap=self.cmapname, 
+                                   alpha=self.alpha)
+
+    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
+                           pad=self.pad, ticks=self.cblevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -850,7 +914,7 @@ class PlotTools():
                                color=color, linewidth=linewidth,
                                dashes=dashes, fontsize=fontsize)
 
-  def plot_coast_lat_lon_line4hemisphere(self):
+  def plot_coast_lat_lon_line4hemisphere(self, basemap):
    #https://matplotlib.org/basemap/users/geography.html
    #map.drawmapboundary(fill_color='aqua')
    #map.fillcontinents(color='#cc9955', lake_color='aqua')
@@ -860,7 +924,7 @@ class PlotTools():
    #draw coastlines
     color = 'black'
     linewidth = 0.5
-    self.basemap.drawcoastlines(color=color, linewidth=linewidth)
+    basemap.drawcoastlines(color=color, linewidth=linewidth)
 
    #draw parallels
     color = 'green'
@@ -873,9 +937,9 @@ class PlotTools():
     else:
       circles = np.arange(-75,-15,30)
 
-    self.basemap.drawparallels(circles, labels=[1,1,0,1],
-                               color=color, linewidth=linewidth,
-                               dashes=dashes, fontsize=fontsize)
+    basemap.drawparallels(circles, labels=[1,1,0,1],
+                          color=color, linewidth=linewidth,
+                          dashes=dashes, fontsize=fontsize)
 
    #draw meridians
     color = 'green'
@@ -883,11 +947,11 @@ class PlotTools():
     fontsize = 8
     dashes = [10, 10]
     meridians = np.arange(0,360,15)
-    self.basemap.drawmeridians(meridians, labels=[1,1,0,1],
-                               color=color, linewidth=linewidth,
-                               dashes=dashes, fontsize=fontsize)
+    basemap.drawmeridians(meridians, labels=[1,1,0,1],
+                          color=color, linewidth=linewidth,
+                          dashes=dashes, fontsize=fontsize)
 
-  def scatter_plot(self, x, y, var):
+  def scatter_plot(self, x, y, var, inbound=False):
     self.plt = matplotlib.pyplot
     try:
       self.plt.close('all')
@@ -914,8 +978,14 @@ class PlotTools():
     for n in range(len(size)):
       size[n] = 1.0 + 100.0*abs(var[n])/vm
 
+    if(inbound):
+      midvar = np.where(var > self.cblevs[0], var, self.cblevs[0])
+      sclvar = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      sclvar = var
+
     print('self.cmapname = ', self.cmapname)
-    scatterplot = self.plt.scatter(x, y, s=size, c=var, cmap=self.cmapname, 
+    scatterplot = self.plt.scatter(x, y, s=size, c=sclvar, cmap=self.cmapname, 
                                alpha=self.alpha)
 
     cb = self.plt.colorbar(orientation=self.orientation,
@@ -940,6 +1010,59 @@ class PlotTools():
 
     self.plt.xlabel('JEDI_omb', fontsize=14)
     self.plt.ylabel('GSI_omb', fontsize=14)
+    self.plt.grid(True)
+
+    ax = self.plt.gca()
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def scatter_plot2(self, x, y, var, inbound=False, vm=5.0):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (np.min(var), np.max(var)))
+    print(msg)
+
+    size = np.zeros((len(var)), dtype=float)
+    for n in range(len(size)):
+      size[n] = 1.0 + 100.0*abs(var[n])/vm
+      if(size[n] > 150.0):
+        size[n] = 150.0
+
+    if(inbound):
+      midvar = np.where(var > self.cblevs[0], var, self.cblevs[0])
+      sclvar = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      sclvar = var
+
+    print('self.cmapname = ', self.cmapname)
+    scatterplot = self.plt.scatter(x, y, s=size, c=sclvar, cmap=self.cmapname, 
+                               alpha=self.alpha)
+
+    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
+                           pad=self.pad, ticks=self.cblevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.ax.set_title(self.title)
+
+    self.plt.xlim((850.0, 1050))
+    self.plt.ylim((850.0, 1050))
+
+    self.plt.xlabel('GSI_HofX', fontsize=14)
+    self.plt.ylabel('JEDI_HofX', fontsize=14)
     self.plt.grid(True)
 
     ax = self.plt.gca()
@@ -988,7 +1111,61 @@ class PlotTools():
 
     self.ax.set_title(self.title)
 
-    self.plot_coast_lat_lon_line4hemisphere()
+    self.plot_coast_lat_lon_line4hemisphere(self.basemap)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #https://matplotlib.org/stable/gallery/subplots_axes_and_figures/subplots_demo.html
+  def panel2hemispheres(self, pvar):
+#fig, (ax1, ax2) = plt.subplots(1, 2)
+#fig.suptitle('Horizontally stacked subplots')
+#ax1.plot(x, y)
+#ax2.plot(x, -y)
+
+    self.basemapn = self.build_basemap4stereo_projection(hemisphere='N')
+    self.basemaps = self.build_basemap4stereo_projection(hemisphere='S')
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig, (ax1, ax2) = self.plt.subplots(nrows=1, ncols=2)
+    self.fig.suptitle(self.title)
+
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    v1d = np.reshape(pvar, (pvar.size, ))
+
+    (self.x, self.y) = self.basemapn(self.lon1d, self.lat1d)
+    ax1 = self.basemapn.contourf(self.x, self.y, v1d, tri=True,
+                                   levels=self.clevs, extend=self.extend,
+                                   alpha=self.alpha, cmap=self.cmapname)
+    self.plot_coast_lat_lon_line4hemisphere(self.basemapn)
+
+    (self.x, self.y) = self.basemaps(self.lon1d, self.lat1d)
+    ax2 = self.basemaps.contourf(self.x, self.y, v1d, tri=True,
+                                   levels=self.clevs, extend=self.extend,
+                                   alpha=self.alpha, cmap=self.cmapname)
+    self.plot_coast_lat_lon_line4hemisphere(self.basemaps)
+
+    cb = self.fig.colorbar(ax1, ax=[ax1, ax2], orientation=self.orientation,
+                           pad=self.pad, ticks=self.cblevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    if(self.precision == 0):
+      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 1):
+      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
+    elif(self.precision == 2):
+      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
+    else:
+      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
 
     self.display(output=self.output, image_name=self.image_name)
 

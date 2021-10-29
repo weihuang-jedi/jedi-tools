@@ -64,6 +64,9 @@ class StatsHandler():
   def get_omb(self):
     return self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb
 
+  def get_HofX(self):
+    return self.latitude, self.longitude, self.GSI_HofX, self.JEDI_HofX
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
@@ -88,7 +91,7 @@ if __name__ == '__main__':
 
   sh = StatsHandler(debug=debug, output=output, filename=filename)
 
-  obslat, obslon, GSI_omb, JEDI_omb = sh.get_omb()
+  obslat, obslon, GSI_HofX, JEDI_HofX = sh.get_HofX()
 
 #------------------------------------------------------------------------------
   nlon = 360
@@ -104,43 +107,49 @@ if __name__ == '__main__':
  #clevs = np.arange(-20.0, 20.5, 0.5)
  #cblevs = np.arange(-20.0, 22.0, 2.0)
   clevs = np.arange(-2.0, 2.1, 0.1)
-  cblevs = np.arange(-2.0, 4.0, 2.0)
+  cblevs = np.arange(-2.0, 3.0, 1.0)
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
+  pt.set_precision(precision=0)
  #pt.set_cmapname('bwr')
   pt.set_cmapname('brg')
  #pt.set_cmapname('YlGn')
 
-  print('clevs = ', clevs)
-  print('cblevs = ', cblevs)
+ #print('clevs = ', clevs)
+ #print('cblevs = ', cblevs)
 
-  pt.set_label('GSI omb - JEDI omb, Surface Pressure (hPa)')
+  pt.set_label('JEDI HofX - GSI HofX, Surface Pressure (hPa)')
 
-  imgname = 'GSIomb-JEDIomb_sondes_obs_ps_only'
-  title = 'GSIomb-JEDIomb Sondes Surface Pressure OBS (only)'
+  imgname = 'JEDI_HofX-GSI_HofX_sondes_obs_ps_only'
+  title = 'JEDI_HofX-GSI_HofX Sondes Surface Pressure OBS (only)'
 
-  obsvar = np.array(GSI_omb) - np.array(JEDI_omb)
+  obsvar = np.array(JEDI_HofX) - np.array(GSI_HofX)
 
-  meangsiomb = np.mean(np.abs(GSI_omb))
+  meangsi_HofX = np.mean(np.abs(GSI_HofX))
 
-  title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
+  title = '%s mean(abs(GSI_HofX)): %f' %(title, meangsi_HofX)
+
+ #meanjedi_HofX = np.mean(np.abs(GSI_HofX))
+ #print('mean(abs(JEDI_HofX)): %f' %(meanjedi_HofX))
+ #print('JEDI_HofX = ', JEDI_HofX)
 
   pt.set_imagename(imgname)
   pt.set_title(title)
   
+ #pt.obsonly2(obslat, obslon, obsvar, inbound=True, vm=100.0)
   pt.obsonly(obslat, obslon, obsvar, inbound=True)
 
   clevs = np.arange(-2.0, 2.1, 0.1)
-  cblevs = np.arange(-2.0, 4.0, 2.0)
+  cblevs = np.arange(-2.0, 3.0, 1.0)
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
 
-  imgname = 'GSIomb-JEDIomb_sondes_obs_ps_only_scatter'
-  title = 'GSIomb-JEDIomb Sondes Surface Pressure OBS (only)'
+  imgname = 'JEDI_HofX-GSI_HofX_sondes_obs_ps_only_scatter'
+  title = 'JEDI_HofX-GSI_HofX Sondes Surface Pressure OBS (only)'
   pt.set_imagename(imgname)
   pt.set_title(title)
  #pt.set_cmapname('rainbow')
   pt.set_cmapname('brg')
 
-  pt.scatter_plot(JEDI_omb, GSI_omb, obsvar, inbound=True)
+  pt.scatter_plot2(GSI_HofX, JEDI_HofX, obsvar, inbound=True, vm=50.0)
 
