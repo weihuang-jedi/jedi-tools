@@ -80,7 +80,7 @@ subroutine interp2latlongrid(tile, latlon, flnm)
 
    call create_global_attr(ncid, flnm, 'FV3 to Lat-Lon Grid', 'Lat-Lon Grid')
 
-   call create_var_attr(ncid, dimidx, dimidy, dimidz, dimidh, dimidt)
+   call create_var_attr(tile, ncid, dimidx, dimidy, dimidz, dimidh, dimidt)
 
    !write lon
   !call nc_put1Dvar0(ncid, 'lon', latlon%lon, 1, latlon%nlon)
@@ -134,43 +134,29 @@ subroutine interp2latlongrid(tile, latlon, flnm)
             call check_status(status)
          else if((trim(tile(n)%vars(i)%name) == 'ua') .or. &
                  (trim(tile(n)%vars(i)%name) == 'va') .or. &
+                 (trim(tile(n)%vars(i)%name) == 'W') .or. &
+                 (trim(tile(n)%vars(i)%name) == 'delp') .or. &
+                 (trim(tile(n)%vars(i)%name) == 'DZ') .or. &
                  (trim(tile(n)%vars(i)%name) == 'T')) then
             status = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var3d)
             call check_status(status)
          end if
       end do
 
-      if(trim(tile(1)%vars(i)%name) == 'ps') then
+      if((trim(tile(1)%vars(i)%name) == 'ps') .or. &
+         (trim(tile(1)%vars(i)%name) == 'phis')) then
          call interp2dvar(tile, latlon, var2d)
-         !--write ps
-         call nc_put3Dvar(ncid, 'ps', var2d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
-        !call nc_put2Dvar0(ncid, 'ps', var2d, 1, latlon%nlon, 1, latlon%nlat)
-      else if(trim(tile(1)%vars(i)%name) == 'phis') then
-         call interp2dvar(tile, latlon, var2d)
-         !--write phis
-         call nc_put3Dvar(ncid, 'phis', var2d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
-        !call nc_put2Dvar0(ncid, 'phis', var2d, 1, latlon%nlon, 1, latlon%nlat)
-      else if(trim(tile(1)%vars(i)%name) == 'ua') then
+         call nc_put3Dvar(ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
+      else if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
+              (trim(tile(1)%vars(i)%name) == 'va') .or. &
+              (trim(tile(1)%vars(i)%name) == 'W') .or. &
+              (trim(tile(1)%vars(i)%name) == 'delp') .or. &
+              (trim(tile(1)%vars(i)%name) == 'DZ') .or. &
+              (trim(tile(1)%vars(i)%name) == 'T')) then
          call interp3dvar(tile, latlon, var3d)
-         !--write ua
-         call nc_put3Dvar(ncid, 'ua', var3d, 1, 1, latlon%nlon, 1, latlon%nlat, &
-                                                1, latlon%nlev)
-        !call nc_put3Dvar0(ncid, 'ua', var3d, 1, latlon%nlon, 1, latlon%nlat, &
-        !                                     1, latlon%nlev)
-      else if(trim(tile(1)%vars(i)%name) == 'va') then
-         call interp3dvar(tile, latlon, var3d)
-         !--write va
-         call nc_put3Dvar(ncid, 'va', var3d, 1, 1, latlon%nlon, 1, latlon%nlat, &
-                                                1, latlon%nlev)
-        !call nc_put3Dvar0(ncid, 'va', var3d, 1, latlon%nlon, 1, latlon%nlat, &
-        !                                     1, latlon%nlev)
-      else if(trim(tile(1)%vars(i)%name) == 'T') then
-         call interp3dvar(tile, latlon, var3d)
-         !--write T
-         call nc_put3Dvar(ncid, 'T', var3d, 1, 1, latlon%nlon, 1, latlon%nlat, &
-                                               1, latlon%nlev)
-        !call nc_put3Dvar0(ncid, 'T', var3d, 1, latlon%nlon, 1, latlon%nlat, &
-        !                                    1, latlon%nlev)
+         call nc_put3Dvar(ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
       end if
    end do
 
@@ -184,19 +170,22 @@ subroutine interp2latlongrid(tile, latlon, flnm)
 end subroutine interp2latlongrid
 
 !-------------------------------------------------------------------------------------
-subroutine create_var_attr(ncid, dimid_nx, dimid_ny, dimid_nz, dimid_nh, dimid_nt)
+subroutine create_var_attr(tile, ncid, dimid_nx, dimid_ny, dimid_nz, dimid_nh, dimid_nt)
 
    use netcdf
+   use tile_module
 
    implicit none
 
+   type(tilegrid), dimension(6), intent(inout) :: tile
    integer, intent(in) :: ncid
    integer, intent(in) :: dimid_nx, dimid_ny, dimid_nz, dimid_nh, dimid_nt
 
    integer, dimension(6) :: dimids
-   integer :: status, nd
+   integer :: status, nd, i
    integer :: missing_int
    real    :: missing_real
+   character(len=80) :: long_name, units, coordinates
 
    missing_real = -1.0e38
    missing_int = -999999
@@ -246,57 +235,62 @@ subroutine create_var_attr(ncid, dimid_nx, dimid_ny, dimid_nz, dimid_nh, dimid_n
                       "time level", &
                       "Time" )
 
-   dimids(1) = dimid_nx
-   dimids(2) = dimid_ny
-   dimids(3) = dimid_nh
-   dimids(4) = dimid_nt
-   nd = 4
+   do i = 1, tile(1)%nVars
+      if((trim(tile(1)%vars(i)%name) == 'xaxis_1') .or. &
+         (trim(tile(1)%vars(i)%name) == 'xaxis_2') .or. &
+         (trim(tile(1)%vars(i)%name) == 'yaxis_1') .or. &
+         (trim(tile(1)%vars(i)%name) == 'yaxis_2') .or. &
+         (trim(tile(1)%vars(i)%name) == 'zaxis_1') .or. &
+         (trim(tile(1)%vars(i)%name) == 'u') .or. &
+         (trim(tile(1)%vars(i)%name) == 'v') .or. &
+         (trim(tile(1)%vars(i)%name) == 'Time')) then
+         cycle
+      end if
 
-!--Field 1, ps
-   call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
-                   "ps", &
-                   "surface_pressure", &
-                   "Pa", &
-                   "Time hor lat lon", &
-                   missing_real)
+      long_name = 'unknown'
+      units = 'unknown'
+      coordinates = 'Time lev lat lon'
+      dimids(1) = dimid_nx
+      dimids(2) = dimid_ny
+      dimids(3) = dimid_nz
+      dimids(4) = dimid_nt
+      nd = 4
 
-!--Field 2, phis
-   call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
-                   "phis", &
-                   "surface_geopotential_height", &
-                   "m", &
-                   "Time hor lat lon", &
-                   missing_real)
+      long_name = trim(tile(1)%vars(i)%name)
+      if((trim(tile(1)%vars(i)%name) == 'ps') .or. &
+         (trim(tile(1)%vars(i)%name) == 'phis')) then
+         dimids(3) = dimid_nh
+         coordinates = 'Time hor lat lon'
+         if(trim(tile(1)%vars(i)%name) == 'ps') then
+            long_name = 'surface_pressure'
+            units = 'Pa'
+         else if(trim(tile(1)%vars(i)%name) == 'phis') then
+            long_name = 'surface_geopotential_height'
+            units = 'm'
+         end if
+      else if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
+              (trim(tile(1)%vars(i)%name) == 'va') .or. &
+              (trim(tile(1)%vars(i)%name) == 'W') .or. &
+              (trim(tile(1)%vars(i)%name) == 'delp') .or. &
+              (trim(tile(1)%vars(i)%name) == 'DZ') .or. &
+              (trim(tile(1)%vars(i)%name) == 'T')) then
+         if(trim(tile(1)%vars(i)%name) == 'ua') then
+            long_name = 'eastward_wind'
+            units = 'm/s'
+         else if(trim(tile(1)%vars(i)%name) == 'va') then
+            long_name = 'northward_wind'
+            units = 'm/s'
+         else if(trim(tile(1)%vars(i)%name) == 'T') then
+            long_name = 'air_temperature'
+            units = 'K'
+         end if
+      end if
 
-   dimids(1) = dimid_nx
-   dimids(2) = dimid_ny
-   dimids(3) = dimid_nz
-   dimids(4) = dimid_nt
-   nd = 4
-
-!--Field 3, ua
-   call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
-                   "ua", &
-                   "eastward_wind", &
-                   "ms-1", &
-                   "Time lev lat lon", &
-                   missing_real)
-
-!--Field 4, va
-   call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
-                   "va", &
-                   "northward_wind", &
-                   "ms-1", &
-                   "Time lev lat lon", &
-                   missing_real)
-
-!--Field 5, T
-   call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
-                   "T", &
-                   "air_temperature", &
-                   "K", &
-                   "Time lev lat lon", &
-                   missing_real)
+      call nc_putAttr(ncid, nd, dimids, NF90_REAL, &
+                      trim(tile(1)%vars(i)%name), &
+                      trim(long_name), trim(units), &
+                      trim(coordinates), missing_real)
+   end do
 
 !--End define mode.
    status = nf90_enddef(ncid)

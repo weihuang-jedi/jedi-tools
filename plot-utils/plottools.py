@@ -11,6 +11,7 @@ import matplotlib.pyplot
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 from matplotlib.ticker import MultipleLocator
+
 from modelVerticalpressure import ModelVerticalPressure
 
 #=========================================================================
@@ -53,18 +54,6 @@ class PlotTools():
   def set_default(self):
     self.image_name = 'sample.png'
 
-   #self.basemap = self.build_basemap()
-
-   #self.plt = matplotlib.pyplot
-   #try:
-   #  self.plt.close('all')
-   #  self.plt.clf()
-   #except Exception:
-   #  pass
-
-   #self.fig = self.plt.figure()
-   #self.ax = self.plt.subplot()
-
    #cmapname = coolwarm, bwr, rainbow, jet, seismic
     self.cmapname = 'bwr'
 
@@ -73,9 +62,6 @@ class PlotTools():
 
     self.obslat = []
     self.obslon = []
-
-   #self.clevs = np.arange(-0.2, 0.21, 0.01)
-   #self.cblevs = np.arange(-0.2, 0.3, 0.1)
 
     self.extend = 'both'
     self.alpha = 0.5
@@ -260,14 +246,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -308,14 +287,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -559,14 +531,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -668,14 +633,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -727,14 +685,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -788,14 +739,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -850,14 +794,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -935,9 +872,9 @@ class PlotTools():
     if('N' == self.hemisphere):
       circles = np.arange(30,90,15)
     else:
-      circles = np.arange(-75,-15,30)
+      circles = np.arange(-75,0,15)
 
-    basemap.drawparallels(circles, labels=[1,1,0,1],
+    basemap.drawparallels(circles, labels=[1,1,1,1],
                           color=color, linewidth=linewidth,
                           dashes=dashes, fontsize=fontsize)
 
@@ -947,7 +884,7 @@ class PlotTools():
     fontsize = 8
     dashes = [10, 10]
     meridians = np.arange(0,360,15)
-    basemap.drawmeridians(meridians, labels=[1,1,0,1],
+    basemap.drawmeridians(meridians, labels=[1,1,1,1],
                           color=color, linewidth=linewidth,
                           dashes=dashes, fontsize=fontsize)
 
@@ -994,14 +931,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -1100,14 +1030,7 @@ class PlotTools():
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.ax.set_title(self.title)
 
@@ -1116,14 +1039,17 @@ class PlotTools():
     self.display(output=self.output, image_name=self.image_name)
 
  #https://matplotlib.org/stable/gallery/subplots_axes_and_figures/subplots_demo.html
-  def panel2hemispheres(self, pvar):
-#fig, (ax1, ax2) = plt.subplots(1, 2)
-#fig.suptitle('Horizontally stacked subplots')
-#ax1.plot(x, y)
-#ax2.plot(x, -y)
+ #	fig, (ax1, ax2) = plt.subplots(1, 2)
+ #	fig.suptitle('Horizontally stacked subplots')
+ #	ax1.plot(x, y)
+ #	ax2.plot(x, -y)
 
-    self.basemapn = self.build_basemap4stereo_projection(hemisphere='N')
-    self.basemaps = self.build_basemap4stereo_projection(hemisphere='S')
+  def panel2hemispheres(self, pvar):
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    self.hemisphere = 'N'
+    self.projection = 'ortho'
 
     self.plt = matplotlib.pyplot
     try:
@@ -1132,40 +1058,44 @@ class PlotTools():
     except Exception:
       pass
 
-    self.fig, (ax1, ax2) = self.plt.subplots(nrows=1, ncols=2)
+    self.fig, ax = self.plt.subplots(nrows=1, ncols=2)
     self.fig.suptitle(self.title)
 
-    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
-    print(msg)
+    north_map = Basemap(ax=ax[0], projection='ortho', lon_0=-105, lat_0=90, resolution='c')
+    south_map = Basemap(ax=ax[1], projection='ortho', lon_0=75, lat_0=-90, resolution='c')
+
+   #north_map = Basemap(ax=ax[0], projection='npstere', boundinglat=0, round=True,
+   #                    lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+   #south_map = Basemap(ax=ax[1], projection='spstere', boundinglat=0, round=True,
+   #                    lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
 
     v1d = np.reshape(pvar, (pvar.size, ))
 
-    (self.x, self.y) = self.basemapn(self.lon1d, self.lat1d)
-    ax1 = self.basemapn.contourf(self.x, self.y, v1d, tri=True,
-                                   levels=self.clevs, extend=self.extend,
-                                   alpha=self.alpha, cmap=self.cmapname)
-    self.plot_coast_lat_lon_line4hemisphere(self.basemapn)
+   #small_val = 1.0e-6
+   #var = np.where(v1d > small_val, v1d, np.nan)
+    var = v1d
 
-    (self.x, self.y) = self.basemaps(self.lon1d, self.lat1d)
-    ax2 = self.basemaps.contourf(self.x, self.y, v1d, tri=True,
-                                   levels=self.clevs, extend=self.extend,
-                                   alpha=self.alpha, cmap=self.cmapname)
-    self.plot_coast_lat_lon_line4hemisphere(self.basemaps)
+    (nx, ny) = north_map(self.lon1d, self.lat1d)
+    f_n = north_map.contourf(nx, ny, var, tri=True,
+                             levels=self.clevs, extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+    self.hemisphere = 'N'
+    self.plot_coast_lat_lon_line4hemisphere(north_map)
 
-    cb = self.fig.colorbar(ax1, ax=[ax1, ax2], orientation=self.orientation,
-                           pad=self.pad, ticks=self.cblevs)
+    (sx, sy) = south_map(self.lon1d, self.lat1d)
+    f_s = south_map.contourf(sx, sy, var, tri=True,
+                             levels=self.clevs, extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+    self.hemisphere = 'S'
+    self.plot_coast_lat_lon_line4hemisphere(south_map)
+
+    cb = self.fig.colorbar(f_s, ax=ax, orientation=self.orientation,
+                           pad=self.pad, ticks=self.cblevs, shrink=0.6)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
     cb.ax.tick_params(labelsize=self.labelsize)
-    if(self.precision == 0):
-      cb.ax.set_xticklabels(['{:.0f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 1):
-      cb.ax.set_xticklabels(['{:.1f}'.format(x) for x in self.cblevs], minor=False)
-    elif(self.precision == 2):
-      cb.ax.set_xticklabels(['{:.2f}'.format(x) for x in self.cblevs], minor=False)
-    else:
-      cb.ax.set_xticklabels(['{:.3f}'.format(x) for x in self.cblevs], minor=False)
+    self.set_format(cb)
 
     self.display(output=self.output, image_name=self.image_name)
 
