@@ -1071,9 +1071,12 @@ class PlotTools():
 
     v1d = np.reshape(pvar, (pvar.size, ))
 
-   #small_val = 1.0e-6
-   #var = np.where(v1d > small_val, v1d, np.nan)
-    var = v1d
+    small_val = 1.0e-6
+   #mask = np.ma.masked_where(v1d < small_val, v1d)
+   #var = v1d.copy()
+   #var[mask < small_val] = np.nan
+   #var = v1d
+    var = np.ma.array(v1d, mask = v1d < small_val)
 
     (nx, ny) = north_map(self.lon1d, self.lat1d)
     f_n = north_map.contourf(nx, ny, var, tri=True,

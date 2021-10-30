@@ -16,10 +16,10 @@
  ulimit -s unlimited
  ulimit -c unlimited
 
- executable=/work/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
+ executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
 
  ln -sf /work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96 .
- ln -sf /work/noaa/gsienkf/weihuang/jedi/vis_tools/weiinterp/weight/weights.nc .
+ ln -sf /work2/noaa/gsienkf/weihuang/tools/weiinterp/weight/weights.nc .
 
  ${executable}
 
