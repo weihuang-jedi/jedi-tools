@@ -269,7 +269,8 @@ if __name__ == '__main__':
   jediobsfile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
   gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
   gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
-  jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
+ #jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
+  jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/anna-request/ioda_v2_data/out-2/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
 
   coi = CheckObsInfo(debug=debug, jedifile=jediobsfile, gsifile=gsiobsfile, jediOutFile=jediOutFile)
 
