@@ -142,6 +142,7 @@ class CheckObsInfo():
 
   def reorderobs(self):
     self.delt = 0.000001
+    self.gsiidx = []
     self.jediidx = []
 
     nlat = len(self.gsilat)
@@ -149,6 +150,7 @@ class CheckObsInfo():
     for i in range(nlat):
       found, idx = self.findobs(i)
       if(found):
+        self.gsiidx.append(i)
         self.jediidx.append(idx)
        #infostr = 'found gsi lat: %f, lon %f, ' %(self.gsilat[i], self.gsilon[i])
        #infostr = '%s matches jedi lat: %f, lon %f' %(infostr, self.jedilat[idx], self.jedilon[idx])
@@ -223,9 +225,10 @@ class CheckObsInfo():
     infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
     infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
     OUTF.write('%s\n' %(infostr))
-    nlat = len(self.gsilat)
-    for n in range(nlat):
-      i = self.jediidx[n]
+    nobs = len(self.gsiidx)
+    for k in range(nobs):
+      n = self.gsiidx[k]
+      i = self.jediidx[k]
       if((abs(self.gsilat[n] - self.jedilat[i]) > self.delt) or
          (abs(self.gsilon[n] - self.jedilon[i]) > self.delt)):
          infostr = 'gsi lat: %f, lon %f did not match ' %(self.gsilat[n], self.gsilon[n])
@@ -259,19 +262,6 @@ class CheckObsInfo():
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
-  def readdata(self, flnm):
-    lat = []
-    lon = []
-    INF = open(flnm, 'r')
-    lines = INF.readlines()
-    for line in lines:
-      item = line.split(', ')
-      lat.append(float(item[0]))
-      lon.append(float(item[1]))
-    INF.close()
-
-    return lat, lon
-
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
@@ -291,15 +281,17 @@ if __name__ == '__main__':
   print('varname = ', varname)
 
 #=======================================================================================================================
-  jediobsfile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
+  jedidir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes'
+  jediobsfile = '%s/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4' %(jedidir)
 
- #jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
-  jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/anna-request/ioda_v2_data/out-2/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
+ #jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/anna-request/ioda_v2_data/out-2/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
 
   gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
   if(varname == 'surface_pressure'):
+    jediOutFile = '%s/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4' %(jedidir)
     gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
   else:
+    jediOutFile = '%s/ioda_v2_data/uvTq-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4' %(jedidir)
     if(varname == 'air_temperature' or
        varname == 'virtual_temperature'):
       gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_t_ges.2021010900_ensmean.nc4' %(gsidatadir)
