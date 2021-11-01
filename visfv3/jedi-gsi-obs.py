@@ -13,12 +13,38 @@ import numpy as np
 class CheckObsInfo():
   def __init__(self, debug=0, jedifile=None, gsifile=None, jediOutFile=None):
     self.debug = debug
+    self.gsifile = gsifile
+    self.jedifile = jedifile
     self.jediOutFile = jediOutFile
+    self.varname = None
 
-   #----------------------------------------------------------------
+  def process(self, varname):
+    self.varname = varname
+
+    if(self.varname is None):
+      print('varname is None. Stop.')
+      sys.exit(-1)
+
+    self.gsiinfo = self.get_gsiinfo()
+    self.jediinfo = self.get_jediinfo()
+
+    nobs = len(self.gsilat)
+    self.jediEffectiveError0 = np.zeros((nobs), dtype=float)
+    self.jedihofx_y_mean_xb0 = np.zeros((nobs), dtype=float)
+    self.jediombg = np.zeros((nobs), dtype=float)
+
+    self.reorderobs()
+
+    self.readJEDIobsout()
+
+    flnm = 'stats_gsiNjedi_%s.txt' %(self.varname)
+    self.writedata(flnm)
+
+#----------------------------------------------------------------
+  def get_gsiinfo(self):
     gsiinfo = {}
 
-    ncfile = netCDF4.Dataset(gsifile, 'r')
+    ncfile = netCDF4.Dataset(self.gsifile, 'r')
     lat = ncfile.variables['Latitude'][:]
     lon = ncfile.variables['Longitude'][:]
 
@@ -31,11 +57,19 @@ class CheckObsInfo():
     prs = ncfile.variables['Pressure'][:]
     gsiinfo['prs'] = prs
 
-    obs = ncfile.variables['Observation'][:]
+    if('surface_pressure' == self.varname or
+       'specific_humidity' == self.varname or
+       'air_temperature' == self.varname):
+      obs = ncfile.variables['Observation'][:]
+      omb = ncfile.variables['Obs_Minus_Forecast_adjusted'][:]
+     #omb = ncfile.variables['Obs_Minus_Forecast_unadjusted'][:]
+    elif('eastward_wind' == self.varname):
+      obs = ncfile.variables['u_Observation'][:]
+      omb = ncfile.variables['u_Obs_Minus_Forecast_adjusted'][:]
+    elif('northward_wind' == self.varname):
+      obs = ncfile.variables['v_Observation'][:]
+      omb = ncfile.variables['v_Obs_Minus_Forecast_adjusted'][:]
     gsiinfo['obs'] = obs
-
-    omb = ncfile.variables['Obs_Minus_Forecast_adjusted'][:]
-   #omb = ncfile.variables['Obs_Minus_Forecast_unadjusted'][:]
     gsiinfo['omb'] = omb
 
     err = ncfile.variables['Errinv_Final'][:]
@@ -49,24 +83,27 @@ class CheckObsInfo():
 
     print("len(gsiinfo['sid']) = ", len(gsiinfo['sid']))
 
-   #----------------------------------------------------------------
+    return gsiinfo
+
+#----------------------------------------------------------------
+  def get_jediinfo(self):
     jediinfo = {}
-    ncfile = netCDF4.Dataset(jedifile, 'r')
+    ncfile = netCDF4.Dataset(self.jedifile, 'r')
 
     ncgroup = ncfile['/ObsValue/']
-    var = ncgroup.variables['surface_pressure'][:]
+    var = ncgroup.variables[self.varname][:]
     self.set_mask(var)
     obs = 0.01*self.get_unmasked_value(var)
     jediinfo['obs'] = obs
 
    #ncgroup = ncfile['/GsiFinalObsError/']
     ncgroup = ncfile['/ObsError/']
-    var = ncgroup.variables['surface_pressure'][:]
+    var = ncgroup.variables[self.varname][:]
     oberr = 0.01*self.get_unmasked_value(var)
     jediinfo['err'] = oberr
 
     ncgroup = ncfile['/GsiHofX/']
-    var = ncgroup.variables['surface_pressure'][:]
+    var = ncgroup.variables[self.varname][:]
     hofx = 0.01*self.get_unmasked_value(var)
     jediinfo['hofx'] = hofx
 
@@ -90,19 +127,7 @@ class CheckObsInfo():
 
     print("len(jediinfo['sid']) = ", len(jediinfo['sid']))
 
-    self.gsiinfo = gsiinfo
-    self.jediinfo = jediinfo
-
-    nobs = len(lat)
-    self.jediEffectiveError0 = np.zeros((nobs), dtype=float)
-    self.jedihofx_y_mean_xb0 = np.zeros((nobs), dtype=float)
-    self.jediombg = np.zeros((nobs), dtype=float)
-
-    self.reorderobs()
-
-    self.readJEDIobsout()
-
-    self.writedata('gsiNjedi_stats.txt')
+    return jediinfo
 
   def set_mask(self, var):
     self.mask = []
@@ -152,7 +177,7 @@ class CheckObsInfo():
       ncfile = netCDF4.Dataset(flnm, 'r')
  
       ncgroup = ncfile['/EffectiveError0/']
-      var = ncgroup.variables['surface_pressure'][:]
+      var = ncgroup.variables[self.varname][:]
       self.set_mask(var)
       EffectiveError0 = 0.01*self.get_unmasked_value(var)
 
@@ -163,11 +188,11 @@ class CheckObsInfo():
       lon = self.get_unmasked_value(var)
 
       ncgroup = ncfile['/hofx_y_mean_xb0/']
-      var = ncgroup.variables['surface_pressure'][:]
+      var = ncgroup.variables[self.varname][:]
       hofx_y_mean_xb0 = 0.01*self.get_unmasked_value(var)
 
       ncgroup = ncfile['/ombg/']
-      var = ncgroup.variables['surface_pressure'][:]
+      var = ncgroup.variables[self.varname][:]
       ombg = 0.01*self.get_unmasked_value(var)
 
       ncfile.close()
@@ -250,27 +275,40 @@ class CheckObsInfo():
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
-  output = 0
+  varname = 'surface_pressure'
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'varname='])
 
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
-    elif o in ('--output'):
-      output = int(a)
+    elif o in ('--varname'):
+      varname = a
    #else:
    #  assert False, 'unhandled option'
 
   print('debug = ', debug)
-  print('output = ', output)
+  print('varname = ', varname)
 
 #=======================================================================================================================
   jediobsfile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
-  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
-  gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
+
  #jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
   jediOutFile = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/anna-request/ioda_v2_data/out-2/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4'
 
+  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  if(varname == 'surface_pressure'):
+    gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
+  else:
+    if(varname == 'air_temperature' or
+       varname == 'virtual_temperature'):
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_t_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    elif(varname == 'specific_humidity'):
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_q_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    else:
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_uv_ges.2021010900_ensmean.nc4' %(gsidatadir)
+
   coi = CheckObsInfo(debug=debug, jedifile=jediobsfile, gsifile=gsiobsfile, jediOutFile=jediOutFile)
+
+  coi.process(varname=varname)
 

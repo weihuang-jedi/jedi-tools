@@ -61,7 +61,8 @@ if __name__ == '__main__':
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs/increment/'
    #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_psonly/increment/'
    #datadir = '%s/anna-request/analysis.getkf.80members.36procs.1/increment/' %(casedir)
-    datadir = '%s/anna-request/analysis.getkf.80members.36procs.2/increment/' %(casedir)
+   #datadir = '%s/anna-request/analysis.getkf.80members.36procs.2/increment/' %(casedir)
+    datadir = '%s/anna-request/analysis.getkf.80members.36procs.3/increment/' %(casedir)
 
   datafiles = []
   snd_files = []
@@ -113,8 +114,14 @@ if __name__ == '__main__':
    #title_preix = 'uvTq JEDI Sondes Temperature at'
    #image_prefix = 'PSonly_jedi_sondes'
    #title_preix = 'PSonly JEDI Sondes Temperature at'
-    image_prefix = 'LETKF_PSonly_jedi_sondes'
-    title_preix = 'LETKF PSonly JEDI Sondes Temperature at'
+   #image_prefix = 'LETKF_PSonly_jedi_sondes'
+   #title_preix = 'LETKF PSonly JEDI Sondes Temperature at'
+   #image_prefix = 'LETKF_PSonly_exp_1'
+   #title_preix = 'LETKF PS only Temperature at'
+   #image_prefix = 'GETKF_PSonly_logp_exp_2'
+   #title_preix = 'GETKF PS only logp as vert loc. Temperature at'
+    image_prefix = 'LETKF_PSonly_logp_exp_3'
+    title_preix = 'LETKF PS only logp as vert loc. Temperature at'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
