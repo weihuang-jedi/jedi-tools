@@ -888,7 +888,7 @@ class PlotTools():
                           color=color, linewidth=linewidth,
                           dashes=dashes, fontsize=fontsize)
 
-  def scatter_plot(self, x, y, var, inbound=False):
+  def scatter_plot(self, x, y, var, varname, inbound=False):
     self.plt = matplotlib.pyplot
     try:
       self.plt.close('all')
@@ -926,7 +926,7 @@ class PlotTools():
                                alpha=self.alpha)
 
     cb = self.plt.colorbar(orientation=self.orientation,
-                           pad=self.pad, ticks=self.cblevs)
+                           pad=self.pad, ticks=self.cblevs, shrink=0.8)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
@@ -935,8 +935,16 @@ class PlotTools():
 
     self.ax.set_title(self.title)
 
-    self.plt.xlim((-7, 3))
-    self.plt.ylim((-7, 3))
+    if(varname == 'surface_pressure'):
+      self.plt.xlim((-7, 7))
+      self.plt.ylim((-7, 7))
+    elif(varname == 'air_temperature'):
+      self.plt.xlim((-7, 7))
+      self.plt.ylim((-7, 7))
+    elif(varname == 'eastward_wind' or varname == 'northward_wind'):
+      self.plt.xlim((-7, 7))
+    elif(varname == 'specific_humidity'):
+      self.plt.xlim((-7, 7))
 
     self.plt.xlabel('JEDI_omb', fontsize=14)
     self.plt.ylabel('GSI_omb', fontsize=14)
