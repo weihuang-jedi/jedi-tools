@@ -178,7 +178,7 @@ class Ocean2LatLon():
         if coords.names[1] == 'Layer':  # 3-dimensional data
           if pos=='T':  # interplate to lat-lon grid
             interp_out= rg_tt(ds_in[i].values)
-            da_out=xr.DataArray(interp_out,dims=['time','lev','lat','lon'])                    
+            da_out=xr.DataArray(interp_out,dims=['time','lay','lat','lon'])                    
             da_out.attrs['long_name']=ds_in[i].long_name
             da_out.attrs['units']=ds_in[i].units
             ds_out.append(da_out.to_dataset(name=i))
@@ -195,11 +195,11 @@ class Ocean2LatLon():
            #interoplate to lat-lon grid
             uinterp_out= rg_tt(urot)
             vinterp_out= rg_tt(vrot)
-            da_out=xr.DataArray(np.expand_dims(uinterp_out, 0),dims=['time','lev','lat','lon'])                    
+            da_out=xr.DataArray(np.expand_dims(uinterp_out, 0),dims=['time','lay','lat','lon'])                    
             da_out.attrs['long_name']=ds_in[i].long_name
             da_out.attrs['units']=ds_in[i].units
             ds_out.append(da_out.to_dataset(name=i))
-            da_out=xr.DataArray(np.expand_dims(vinterp_out, 0),dims=['time','lev','lat','lon'])
+            da_out=xr.DataArray(np.expand_dims(vinterp_out, 0),dims=['time','lay','lat','lon'])
             da_out.attrs['long_name']=ds_in[i2].long_name
             da_out.attrs['units']=ds_in[i2].units
             ds_out.append(da_out.to_dataset(name=i2))
@@ -233,7 +233,7 @@ class Ocean2LatLon():
     ds_out=xr.merge(ds_out)
     ds_out=ds_out.assign_coords(lon=('lon',lon1d))
     ds_out=ds_out.assign_coords(lat=('lat',lat1d))
-    ds_out=ds_out.assign_coords(lev=('lev',ds_in.Layer.values))
+    ds_out=ds_out.assign_coords(lay=('lay',ds_in.Layer.values))
     ds_out=ds_out.assign_coords(time=('time',ds_in.Time.values))
     ds_out['lon'].attrs['units']='degrees_east'
     ds_out['lon'].attrs['axis']='X'
@@ -241,9 +241,9 @@ class Ocean2LatLon():
     ds_out['lat'].attrs['units']='degrees_north'
     ds_out['lat'].attrs['axis']='Y'
     ds_out['lat'].attrs['standard_name']='latitude'
-    ds_out['lev'].attrs['units']='meters'
-    ds_out['lev'].attrs['positive']='down'
-    ds_out['lev'].attrs['axis']='Z'
+    ds_out['lay'].attrs['units']='meters'
+    ds_out['lay'].attrs['positive']='down'
+    ds_out['lay'].attrs['axis']='Z'
 
     ds_out.to_netcdf(outfilename)
     ds_out.close()

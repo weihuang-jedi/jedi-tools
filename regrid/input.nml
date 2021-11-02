@@ -1,9 +1,9 @@
 &control_param
  generate_weights = .false.
  dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/',
- prefix = 'fv_core.res.tile',
+ prefix = 'sfc_data.tile',
 
- output_flnm = 'latlon_grid.nc',
+ output_flnm = 'latlon_sfc.nc',
  wgt_flnm = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/weight/weights.nc',
 
  nlon = 360

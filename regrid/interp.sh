@@ -19,8 +19,10 @@
  ulimit -c unlimited
 
  DIRNAME=/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/
- PREFIX=fv_core.res.tile
- OUTPUTFILE=latlon_grid.nc
+#PREFIX=fv_core.res.tile
+#OUTPUTFILE=latlon_grid.nc
+ PREFIX=sfc_data.tile
+ OUTPUTFILE=latlon_sfc.nc
  WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weight/weights.nc
 
  sed -e "s?DIRNAME?${DIRNAME}?g" \
@@ -32,13 +34,13 @@
  executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
 #ln -sf /work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96 .
 
-#${executable}
+ ${executable}
 
- nemsrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
+#nemsrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
 
- python ocean2latlon.py --nemsrc=${nemsrc}
+#python ocean2latlon.py --nemsrc=${nemsrc}
 
- icesrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
+#icesrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
 
- python ice2latlon.py --icesrc=${icesrc}
+#python ice2latlon.py --icesrc=${icesrc}
 
