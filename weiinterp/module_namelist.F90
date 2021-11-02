@@ -5,11 +5,13 @@ MODULE namelist_module
   implicit none
 
   integer, parameter :: nml_unit = 7
+  integer, parameter :: max_types = 5
 
   CHARACTER(LEN=1024) :: program_name
   character(len=1024) :: dirname, prefix
   character(len=1024) :: output_flnm, wgt_flnm
-  integer :: nlat, nlon, npnt
+  character(len=128), dimension(max_types) :: data_types
+  integer :: nlat, nlon, npnt, num_types
   logical :: generate_weights, debug_on
 
 contains
@@ -24,6 +26,7 @@ contains
     namelist /control_param/ program_name, dirname, prefix, &
                              output_flnm, wgt_flnm, &
                              nlat, nlon, npnt, &
+                             num_types, data_types, &
                              generate_weights
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
@@ -42,6 +45,9 @@ contains
     nlon = 360
     nlat = 181
     npnt = 4
+    num_types = 1
+
+    data_types(1) = 'fv-core'
 
     generate_weights = .false.
     debug_on = .false.
