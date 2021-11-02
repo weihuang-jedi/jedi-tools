@@ -254,22 +254,23 @@ class Ocean2LatLon():
 if __name__ == '__main__':
   debug = 1
   wgtdir = 'grids/'
+  nemsrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
+  outdir = 'output/'
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'nemsrc='])
 
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--wgtdir'):
       wgtdir = a
+    elif o in ('--nemsrc'):
+      nemsrc = a
    #else:
    #  assert False, 'unhandled option'
 
   print('debug = ', debug)
   print('wgtdir = ', wgtdir)
-
-  nemsrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
-  outdir = 'output/'
 
  #open input file to get input grid
  #files=glob.glob('ocn_????_??_??.nc')

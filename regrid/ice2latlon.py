@@ -6,7 +6,7 @@ import glob
 import getopt
 
 #-------------------------------------------------------------------------------------------
-class Ocean2LatLon():
+class Ice2LatLon():
   def __init__(self, debug=0, wgtdir='grids/'):
     self.debug = debug
     self.wgtdir = wgtdir
@@ -154,37 +154,38 @@ class Ocean2LatLon():
 if __name__ == '__main__':
   debug = 1
   wgtdir = 'grids/'
+  icesrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
+  outdir = 'output/'
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'icesrc='])
 
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--wgtdir'):
       wgtdir = a
+    elif o in ('--icesrc'):
+      icesrc = a
    #else:
    #  assert False, 'unhandled option'
 
   print('debug = ', debug)
   print('wgtdir = ', wgtdir)
-
-  nemsrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
-  outdir = 'output/'
+  print('wgtdir = ', wgtdir)
 
  #open input file to get input grid
- #files=glob.glob(nemsrc + 'MOM.res.????-??-??-??-00-00.nc')
-  files=glob.glob(nemsrc + 'iced.????-??-??-?????.nc')
+  files=glob.glob(icesrc + 'iced.????-??-??-?????.nc')
   files.sort()
 
-  o2ll = Ocean2LatLon(debug=debug, wgtdir=wgtdir)
+  i2ll = Ice2LatLon(debug=debug, wgtdir=wgtdir)
   inres = 'mx100'
   outres='360x181'
 
-  o2ll.set_ires(ires=inres)
-  o2ll.set_ores(ores=outres)
+  i2ll.set_ires(ires=inres)
+  i2ll.set_ores(ores=outres)
 
  #generate weight file if needed.
-  o2ll.gen_wgtfile(infilename=files[0])
+  i2ll.gen_wgtfile(infilename=files[0])
 
   for infile in files:
     print('Processing:', infile)
@@ -196,5 +197,5 @@ if __name__ == '__main__':
       outfile = '%s%s_%s.nc' %(outdir, flnm, outres)
     print('\toutput file:', outfile)
 
-    o2ll.process_file(infilename=infile, outfilename=outfile)
+    i2ll.process_file(infilename=infile, outfilename=outfile)
 
