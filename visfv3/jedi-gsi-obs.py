@@ -37,8 +37,7 @@ class CheckObsInfo():
 
     self.readJEDIobsout()
 
-    flnm = 'stats_gsiNjedi_%s.txt' %(self.varname)
-    self.writedata(flnm)
+    self.writedata()
 
 #----------------------------------------------------------------
   def get_gsiinfo(self):
@@ -163,6 +162,12 @@ class CheckObsInfo():
      #print('Loop on No. %d and %d use time: %f' %(i, idx, xe - xb))
      #xb = xe
 
+    self.gsiall = np.linspace(0, len(self.gsilat), len(self.gsilat), endpoint=False, dtype=int)
+    self.gsionly = np.delete(self.gsiall, self.gsiidx)
+
+    self.jediall = np.linspace(0, len(self.jedilat), len(self.jedilat), endpoint=False, dtype=int)
+    self.jedionly = np.delete(self.jediall, self.jediidx)
+
   def findobs(self, i):
     for n in range(len(self.jedilat)):
       if(abs(self.jedilat[n] - self.gsilat[i]) < self.delt):
@@ -172,9 +177,13 @@ class CheckObsInfo():
 
   def readJEDIobsout(self):
     nprocs = 36
+    self.oldlat = []
+    self.oldlon = []
     for n in range(nprocs):
       flstr = '%04d' %(n)
       flnm = self.jediOutFile.replace('0000', flstr)
+
+      print('Reading JEDI out obs for proc: %d' %(n))
 
       ncfile = netCDF4.Dataset(flnm, 'r')
  
@@ -205,10 +214,24 @@ class CheckObsInfo():
       self.insert2JEDI(lat, lon, EffectiveError0, hofx_y_mean_xb0, ombg)
 
   def insert2JEDI(self, lat, lon, EffectiveError0, hofx_y_mean_xb0, ombg):
+    if(len(self.oldlat) < 1):
+      newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
+    else:
+      usedidx = []
+      for i in range(len(lat)):
+        for n in range(len(self.oldlat)):
+          if(abs(self.oldlat[n] - lat[i]) < self.delt and
+             abs(self.oldlon[n] - lon[i]) < self.delt):
+             usedidx.append(i)
+             break
+      newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
+      newidx = np.delete(newidx, usedidx)
+
     self.delt = 0.001
     na = 0
     for n in range(len(self.jedilat)):
-      for i in range(len(lat)):
+     #for i in range(len(lat)):
+      for i in newidx:
         if(abs(self.jedilat[n] - lat[i]) < self.delt):
           if(abs(self.jedilon[n] - lon[i]) < self.delt):
             self.jediEffectiveError0[n] = EffectiveError0[i]
@@ -219,7 +242,9 @@ class CheckObsInfo():
    #print('\tInsert %d obs to jedi.' %(na))
    #print('self.jediombg = ', self.jediombg)
 
-  def writedata(self, flnm):
+  def writedata(self):
+   #---------------------------------------------------------------------------------------------
+    flnm = 'stats_gsiNjedi_%s_common.txt' %(self.varname)
     OUTF = open(flnm, 'w')
     infostr = 'latitude, longitude, ObsValue, GSI HofX, JEDI HofX, '
     infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
@@ -258,7 +283,53 @@ class CheckObsInfo():
         jedierr = 999999.0
      #infostr = '%s %f, %f,' %(infostr, self.gsiinfo['err'][n], self.jediinfo['err'][i])
       infostr = '%s %f, %f,' %(infostr, gsierr, jedierr)
-      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[n], self.jediEffectiveError0[i])
+      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[i], self.jediEffectiveError0[i])
+      OUTF.write('%s\n' %(infostr))
+    OUTF.close()
+
+   #---------------------------------------------------------------------------------------------
+    flnm = 'stats_gsiNjedi_%s_gsionly.txt' %(self.varname)
+    OUTF = open(flnm, 'w')
+    infostr = 'latitude, longitude, ObsValue, GSI HofX, '
+    infostr = infostr + 'GSI omb, GSI ob error'
+    OUTF.write('%s\n' %(infostr))
+    nobs = len(self.gsionly)
+    for k in range(nobs):
+      n = self.gsionly[k]
+
+      infostr = '%f, %f,' %(self.gsilat[n], self.gsilon[n])
+      gsihofx = self.gsiinfo['obs'][n] - self.gsiinfo['omb'][n]
+      infostr = '%s %f, %f,' %(infostr, gsihofx, self.gsiinfo['omb'][n])
+
+      if(math.isnan(self.gsiinfo['err'][n])):
+        gsierr = 999999.0
+      else:
+        gsierr = self.gsiinfo['err'][n]
+      if(gsierr > 999999.0):
+        gsierr = 999999.0
+      infostr = '%s %f' %(infostr, gsierr)
+      OUTF.write('%s\n' %(infostr))
+    OUTF.close()
+
+   #---------------------------------------------------------------------------------------------
+    flnm = 'stats_gsiNjedi_%s_jedionly.txt' %(self.varname)
+    OUTF = open(flnm, 'w')
+    infostr = 'latitude, longitude, ObsValue, JEDI HofX, '
+    infostr = infostr + 'JEDI omb, JEDI ob error, '
+    infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
+    OUTF.write('%s\n' %(infostr))
+    nobs = len(self.jedionly)
+    for k in range(nobs):
+      i = self.jedionly[k]
+
+      infostr = '%f, %f, %f,' %(self.jedilat[i], self.jedilon[i], self.jediinfo['obs'][i])
+      infostr = '%s %f, %f,' %(infostr, self.jediinfo['hofx'][i], self.jediombg[i])
+
+      jedierr = self.jediinfo['err'][i]
+      if(jedierr > 999999.0):
+        jedierr = 999999.0
+      infostr = '%s %f,' %(infostr, jedierr)
+      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[i], self.jediEffectiveError0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
