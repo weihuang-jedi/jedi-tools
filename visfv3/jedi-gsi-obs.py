@@ -46,15 +46,15 @@ class CheckObsInfo():
     ncfile = netCDF4.Dataset(self.gsifile, 'r')
     lat = ncfile.variables['Latitude'][:]
     lon = ncfile.variables['Longitude'][:]
+    prs = ncfile.variables['Pressure'][:]
 
     gsiinfo['lat'] = lat
     gsiinfo['lon'] = lon
+    gsiinfo['prs'] = prs
 
     self.gsilat = lat
     self.gsilon = lon
-
-    prs = ncfile.variables['Pressure'][:]
-    gsiinfo['prs'] = prs
+    self.gsiprs = prs
 
     if('surface_pressure' == self.varname or
        'specific_humidity' == self.varname or
@@ -127,20 +127,18 @@ class CheckObsInfo():
 
     self.jedilat = lat
     self.jedilon = lon
+    self.jediprs = prs
 
     if('surface_pressure' == self.varname):
       jediinfo['obs'] = 0.01*obs
-      jediinfo['omb'] = 0.01*omb
       jediinfo['err'] = 0.01*oberr
       jediinfo['hofx'] = 0.001*hofx
     elif('specific_humidity' == self.varname):
       jediinfo['obs'] = 1000.0*obs
-      jediinfo['omb'] = 1000.0*omb
       jediinfo['err'] = 1000.0*oberr
       jediinfo['hofx'] = 1000.0*hofx
     else:
       jediinfo['obs'] = obs
-      jediinfo['omb'] = omb
       jediinfo['err'] = oberr
       jediinfo['hofx'] = hofx
 
@@ -206,6 +204,7 @@ class CheckObsInfo():
     nprocs = 36
     self.oldlat = []
     self.oldlon = []
+    self.oldprs = []
     for n in range(nprocs):
       flstr = '%04d' %(n)
       flnm = self.jediOutFile.replace('0000', flstr)
@@ -224,6 +223,8 @@ class CheckObsInfo():
       lat = self.get_unmasked_value(var)
       var = ncgroup.variables['longitude'][:]
       lon = self.get_unmasked_value(var)
+      var = ncgroup.variables['air_pressure'][:]
+      prs = 0.01*self.get_unmasked_value(var)
 
       ncgroup = ncfile['/hofx_y_mean_xb0/']
       var = ncgroup.variables[self.varname][:]
@@ -247,9 +248,9 @@ class CheckObsInfo():
      #print('Find %d ombg for proc %d' %(len(ombg), n))
      #print('ombg = ', ombg)
 
-      self.insert2JEDI(lat, lon, EffectiveError0, hofx_y_mean_xb0, ombg)
+      self.insert2JEDI(lat, lon, prs, EffectiveError0, hofx_y_mean_xb0, ombg)
 
-  def insert2JEDI(self, lat, lon, EffectiveError0, hofx_y_mean_xb0, ombg):
+  def insert2JEDI(self, lat, lon, prs, EffectiveError0, hofx_y_mean_xb0, ombg):
     if(len(self.oldlat) < 1):
       newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
     else:
@@ -257,21 +258,22 @@ class CheckObsInfo():
       for i in range(len(lat)):
         for n in range(len(self.oldlat)):
           if(abs(self.oldlat[n] - lat[i]) < self.delt and
-             abs(self.oldlon[n] - lon[i]) < self.delt):
+             abs(self.oldlon[n] - lon[i]) < self.delt and
+             abs(self.oldprs[n] - prs[i]) < self.delt):
              usedidx.append(i)
              break
       newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
       newidx = np.delete(newidx, usedidx)
 
     self.delt = 0.001
-    na = 0
     for n in range(len(self.jedilat)):
       for i in newidx:
         if(abs(self.jedilat[n] - lat[i]) < self.delt):
           if(abs(self.jedilon[n] - lon[i]) < self.delt):
-            self.jediEffectiveError0[n] = EffectiveError0[i]
-            self.jedihofx_y_mean_xb0[n] = hofx_y_mean_xb0[i]
-            self.jediombg[n] = ombg[i]
+            if(abs(self.jediprs[n] - prs[i]) < self.delt):
+              self.jediEffectiveError0[n] = EffectiveError0[i]
+              self.jedihofx_y_mean_xb0[n] = hofx_y_mean_xb0[i]
+              self.jediombg[n] = ombg[i]
 
    #print('\tInsert %d obs to jedi.' %(na))
    #print('self.jediombg = ', self.jediombg)
