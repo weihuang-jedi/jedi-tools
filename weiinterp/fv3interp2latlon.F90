@@ -7,26 +7,50 @@ PROGRAM fv3interp2latlon
 
    IMPLICIT NONE
 
-   type(tilegrid), dimension(6) :: tile
-   type(latlongrid)             :: latlon
+   type tiletype
+      type(tilegrid), dimension(6) :: tile
+   end type tiletype
+
+   type(tiletype), dimension(max_types) :: types
+   type(latlongrid)                     :: latlon
+   integer :: n
+   logical :: last
 
    call read_namelist('input.nml')
 
-   call initialize_tilegrid(tile, dirname, prefix)
    call initialize_latlongrid(nlon, nlat, npnt, latlon)
 
-  !call output_tilegrid(tile)
+   do n = 1, num_types
+      call initialize_tilegrid(types(n)%tile, dirname, trim(data_types(n)))
+      if(trim(data_types(n)) == 'fv_core.res.tile') then
+         latlon%nlev = types(n)%tile(1)%nz
+      else if(trim(data_types(n)) == 'sfc_data.tile') then
+         latlon%nlay = types(n)%tile(1)%nz
+      end if
+   end do
 
    if(generate_weights) then
-      call generate_weight(tile, latlon)
+      call generate_weight(types(1)%tile, latlon)
       call write_latlongrid(latlon, wgt_flnm)
    else
       call read_weights(latlon, wgt_flnm)
-      call interp2latlongrid(tile, latlon, output_flnm)
+
+      do n = 1, num_types
+         last = (n == num_types)
+         call generate_header(n, types(n)%tile, latlon, output_flnm, last)
+      end do
+
+      do n = 1, num_types
+         call interp2latlongrid(n, types(n), latlon)
+      end do
    end if
 
+   do n = 1, num_types
+      call finalize_tilegrid(types(n)%tile)
+   end do
+
+   call closefile(latlon)
    call finalize_latlongrid(latlon)
-   call finalize_tilegrid(tile)
 
 END PROGRAM fv3interp2latlon
 

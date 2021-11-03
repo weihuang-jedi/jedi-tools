@@ -17,8 +17,12 @@ module latlon_module
   !-----------------------------------------------------------------------
 
   type latlongrid
-     integer                               :: nlon, nlat, nlev, npnt
-     integer, dimension(:),    allocatable :: lon, lat, lev, pnt
+     character(len=1024)                   :: filename
+     integer                               :: ncid
+     integer                               :: dimidx, dimidy, dimidz, &
+                                              dimidl, dimidh, dimidt
+     integer                               :: nlon, nlat, nlev, nlay, npnt
+     integer, dimension(:),    allocatable :: lon, lat, lev, lay, pnt
      integer, dimension(:, :), allocatable :: counter
      integer, dimension(:, :, :), allocatable :: tile
      integer, dimension(:, :, :), allocatable :: ilon, jlat
@@ -30,8 +34,7 @@ module latlon_module
 
 contains
 
-  !-----------------------------------------------------------------------
-
+ !-----------------------------------------------------------------------
   subroutine initialize_latlongrid(nlon, nlat, npnt, latlon)
 
     implicit none
@@ -47,6 +50,8 @@ contains
 
     latlon%nlon = nlon
     latlon%nlat = nlat
+    latlon%nlev = 64
+    latlon%nlay = 4
     latlon%npnt = npnt
 
     allocate(latlon%counter(nlon, nlat))
@@ -90,7 +95,7 @@ contains
 
   end subroutine initialize_latlongrid
 
-  !----------------------------------------------------------------------
+ !----------------------------------------------------------------------
   subroutine finalize_latlongrid(latlon)
 
     implicit none
@@ -100,6 +105,7 @@ contains
     deallocate(latlon%lon)
     deallocate(latlon%lat)
     if(allocated(latlon%lev)) deallocate(latlon%lev)
+    if(allocated(latlon%lay)) deallocate(latlon%lay)
     deallocate(latlon%pnt)
 
     deallocate(latlon%counter)

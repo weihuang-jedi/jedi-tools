@@ -47,7 +47,7 @@ contains
     npnt = 4
     num_types = 1
 
-    data_types(1) = 'fv-core'
+    data_types(1) = 'fv_core.res'
 
     generate_weights = .false.
     debug_on = .false.
