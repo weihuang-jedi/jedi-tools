@@ -23,8 +23,8 @@ PROGRAM fv3interp2latlon
    print *, 'part 1'
 
    do n = 1, num_types
-      print *, 'dirname: <', trim(dirname), &
-               '>, data_types(', n, ') = <', trim(data_types(n)), '>'
+     !print *, 'dirname: <', trim(dirname), &
+     !         '>, data_types(', n, ') = <', trim(data_types(n)), '>'
       call initialize_tilegrid(types(n)%tile, trim(dirname), trim(data_types(n)))
 
       if(trim(data_types(n)) == 'fv_core.res.tile') then
@@ -46,7 +46,10 @@ PROGRAM fv3interp2latlon
 
       do n = 1, num_types
          last = (n == num_types)
-         call generate_header(n, types(n)%tile, latlon, output_flnm, last)
+         print *, 'n = ', n
+         print *, 'last = ', last
+         call generate_header(n, types(n)%tile, latlon, &
+                              trim(data_types(n)), output_flnm, last)
       end do
 
       print *, 'part 2.2'

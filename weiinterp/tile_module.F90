@@ -202,6 +202,7 @@ contains
          else if(trim(tile(n)%vars(i)%name) == 'Time') then
             if(.not. allocated(tile(n)%time)) allocate(tile(n)%time(tile(n)%nt))
             rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%time)
+           !print *, 'time(', n, ')%time = ', tile(n)%time(1:tile(n)%nt)
             call check_status(rc)
          end if
 
