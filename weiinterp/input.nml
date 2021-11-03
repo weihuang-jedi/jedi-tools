@@ -9,8 +9,8 @@
  nlat = 181
  npnt = 4
 
- num_types = 1,
- data_types = 'fv_core.res.tile',
+ num_types = 2,
+ data_types = 'fv_core.res.tile', 'sfc_data.tile',
 /
-;data_types = 'fv_core.res.tile', 'sfc_data.tile',
+ data_types = 'fv_core.res.tile',
 

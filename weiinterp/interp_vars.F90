@@ -15,22 +15,20 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
 
    integer :: rc
 
-   print *, 'Enter generate_header'
-   print *, 'k = ', k
-   print *, 'gridtype = ', trim(gridtype)
-   print *, 'flnm = ', trim(flnm)
+  !print *, 'Enter generate_header'
+  !print *, 'k = ', k
+  !print *, 'gridtype = ', trim(gridtype)
+  !print *, 'flnm = ', trim(flnm)
   
    if(k == 1) then
       call create_coord(tile(1)%nt, tile(1)%time(1:tile(1)%nt), latlon, flnm)
    end if
 
-   print *, 'part 1'
-
    if('fv_core.res.tile' == trim(gridtype)) then
       call create_fv_core_var_attr(tile, latlon)
+   else if('sfc_data.tile' == trim(gridtype)) then
+      call create_sfc_data_var_attr(tile, latlon)
    end if
-
-   print *, 'part 2'
 
    if(last) then
      !End define mode.
@@ -44,7 +42,7 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
       end if
    end if
 
-   print *, 'Leave generate_header'
+  !print *, 'Leave generate_header'
 
 end subroutine generate_header
 
@@ -80,10 +78,12 @@ subroutine interp2latlongrid(gridtype, tile, latlon)
    type(tilegrid), dimension(6), intent(inout) :: tile
    type(latlongrid), intent(inout)             :: latlon
 
-   print *, 'Enter interp2latlongrid'
+  !print *, 'Enter interp2latlongrid'
 
    if('fv_core.res.tile' == trim(gridtype)) then
       call process_fv_core(tile, latlon)
+   else if('sfc_data.tile' == trim(gridtype)) then
+      call process_sfc_data(tile, latlon)
    end if
 
 end subroutine interp2latlongrid
@@ -96,7 +96,7 @@ subroutine create_global_attr(ncid, filename, title, type)
    integer, intent(in) :: ncid
    character(len = *), intent(in) :: filename, title, type
 
-   print *, 'Enter create_global_attr'
+  !print *, 'Enter create_global_attr'
 
  ! ----put global attributes----
    call nc_putGlobalCharAttr(ncid, 'filename', trim(filename))
@@ -138,15 +138,15 @@ subroutine create_coord(nt, time, latlon, flnm)
 
    logical :: fileExists
 
-   print *, 'Enter create_coord'
-   print *, 'flnm = ', trim(flnm)
-   print *, 'nt = ', nt
-   print *, 'time(1:nt) = ', time(1:nt)
+  !print *, 'Enter create_coord'
+  !print *, 'flnm = ', trim(flnm)
+  !print *, 'nt = ', nt
+  !print *, 'time(1:nt) = ', time(1:nt)
 
-   print *, 'latlon%nlon = ',  latlon%nlon
-   print *, 'latlon%nlat = ',  latlon%nlat
-   print *, 'latlon%nlev = ',  latlon%nlev
-   print *, 'latlon%nlay = ',  latlon%nlay
+  !print *, 'latlon%nlon = ',  latlon%nlon
+  !print *, 'latlon%nlat = ',  latlon%nlat
+  !print *, 'latlon%nlev = ',  latlon%nlev
+  !print *, 'latlon%nlay = ',  latlon%nlay
 
    latlon%filename = trim(flnm)
 
@@ -181,8 +181,6 @@ subroutine create_coord(nt, time, latlon, flnm)
 
    hor(1) = 0.0
 
-   print *, 'part 1'
-
    rc = nf90_noerr
 
    latlon%dimidt = -1
@@ -200,10 +198,8 @@ subroutine create_coord(nt, time, latlon, flnm)
    call check_status(rc)
 
    latlon%ncid = ncid
-   print *, 'ncid = ', ncid
+  !print *, 'ncid = ', ncid
 
-   print *, 'part 2'
-   
    rc = nf90_def_dim(ncid, 'lon', latlon%nlon, latlon%dimidx)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'lat', latlon%nlat, latlon%dimidy)
@@ -216,8 +212,6 @@ subroutine create_coord(nt, time, latlon, flnm)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'Time', NF90_UNLIMITED, latlon%dimidt)
    call check_status(rc)
-
-   print *, 'part 3'
 
    call create_global_attr(ncid, flnm, 'FV3 to Lat-Lon Grid', 'Lat-Lon Grid')
 
@@ -270,8 +264,7 @@ subroutine create_coord(nt, time, latlon, flnm)
                       "time level", &
                       "Time" )
 
-   print *, 'part 4'
-   print *, 'latlon%dimidx = ', latlon%dimidx
+  !print *, 'latlon%dimidx = ', latlon%dimidx
   !print *, 'latlon%lon = ',  latlon%lon
 
    !write lon
@@ -302,7 +295,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    !write time
    call nc_put1Ddbl0(ncid, 'Time', time, 1, nt)
 
-   print *, 'Leave create_coord'
+  !print *, 'Leave create_coord'
 end subroutine create_coord
 
 !-------------------------------------------------------------------------------------
@@ -323,7 +316,7 @@ subroutine create_fv_core_var_attr(tile, latlon)
    real    :: missing_real
    character(len=80) :: long_name, units, coordinates
 
-   print *, 'Enter create_fv_core_var_attr'
+  !print *, 'Enter create_fv_core_var_attr'
 
    missing_real = -1.0e38
    missing_int = -999999
@@ -386,6 +379,74 @@ subroutine create_fv_core_var_attr(tile, latlon)
    end do
 
 end subroutine create_fv_core_var_attr
+
+!-------------------------------------------------------------------------------------
+subroutine create_sfc_data_var_attr(tile, latlon)
+
+   use netcdf
+   use tile_module
+   use latlon_module
+
+   implicit none
+
+   type(tilegrid), dimension(6), intent(inout) :: tile
+   type(latlongrid), intent(inout)             :: latlon
+
+   integer, dimension(4) :: dimids
+   integer :: rc, nd, i, j
+   integer :: missing_int
+   real    :: missing_real
+   character(len=80) :: long_name, units, coordinates
+
+  !print *, 'Enter create_sfc_data_var_attr'
+
+   missing_real = -1.0e38
+   missing_int = -999999
+
+   do i = 1, tile(1)%nVars
+      j = tile(1)%vars(i)%ndims
+
+     !print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(j)), '>, ndims = ', &
+     !         tile(1)%vars(i)%ndims
+
+      if(tile(1)%vars(i)%ndims < 3) then
+         cycle
+      end if
+
+      if('Time' /= trim(tile(1)%vars(i)%dimnames(j))) then
+         cycle
+      end if
+
+      long_name = 'unknown'
+      units = 'unknown'
+      dimids(1) = latlon%dimidx
+      dimids(2) = latlon%dimidy
+
+      if(3 == tile(1)%vars(i)%ndims) then
+        coordinates = 'Time lat lon'
+        dimids(3) = latlon%dimidt
+        nd = 3
+      else if(4 == tile(1)%vars(i)%ndims) then
+        coordinates = 'Time lay lat lon'
+        dimids(3) = latlon%dimidl
+        dimids(4) = latlon%dimidt
+        nd = 4
+      else
+        print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
+                 '>, ndims = ', tile(1)%vars(i)%ndims
+
+        print *, 'Problem in File: ', __FILE__, ', at line: ', __LINE__
+      end if
+
+      long_name = trim(tile(1)%vars(i)%name)
+
+      call nc_putAttr(latlon%ncid, nd, dimids, NF90_REAL, &
+                      trim(tile(1)%vars(i)%name), &
+                      trim(long_name), trim(units), &
+                      trim(coordinates), missing_real)
+   end do
+
+end subroutine create_sfc_data_var_attr
 
 !----------------------------------------------------------------------------------------
 subroutine process_fv_core(tile, latlon)
@@ -474,6 +535,110 @@ subroutine process_fv_core(tile, latlon)
 
 end subroutine process_fv_core
 
+!----------------------------------------------------------------------------------------
+subroutine process_sfc_data(tile, latlon)
+
+   use netcdf
+   use tile_module
+   use latlon_module
+
+   implicit none
+
+   type(tilegrid), dimension(6), intent(inout) :: tile
+   type(latlongrid), intent(inout)             :: latlon
+
+   integer :: i, j, n, rc
+
+   real, dimension(:,:), allocatable :: var2d
+   real, dimension(:,:,:), allocatable :: var3d
+
+  !print *, 'Enter process_sfc_data'
+
+   allocate(var2d(latlon%nlon, latlon%nlat))
+   allocate(var3d(latlon%nlon, latlon%nlat, latlon%nlay))
+
+   do i = 1, tile(1)%nVars
+      j = tile(1)%vars(i)%ndims
+
+     !print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(j)), &
+     !         '>, ndims = ', tile(1)%vars(i)%ndims
+
+      if(tile(1)%vars(i)%ndims < 3) then
+         cycle
+      end if
+
+      if('Time' /= trim(tile(1)%vars(i)%dimnames(j))) then
+         cycle
+      end if
+
+     !rc = nf90_inquire_variable(tile(1)%fileid, tile(1)%varids(i), &
+     !         ndims=tile(1)%vars(i)%nDims, natts=tile(1)%vars(i)%nAtts)
+     !call check_status(rc)
+
+     !rc = nf90_inquire_variable(tile(1)%fileid, tile(1)%varids(i), &
+     !         dimids=tile(1)%vars(i)%dimids)
+     !call check_status(rc)
+
+     !rc = nf90_inquire_variable(tile(1)%fileid, tile(1)%varids(i), &
+     !         name=tile(1)%vars(i)%name)
+     !call check_status(rc)
+
+     !print *, 'Var No. ', i, ' name: ', trim(tile(1)%vars(i)%name)
+     !print *, 'Var No. ', i, ': varid: ', tile(1)%varids(i)
+     !print *, 'Var No. ', i, ', ndims = ', tile(1)%vars(i)%ndims
+
+      do n = 1, 6
+         rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
+                  name=tile(n)%vars(i)%name)
+         call check_status(rc)
+
+        !print *, 'Tile ', n, ', Var No. ', i, ': varid: ', tile(n)%varids(i)
+        !print *, 'Tile ', n, ', Var ', i, ': ', trim(tile(n)%vars(i)%name)
+
+         if(3 == tile(1)%vars(i)%ndims) then
+            rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var2d)
+            call check_status(rc)
+         else if(4 == tile(1)%vars(i)%ndims) then
+            rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var3d)
+            call check_status(rc)
+         else
+           print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
+                    '>, ndims = ', tile(1)%vars(i)%ndims
+
+           print *, 'Problem in File: ', __FILE__, ', at line: ', __LINE__
+         end if
+      end do
+
+     !print *, 'Var No. ', i, ' name: ', trim(tile(1)%vars(i)%name)
+     !print *, 'Var No. ', i, ': varid: ', tile(1)%varids(i)
+     !print *, 'Var No. ', i, ', ndims = ', tile(1)%vars(i)%ndims
+
+     !do j = 1, tile(1)%vars(i)%ndims
+        !print *, 'Dim ', j, ' name: <', trim(tile(1)%vars(i)%dimnames(j)), &
+        !         '>, len = ', tile(1)%vars(i)%dimlen(j)
+     !end do
+
+      if(3 == tile(1)%vars(i)%ndims) then
+         call interp2dvar4sfc(tile, latlon, var2d)
+         call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+      else if(4 == tile(1)%vars(i)%ndims) then
+         call interp3dvar4sfc(tile, latlon, var3d)
+         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlay)
+      else
+         print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
+                  '>, ndims = ', tile(1)%vars(i)%ndims
+
+         print *, 'Problem in File: ', __FILE__, ', at line: ', __LINE__
+      end if
+   end do
+
+   deallocate(var2d)
+   deallocate(var3d)
+
+end subroutine process_sfc_data
+
 !----------------------------------------------------------------------
 subroutine interp2dvar(tile, latlon, var2d)
 
@@ -541,4 +706,72 @@ subroutine interp3dvar(tile, latlon, var3d)
   end do
 
 end subroutine interp3dvar
+
+!----------------------------------------------------------------------
+subroutine interp2dvar4sfc(tile, latlon, var2d)
+
+  use tile_module
+  use latlon_module
+
+  implicit none
+
+  type(tilegrid), dimension(6),              intent(in)  :: tile
+  type(latlongrid),                          intent(in)  :: latlon
+  real, dimension(latlon%nlon, latlon%nlat), intent(out) :: var2d
+
+  integer :: i, j, n, ik, jk, m
+  real :: w
+
+  do jk = 1, latlon%nlat
+  do ik = 1, latlon%nlon
+     var2d(ik, jk) = 0.0
+
+     do m = 1, latlon%npnt
+        n = latlon%tile(ik, jk, m)
+        i = latlon%ilon(ik, jk, m)
+        j = latlon%jlat(ik, jk, m)
+        w = latlon%wgt(ik, jk, m)
+
+        var2d(ik, jk) = var2d(ik, jk) + w*tile(n)%var2d(i, j)
+     end do
+  end do
+  end do
+
+end subroutine interp2dvar4sfc
+
+!----------------------------------------------------------------------
+subroutine interp3dvar4sfc(tile, latlon, var3d)
+
+  use tile_module
+  use latlon_module
+
+  implicit none
+
+  type(tilegrid), dimension(6), intent(in) :: tile
+  type(latlongrid), intent(in) :: latlon
+  real, dimension(latlon%nlon, latlon%nlat, latlon%nlay), intent(out) :: var3d
+
+  integer :: i, j, k, n, ik, jk, m
+  real :: w
+
+  do jk = 1, latlon%nlat
+  do ik = 1, latlon%nlon
+     do k = 1, latlon%nlay
+        var3d(ik, jk, k) = 0.0
+     end do
+
+     do m = 1, latlon%npnt
+        n = latlon%tile(ik, jk, m)
+        i = latlon%ilon(ik, jk, m)
+        j = latlon%jlat(ik, jk, m)
+        w = latlon%wgt(ik, jk, m)
+
+        do k = 1, latlon%nlay
+           var3d(ik, jk, k) = var3d(ik, jk, k) + w*tile(n)%var3d(i, j, k)
+        end do
+     end do
+  end do
+  end do
+
+end subroutine interp3dvar4sfc
 
