@@ -51,7 +51,7 @@ subroutine read_weights(latlon, wgt_flnm)
    status =  nf90_close(ncid)
    call check_status(status)
 
-   print *, 'Finished Read weights from file: ', trim(wgt_flnm)
+  !print *, 'Finished Read weights from file: ', trim(wgt_flnm)
 
 end subroutine read_weights
 

@@ -69,9 +69,9 @@ contains
 
     close(nml_unit)
 
-    print *, 'dirname: ', trim(dirname)
-    print *, 'data_types(1): ', trim(data_types(1))
-    print *, 'nlon, nlat, npnt = ', nlon, nlat, npnt
+   !print *, 'dirname: ', trim(dirname)
+   !print *, 'data_types(1): ', trim(data_types(1))
+   !print *, 'nlon, nlat, npnt = ', nlon, nlat, npnt
 
   end subroutine read_namelist
 
