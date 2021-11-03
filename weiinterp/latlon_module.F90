@@ -45,6 +45,8 @@ contains
     integer :: i, j, k
     real :: dlon, dlat
 
+    print *, 'enter initialize_latlongrid'
+
     dlon = 360.0/nlon
     dlat = 180.0/(nlat - 1)
 
@@ -92,6 +94,8 @@ contains
 
    !print *, 'latlon%lon = ', latlon%lon
    !print *, 'latlon%lat = ', latlon%lat
+
+    print *, 'leave initialize_latlongrid'
 
   end subroutine initialize_latlongrid
 

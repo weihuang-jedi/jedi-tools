@@ -1,47 +1,50 @@
- !----------------------------------------------------------------------------------------
-  subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
+!----------------------------------------------------------------------------------------
+subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
   
-     use netcdf
-     use tile_module
-     use latlon_module
+   use netcdf
+   use tile_module
+   use latlon_module
 
-     implicit none
+   implicit none
 
-     integer, intent(in)                         :: k
-     type(tilegrid), dimension(6), intent(inout) :: tile
-     type(latlongrid), intent(inout)             :: latlon
-     character(len=*), intent(in)                :: gridtype, flnm
-     logical, intent(in)                         :: last
+   integer, intent(in)                         :: k
+   type(tilegrid), dimension(6), intent(inout) :: tile
+   type(latlongrid), intent(inout)             :: latlon
+   character(len=*), intent(in)                :: gridtype, flnm
+   logical, intent(in)                         :: last
 
-     integer :: rc
-    
-     if(k == 1) then
-        call create_coord(tile(1)%nt, tile(1)%time, latlon)
-     end if
+   integer :: rc
 
-     if('fv_core.res.tile' == trim(gridtype)) then
-        call create_fv_core_var_attr(tile, latlon)
-     end if
+   print *, 'Enter generate_header'
+  
+   if(k == 1) then
+      call create_coord(tile(1)%nt, tile(1)%time, latlon, flnm)
+   end if
 
-     if(last) then
-       !End define mode.
-        rc = nf90_enddef(latlon%ncid)
-        if(rc /= nf90_noerr) then
-           write(unit=0, fmt='(a,i6,a)') "Problem to enddef ncid: <", latlon%ncid, ">."
-           write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
-           write(unit=0, fmt='(3a, i4)') &
-                "Stop in file: <", __FILE__, ">, line: ", __LINE__
-           stop
-        end if
-     end if
+   if('fv_core.res.tile' == trim(gridtype)) then
+      call create_fv_core_var_attr(tile, latlon)
+   end if
 
-  end subroutine generate_header
+   if(last) then
+     !End define mode.
+      rc = nf90_enddef(latlon%ncid)
+      if(rc /= nf90_noerr) then
+         write(unit=0, fmt='(a,i6,a)') "Problem to enddef ncid: <", latlon%ncid, ">."
+         write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
+         write(unit=0, fmt='(3a, i4)') &
+              "Stop in file: <", __FILE__, ">, line: ", __LINE__
+         stop
+      end if
+   end if
+
+end subroutine generate_header
 
 !----------------------------------------------------------------------------------------
 subroutine closefile(latlon)
 
    use netcdf
    use latlon_module
+   use tile_module, only : check_status
 
    implicit none
 
@@ -56,7 +59,7 @@ subroutine closefile(latlon)
 end subroutine closefile
 
 !----------------------------------------------------------------------------------------
-subroutine interp2latlongrid(k, tile, latlon, flnm)
+subroutine interp2latlongrid(gridtype, tile, latlon)
 
    use netcdf
    use tile_module
@@ -64,10 +67,11 @@ subroutine interp2latlongrid(k, tile, latlon, flnm)
 
    implicit none
 
-   integer, intent(in)                         :: k
+   character(len=*), intent(in)                :: gridtype
    type(tilegrid), dimension(6), intent(inout) :: tile
    type(latlongrid), intent(inout)             :: latlon
-   character(len=*), intent(in)                :: flnm
+
+   print *, 'Enter interp2latlongrid'
 
    call process_fv_core(tile, latlon)
 
@@ -81,6 +85,8 @@ subroutine create_global_attr(ncid, filename, title, type)
    integer, intent(in) :: ncid
    character(len = *), intent(in) :: filename, title, type
 
+   print *, 'Enter create_global_attr'
+
  ! ----put global attributes----
    call nc_putGlobalCharAttr(ncid, 'filename', trim(filename))
    call nc_putGlobalCharAttr(ncid, 'title', trim(title))
@@ -93,10 +99,11 @@ subroutine create_global_attr(ncid, filename, title, type)
 end subroutine create_global_attr
 
 !----------------------------------------------------------------------------------------
-subroutine create_coord(nt, time, latlon, flnm, ncid)
+subroutine create_coord(nt, time, latlon, flnm)
 
    use netcdf
    use latlon_module
+   use tile_module, only : check_status
 
    implicit none
 
@@ -104,10 +111,8 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
    real(kind=8), dimension(:), intent(in) :: time
    type(latlongrid), intent(inout)        :: latlon
    character(len=*), intent(in)           :: flnm
-   integer,          intent(out)          :: ncid
 
-   integer :: dimidx, dimidy, dimidz, dimidh, dimidl, dimidt
-   integer :: i, nd, rc
+   integer :: i, nd, rc, ncid
 
    integer, dimension(2) :: dimids
 
@@ -116,13 +121,15 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
    real, dimension(latlon%nlev) :: lev
    real, dimension(latlon%nlay) :: lay
 
-   real,         dimension(1)   :: hor
+   real, dimension(1) :: hor
 
    real :: dlon, dlat
 
+   print *, 'Enter create_coord'
+
    rc = nf90_noerr
 
-   dimidt = -1
+   latlon%dimidt = -1
 
    !Create the file. 
    rc = nf90_create(trim(flnm), NF90_CLOBBER, ncid)
@@ -169,25 +176,18 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
    print *, 'latlon%nlev = ',  latlon%nlev
    print *, 'latlon%nlay = ',  latlon%nlay
    
-   rc = nf90_def_dim(ncid, 'lon', latlon%nlon, dimidx)
+   rc = nf90_def_dim(ncid, 'lon', latlon%nlon, latlon%dimidx)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lat', latlon%nlat, dimidy)
+   rc = nf90_def_dim(ncid, 'lat', latlon%nlat, latlon%dimidy)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lev', latlon%nlev, dimidz)
+   rc = nf90_def_dim(ncid, 'lev', latlon%nlev, latlon%dimidz)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lay', latlon%nlay, dimidl)
+   rc = nf90_def_dim(ncid, 'lay', latlon%nlay, latlon%dimidl)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'hor', 1, dimidh)
+   rc = nf90_def_dim(ncid, 'hor', 1, latlon%dimidh)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'Time', NF90_UNLIMITED, dimidt)
+   rc = nf90_def_dim(ncid, 'Time', NF90_UNLIMITED, latlon%dimidt)
    call check_status(rc)
-
-   latlon%dimidx = dimidx
-   latlon%dimidy = dimidy
-   latlon%dimidz = dimidz
-   latlon%dimidl = dimidl
-   latlon%dimidh = dimidh
-   latlon%dimidt = dimidt
 
    call create_global_attr(ncid, flnm, 'FV3 to Lat-Lon Grid', 'Lat-Lon Grid')
 
@@ -213,7 +213,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
    !write time
    call nc_put1Ddbl0(ncid, 'Time', time, 1, nt)
 
-   dimids(1) = dimidx
+   dimids(1) = latlon%dimidx
    nd = 1
 !--Field lon
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
@@ -222,7 +222,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
                       "degree_east", &
                       "Longitude" )
 
-   dimids(1) = dimidy
+   dimids(1) = latlon%dimidy
 !--Field lat
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
                       "lat", &
@@ -230,7 +230,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
                       "degree_north", &
                       "Latitude" )
 
-   dimids(1) = dimidz
+   dimids(1) = latlon%dimidz
 !--Field lev
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
                       "lev", &
@@ -238,7 +238,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
                       "top_down", &
                       "Altitude" )
 
-   dimids(1) = dimidl
+   dimids(1) = latlon%dimidl
 !--Field lay
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
                       "lay", &
@@ -246,7 +246,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
                       "top_down", &
                       "Altitude" )
 
-   dimids(1) = dimidh
+   dimids(1) = latlon%dimidh
 !--Field hor
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
                       "hor", &
@@ -254,7 +254,7 @@ subroutine create_coord(nt, time, latlon, flnm, ncid)
                       "one_level", &
                       "Horizontal" )
 
-   dimids(1) = dimidt
+   dimids(1) = latlon%dimidt
 !--Field time
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL8, &
                       "Time", &
@@ -280,6 +280,8 @@ subroutine create_fv_core_var_attr(tile, latlon)
    integer :: missing_int
    real    :: missing_real
    character(len=80) :: long_name, units, coordinates
+
+   print *, 'Enter create_fv_core_var_attr'
 
    missing_real = -1.0e38
    missing_int = -999999

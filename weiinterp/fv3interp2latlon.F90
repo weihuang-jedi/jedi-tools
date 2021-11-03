@@ -20,8 +20,11 @@ PROGRAM fv3interp2latlon
 
    call initialize_latlongrid(nlon, nlat, npnt, latlon)
 
+   print *, 'part 1'
+
    do n = 1, num_types
       call initialize_tilegrid(types(n)%tile, dirname, trim(data_types(n)))
+
       if(trim(data_types(n)) == 'fv_core.res.tile') then
          latlon%nlev = types(n)%tile(1)%nz
       else if(trim(data_types(n)) == 'sfc_data.tile') then
@@ -29,25 +32,35 @@ PROGRAM fv3interp2latlon
       end if
    end do
 
+   print *, 'part 2'
+
    if(generate_weights) then
       call generate_weight(types(1)%tile, latlon)
       call write_latlongrid(latlon, wgt_flnm)
    else
       call read_weights(latlon, wgt_flnm)
 
+      print *, 'part 2.1'
+
       do n = 1, num_types
          last = (n == num_types)
          call generate_header(n, types(n)%tile, latlon, output_flnm, last)
       end do
 
+      print *, 'part 2.2'
+
       do n = 1, num_types
-         call interp2latlongrid(n, types(n), latlon)
+         call interp2latlongrid(trim(data_types(n)), types(n)%tile, latlon)
       end do
    end if
+
+   print *, 'part 3'
 
    do n = 1, num_types
       call finalize_tilegrid(types(n)%tile)
    end do
+
+   print *, 'part 4'
 
    call closefile(latlon)
    call finalize_latlongrid(latlon)

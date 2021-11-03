@@ -9,5 +9,8 @@
  nlon = 360
  nlat = 181
  npnt = 4
+
+ num_types = 2,
+ data_types = 'fv_core.res.tile', 'sfc_data.tile',
 /
 
