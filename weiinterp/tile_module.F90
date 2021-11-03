@@ -28,8 +28,9 @@ module tile_module
      integer             :: xtype, ndims, nAtts, deflate_level, endianness
      logical             :: contiguous, shuffle, fletcher32
      integer, dimension(:), allocatable :: dimids
+     integer, dimension(:), allocatable :: dimlen
      character(len=128), dimension(:), allocatable :: dimnames
-     integer, dimension(:), allocatable :: chunksizes
+    !integer, dimension(:), allocatable :: chunksizes
   end type vartype
 
   type tilegrid
@@ -39,6 +40,7 @@ module tile_module
      integer                               :: nx, ny, nz, ns, nt
      integer, dimension(:),    allocatable :: varids
      integer, dimension(:),    allocatable :: dimids
+     integer, dimension(:),    allocatable :: dimlen
      character(len=128), dimension(:),    allocatable :: dimnames
      real,    dimension(:, :), allocatable :: lon, lat
      integer, dimension(:),    allocatable :: xt, yt
@@ -63,13 +65,17 @@ contains
     implicit none
 
     type(tilegrid), dimension(6), intent(out) :: tile
-    character(len=1024),          intent(in)  :: dirname, prefix
+    character(len=*),             intent(in)  :: dirname, prefix
 
     integer :: i, k, n, rc
-    integer :: ny2
+    integer :: ny2, ik
     integer :: include_parents, dimlen
 
     character(len=1024) :: dimname, varname
+
+   !print *, 'Enter initialize_tilegrid'
+   !print *, 'dirname: <', trim(dirname), '>'
+   !print *, 'prefix: <', trim(prefix), '>'
 
     include_parents = 0
     ny2 = -1
@@ -85,14 +91,12 @@ contains
       rc = nf90_inquire(tile(n)%fileid, tile(n)%nDims, tile(n)%nVars, &
                tile(n)%nGlobalAtts, tile(n)%unlimdimid)
       call check_status(rc)
-     !rc = nf90_inquire(ncid, nDimensions = nDims, &
-     !                      unlimitedDimID = unlimdimid)
-     !call check_status(rc)
      !print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
      !print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
 
       ! Allocate memory.
       allocate(tile(n)%dimids(tile(n)%nDims))
+      allocate(tile(n)%dimlen(tile(n)%nDims))
       allocate(tile(n)%dimnames(tile(n)%nDims))
 
       rc = nf90_inq_dimids(tile(n)%fileid, tile(n)%nDims, tile(n)%dimids, include_parents)
@@ -106,6 +110,7 @@ contains
          rc = nf90_inquire_dimension(tile(n)%fileid, tile(n)%dimids(i), dimname, dimlen)
          call check_status(rc)
         !print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
+
          if(trim(dimname) == 'grid_xt') then
             tile(n)%nx = dimlen
          else if(trim(dimname) == 'grid_yt') then
@@ -124,6 +129,8 @@ contains
          else if(trim(dimname) == 'Time') then
             tile(n)%nt = dimlen
          end if
+
+         tile(n)%dimlen(i) = dimlen
          tile(n)%dimnames(i) = trim(dimname)
       end do
 
@@ -149,17 +156,18 @@ contains
 
       do i = 1, tile(n)%nVars
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
-                  ndims=tile(n)%vars(i)%nDims, natts=tile(n)%vars(i)%nAtts)
+                                    ndims=tile(n)%vars(i)%nDims, natts=tile(n)%vars(i)%nAtts)
          call check_status(rc)
         !print *, 'Var No. ', i, ': ndims = ', tile(n)%vars(i)%nDims
 
          allocate(tile(n)%vars(i)%dimids(tile(n)%vars(i)%nDims))
+         allocate(tile(n)%vars(i)%dimlen(tile(n)%vars(i)%nDims))
          allocate(tile(n)%vars(i)%dimnames(tile(n)%vars(i)%nDims))
-         allocate(tile(n)%vars(i)%chunksizes(tile(n)%vars(i)%nDims))
 
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
-                  dimids=tile(n)%vars(i)%dimids)
+                                    dimids=tile(n)%vars(i)%dimids)
          call check_status(rc)
+        !print *, 'Var No. ', i, ': tile(n)%vars(i)%dimids = ', tile(n)%vars(i)%dimids
 
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
                   name=tile(n)%vars(i)%name)
@@ -174,12 +182,6 @@ contains
         !         tile(n)%vars(i)%shuffle, tile(n)%vars(i)%fletcher32, &
         !         tile(n)%vars(i)%endianness)
         !call check_status(rc)
-
-        !function nf90_get_var(ncid, varid, values, start, count, stride, map)
-        !integer,                         intent( in) :: ncid, varid
-        !any valid type, scalar or array of any rank, &
-        !                                 intent(out) :: values
-        !integer, dimension(:), optional, intent( in) :: start, count, stride, map
 
          if(trim(tile(n)%vars(i)%name) == 'grid_lont') then
             allocate(tile(n)%lon(tile(n)%nx, tile(n)%ny))
@@ -204,10 +206,14 @@ contains
          end if
 
          do k = 1, tile(n)%vars(i)%ndims
-            rc = nf90_inquire_dimension(tile(n)%varids(i), tile(n)%vars(i)%dimids(k), &
-                                        dimname, dimlen)
-            call check_status(rc)
-            tile(n)%vars(i)%dimnames(k) = trim(dimname)
+           !rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
+           !                           tile(n)%vars(i)%dimids(k), &
+           !                           dimname, dimlen)
+           !call check_status(rc)
+           !print *, 'k = ', k, ', tile(n)%vars(i)%dimids(k) = ', tile(n)%vars(i)%dimids(k)
+            ik = tile(n)%vars(i)%dimids(k)
+            tile(n)%vars(i)%dimnames(k) = trim(tile(n)%dimnames(ik))
+            tile(n)%vars(i)%dimlen(k) = tile(n)%dimlen(ik)
          end do
       end do
     end do
@@ -226,6 +232,7 @@ contains
     do n = 1, 6
       if(allocated(tile(n)%varids)) deallocate(tile(n)%varids)
       if(allocated(tile(n)%dimids)) deallocate(tile(n)%dimids)
+      if(allocated(tile(n)%dimlen)) deallocate(tile(n)%dimlen)
       if(allocated(tile(n)%dimnames)) deallocate(tile(n)%dimnames)
       if(allocated(tile(n)%time)) deallocate(tile(n)%time)
       if(allocated(tile(n)%lon)) deallocate(tile(n)%lon)
@@ -236,10 +243,10 @@ contains
       do i = 1, tile(n)%nVars
          if(allocated(tile(n)%vars(i)%dimids)) &
             deallocate(tile(n)%vars(i)%dimids)
+         if(allocated(tile(n)%vars(i)%dimlen)) &
+            deallocate(tile(n)%vars(i)%dimlen)
          if(allocated(tile(n)%vars(i)%dimnames)) &
             deallocate(tile(n)%vars(i)%dimnames)
-         if(allocated(tile(n)%vars(i)%chunksizes)) &
-            deallocate(tile(n)%vars(i)%chunksizes)
       end do
 
       if(allocated(tile(n)%vars)) deallocate(tile(n)%vars)

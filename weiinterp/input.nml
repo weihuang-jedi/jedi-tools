@@ -1,7 +1,6 @@
 &control_param
  generate_weights = .false.
  dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/'
- prefix = 'fv_core.res.tile'
 
  output_flnm = 'latlon_grid.nc'
  wgt_flnm = 'weights.nc'

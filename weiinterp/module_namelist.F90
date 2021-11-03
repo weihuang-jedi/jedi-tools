@@ -8,7 +8,7 @@ MODULE namelist_module
   integer, parameter :: max_types = 5
 
   CHARACTER(LEN=1024) :: program_name
-  character(len=1024) :: dirname, prefix
+  character(len=1024) :: dirname
   character(len=1024) :: output_flnm, wgt_flnm
   character(len=128), dimension(max_types) :: data_types
   integer :: nlat, nlon, npnt, num_types
@@ -23,7 +23,7 @@ contains
     integer :: rc
 
     ! Namelist definition.
-    namelist /control_param/ program_name, dirname, prefix, &
+    namelist /control_param/ program_name, dirname, &
                              output_flnm, wgt_flnm, &
                              nlat, nlon, npnt, &
                              num_types, data_types, &
@@ -33,10 +33,8 @@ contains
 
    !if(generate_weights) then
    !  dirname = 'C96/'
-   !  prefix = 'C96_grid_spec.tile'
    !else
       dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
-      prefix = '20210109.000000.fv_core.res.tile'
    !end if
 
     output_flnm = 'latlon_grid.nc'
@@ -47,7 +45,7 @@ contains
     npnt = 4
     num_types = 1
 
-    data_types(1) = 'fv_core.res'
+    data_types(1) = 'fv_core.res.tile'
 
     generate_weights = .false.
     debug_on = .false.
@@ -72,7 +70,7 @@ contains
     close(nml_unit)
 
     print *, 'dirname: ', trim(dirname)
-    print *, 'prefix: ', trim(prefix)
+    print *, 'data_types(1): ', trim(data_types(1))
     print *, 'nlon, nlat, npnt = ', nlon, nlat, npnt
 
   end subroutine read_namelist
