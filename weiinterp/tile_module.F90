@@ -270,7 +270,8 @@ contains
     
     if(rc /= nf90_noerr) then 
       print *, trim(nf90_strerror(rc))
-      stop 2
+      print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
+      stop 'in check_status'
     end if
   end subroutine check_status  
 

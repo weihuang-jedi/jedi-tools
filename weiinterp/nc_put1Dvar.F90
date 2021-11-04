@@ -15,30 +15,30 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
 !--Variable id
    integer :: varid
 
-!--Return status
-   integer :: status
+!--Return Code
+   integer :: rc
 
-   integer :: start(2), count(2)
+   integer :: start(2), length(2)
 
    start(1) = m1s
    start(2) = nrec
 
-   count(1) = m1e - m1s + 1
-   count(2) = 1
+   length(1) = m1e - m1s + 1
+   length(2) = 1
 
-   status = nf90_inq_varid(ncid, trim(var_name), varid)
-   if(status /= nf90_noerr) then
+   rc = nf90_inq_varid(ncid, trim(var_name), varid)
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to get varid for: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop
    end if
 
-   status = nf90_put_var(ncid,varid,v1d,start=start,count=count)
-   if(status /= nf90_noerr) then
+   rc = nf90_put_var(ncid,varid,v1d,start=start,count=length)
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to write variable: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop
@@ -61,33 +61,34 @@ subroutine nc_put1Dvar0(ncid, var_name, v1d, m1s, m1e)
 !--Variable id
    integer :: varid
 
-!--Return status
-   integer :: status
+!--Return Code
+   integer :: rc
 
-   integer :: start(1), count(1)
+   integer :: start(1), length(1)
 
    start(1) = m1s
+   length(1) = m1e - m1s + 1
 
-   count(1) = m1e - m1s + 1
+   rc = nf90_inq_varid(ncid, trim(var_name), varid)
 
-   status = nf90_inq_varid(ncid, trim(var_name), varid)
-   if(status /= nf90_noerr) then
+  !print *, 'var_name=', trim(var_name)
+  !print *, 'ncid,varid=', ncid,varid
+  !print *, 'rc=', rc
+  !print *, 'v1d=', v1d
+
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to get varid for: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop
    end if
 
-  !print *, 'var_name=', trim(var_name)
-  !print *, 'ncid,varid=', ncid,varid
-  !print *, 'v1d=', v1d
-
-   status = nf90_put_var(ncid,varid,v1d,start=start,count=count)
-  !status = nf90_put_var(ncid,varid,v1d)
-   if(status /= nf90_noerr) then
+   rc = nf90_put_var(ncid,varid,v1d,start=start,count=length)
+  !rc = nf90_put_var(ncid,varid,v1d)
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to write variable: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop
@@ -110,19 +111,19 @@ subroutine nc_put1Ddbl0(ncid, var_name, v1d, m1s, m1e)
 !--Variable id
    integer :: varid
 
-!--Return status
-   integer :: status
+!--Return Code
+   integer :: rc
 
-   integer :: start(1), count(1)
+   integer :: start(1), length(1)
 
    start(1) = m1s
 
-   count(1) = m1e - m1s + 1
+   length(1) = m1e - m1s + 1
 
-   status = nf90_inq_varid(ncid, trim(var_name), varid)
-   if(status /= nf90_noerr) then
+   rc = nf90_inq_varid(ncid, trim(var_name), varid)
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to get varid for: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop
@@ -132,11 +133,11 @@ subroutine nc_put1Ddbl0(ncid, var_name, v1d, m1s, m1e)
   !print *, 'ncid,varid=', ncid,varid
   !print *, 'v1d=', v1d
 
-   status = nf90_put_var(ncid,varid,v1d,start=start,count=count)
-  !status = nf90_put_var(ncid,varid,v1d)
-   if(status /= nf90_noerr) then
+   rc = nf90_put_var(ncid,varid,v1d,start=start,count=length)
+  !rc = nf90_put_var(ncid,varid,v1d)
+   if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to write variable: <", trim(var_name), ">.", &
-                                "Error status: ", trim(nf90_strerror(status))
+                                "Error status: ", trim(nf90_strerror(rc))
       write(unit=0, fmt='(3a, i4)') &
            "Stop in file: <", __FILE__, ">, line: ", __LINE__
       stop

@@ -132,7 +132,7 @@ class CheckObsInfo():
     if('surface_pressure' == self.varname):
       jediinfo['obs'] = 0.01*obs
       jediinfo['err'] = 0.01*oberr
-      jediinfo['hofx'] = 0.001*hofx
+      jediinfo['hofx'] = 0.01*hofx
     elif('specific_humidity' == self.varname):
       jediinfo['obs'] = 1000.0*obs
       jediinfo['err'] = 1000.0*oberr
