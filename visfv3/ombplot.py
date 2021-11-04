@@ -70,7 +70,7 @@ class StatsHandler():
     return self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb
 
 #------------------------------------------------------------------------------
-  def plotit(self, clevs, cblevs, cmapname, units='hPa'):
+  def plotit(self, clevs, cblevs, cmapname, units='hPa', precision=1):
     nlon = 360
     nlat = nlon/2 + 1
     dlon = 360.0/nlon
@@ -86,6 +86,7 @@ class StatsHandler():
     pt.set_clevs(clevs=clevs)
     pt.set_cblevs(cblevs=cblevs)
     pt.set_cmapname(cmapname)
+    pt.set_precision(precision=precision)
 
     label = '%s GSI omb - JEDI omb, units: %s' %(self.varname, units)
     pt.set_label(label)
@@ -143,21 +144,22 @@ if __name__ == '__main__':
   cmapname = 'brg'
  #cmapname = 'YlGn'
 
-
   if(varname == 'surface_pressure'):
     units = 'hPa'
-    clevs = np.arange(-5.0, 5.1, 0.1)
-    cblevs = np.arange(-5.0, 5.5, 1.0)
+    clevs = np.arange(-2.0, 2.1, 0.1)
+    cblevs = np.arange(-2.0, 2.5, 0.5)
   elif(varname == 'air_temperature'):
     units = 'K'
-    clevs = np.arange(-5.0, 5.1, 0.1)
+    clevs = np.arange(-5.0, 5.1, 0.2)
     cblevs = np.arange(-5.0, 5.5, 1.0)
   elif(varname == 'eastward_wind' or varname == 'northward_wind'):
+    clevs = np.arange(-5.0, 5.2, 0.2)
+    cblevs = np.arange(-5.0, 6.0, 1.0)
     units = 'm/s'
   elif(varname == 'specific_humidity'):
     units = 'g/kg'
-    clevs = np.arange(-10.0, 10.1, 0.2)
-    cblevs = np.arange(-10.0, 12.0, 2.0)
+    clevs = np.arange(-5.0, 5.2, 0.2)
+    cblevs = np.arange(-5.0, 6.0, 1.0)
 
   print('clevs = ', clevs)
   print('cblevs = ', cblevs)

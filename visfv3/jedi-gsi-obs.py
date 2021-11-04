@@ -73,9 +73,9 @@ class CheckObsInfo():
     oberr = 1.0/err
 
     if('surface_pressure' == self.varname):
-      gsiinfo['obs'] = 0.01*obs
-      gsiinfo['omb'] = 0.01*omb
-      gsiinfo['err'] = 0.01*oberr
+      gsiinfo['obs'] = obs
+      gsiinfo['omb'] = omb
+      gsiinfo['err'] = oberr
     elif('specific_humidity' == self.varname):
       gsiinfo['obs'] = 1000.0*obs
       gsiinfo['omb'] = 1000.0*omb

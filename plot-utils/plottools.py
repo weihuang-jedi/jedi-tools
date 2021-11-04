@@ -525,7 +525,7 @@ class PlotTools():
     obsplot = self.basemap.scatter(x, y, s=size, c=var, cmap=self.cmapname, 
                                    alpha=self.alpha)
 
-    cb = self.plt.colorbar(orientation=self.orientation,
+    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
                            pad=self.pad, ticks=self.cblevs, shrink=0.8)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
@@ -925,7 +925,7 @@ class PlotTools():
     scatterplot = self.plt.scatter(x, y, s=size, c=sclvar, cmap=self.cmapname, 
                                alpha=self.alpha)
 
-    cb = self.plt.colorbar(orientation=self.orientation,
+    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
                            pad=self.pad, ticks=self.cblevs, shrink=0.8)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
@@ -942,9 +942,11 @@ class PlotTools():
       self.plt.xlim((-7, 7))
       self.plt.ylim((-7, 7))
     elif(varname == 'eastward_wind' or varname == 'northward_wind'):
-      self.plt.xlim((-7, 7))
+      self.plt.xlim((-5, 5))
+      self.plt.ylim((-5, 5))
     elif(varname == 'specific_humidity'):
-      self.plt.xlim((-7, 7))
+      self.plt.xlim((-5, 5))
+      self.plt.ylim((-5, 5))
 
     self.plt.xlabel('JEDI_omb', fontsize=14)
     self.plt.ylabel('GSI_omb', fontsize=14)
