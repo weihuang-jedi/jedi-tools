@@ -1,0 +1,16 @@
+&control_param
+ generate_weights = .true.
+ dirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/',
+
+ output_flnm = 'grid_latlon.nc'
+ wgt_flnm = 'weights.nc'
+
+ nlon = 360
+ nlat = 181
+ npnt = 4
+
+ num_types = 1,
+ data_types = 'C96_grid_spec.tile',
+/
+ data_types = 'fv_core.res.tile',
+

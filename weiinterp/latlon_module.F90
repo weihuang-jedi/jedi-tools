@@ -159,7 +159,7 @@ contains
 
     implicit none
 
-    integer :: ik, jk
+    integer, intent(in) :: ik, jk
     type(tilegrid), dimension(6), intent(in) :: tile
     type(latlongrid), intent(inout) :: latlon
 

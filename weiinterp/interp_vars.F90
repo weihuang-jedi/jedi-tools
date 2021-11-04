@@ -140,14 +140,7 @@ subroutine create_coord(nt, time, latlon, flnm)
 
    integer, dimension(2) :: dimids
 
-   real, dimension(latlon%nlon) :: lon
-   real, dimension(latlon%nlat) :: lat
-   real, dimension(latlon%nlev) :: lev
-   real, dimension(latlon%nlay) :: lay
-
    real, dimension(1) :: hor
-
-   real :: dlon, dlat
 
    logical :: fileExists
 
@@ -163,33 +156,16 @@ subroutine create_coord(nt, time, latlon, flnm)
 
    latlon%filename = trim(flnm)
 
-   dlon = 360.0/latlon%nlon
-   dlat = 180.0/(latlon%nlat - 1)
-
-   do i = 1, latlon%nlon
-     latlon%lon(i) = dlon*real(i-1)
-     lon(i) = dlon*real(i-1)
-    !latlon%lon(i) = dlon*real(i-1) + 0.5*dlon
-    !lon(i) = dlon*real(i-1) + 0.5*dlon
-   end do
-
-   do i = 1, latlon%nlat
-     latlon%lat(i) = dlat*real(i-1) - 90.0
-     lat(i) = dlat*real(i-1) - 90.0
-   end do
-
    allocate(latlon%lev(latlon%nlev))
 
    do i = 1, latlon%nlev
       latlon%lev(i) = real(i-1)
-      lev(i) = real(i-1)
    end do
 
    allocate(latlon%lay(latlon%nlay))
 
    do i = 1, latlon%nlay
       latlon%lay(i) = real(i-1)
-      lay(i) = real(i-1)
    end do
 
    hor(1) = 0.0
@@ -277,30 +253,17 @@ subroutine create_coord(nt, time, latlon, flnm)
                       "time level", &
                       "Time" )
 
-  !print *, 'latlon%dimidx = ', latlon%dimidx
-  !print *, 'latlon%lon = ',  latlon%lon
-
    !write lon
-  !call nc_put1Dvar0(ncid, 'lon', latlon%lon, 1, latlon%nlon)
-   call nc_put1Dvar0(ncid, 'lon', lon, 1, latlon%nlon)
-
-  !print *, 'part 5'
-  !print *, 'latlon%dimidy = ', latlon%dimidy
-  !print *, 'latlon%lat = ',  latlon%lat
-  !print *, 'latlon%lev = ',  latlon%lev
-  !print *, 'latlon%lay = ',  latlon%lay
+   call nc_put1Dvar0(ncid, 'lon', latlon%lon, 1, latlon%nlon)
 
    !write lat
-  !call nc_put1Dvar0(ncid, 'lat', latlon%lat, 1, latlon%nlat)
-   call nc_put1Dvar0(ncid, 'lat', lat, 1, latlon%nlat)
+   call nc_put1Dvar0(ncid, 'lat', latlon%lat, 1, latlon%nlat)
 
    !write lev
-  !call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
-   call nc_put1Dvar0(ncid, 'lev', lev, 1, latlon%nlev)
+   call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
 
    !write lay
-  !call nc_put1Dvar0(ncid, 'lay', latlon%lay, 1, latlon%nlay)
-   call nc_put1Dvar0(ncid, 'lay', lay, 1, latlon%nlay)
+   call nc_put1Dvar0(ncid, 'lay', latlon%lay, 1, latlon%nlay)
 
    !write hor
    call nc_put1Dvar0(ncid, 'hor', hor, 1, 1)

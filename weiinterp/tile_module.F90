@@ -219,6 +219,8 @@ contains
       end do
     end do
 
+   !print *, 'Leave initialize_tilegrid'
+
   end subroutine initialize_tilegrid
 
   !----------------------------------------------------------------------

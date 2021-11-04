@@ -21,8 +21,8 @@ PROGRAM fv3interp2latlon
    call initialize_latlongrid(nlon, nlat, npnt, latlon)
 
    do n = 1, num_types
-     !print *, 'dirname: <', trim(dirname), &
-     !         '>, data_types(', n, ') = <', trim(data_types(n)), '>'
+      print *, 'dirname: <', trim(dirname), &
+               '>, data_types(', n, ') = <', trim(data_types(n)), '>'
       call initialize_tilegrid(types(n)%tile, trim(dirname), trim(data_types(n)))
 
       if(trim(data_types(n)) == 'fv_core.res.tile') then
