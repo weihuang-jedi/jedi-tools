@@ -18,21 +18,27 @@
  ulimit -s unlimited
  ulimit -c unlimited
 
- DIRNAME=/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/
-#PREFIX=fv_core.res.tile
-#OUTPUTFILE=latlon_grid.nc
- PREFIX=sfc_data.tile
- OUTPUTFILE=latlon_sfc.nc
- WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weight/weights.nc
+ generate_weights=0
 
- sed -e "s?DIRNAME?${DIRNAME}?g" \
-     -e "s?PREFIX?${PREFIX}?g" \
-     -e "s?OUTPUTFILE?${OUTPUTFILE}?g" \
-     -e "s?WEIGHTFILE?${WEIGHTFILE}?g" \
-     input.nml.template > input.nml
+ if [ "generate_weights" -eq "1" ]
+ then
+   cp input.nml.weights input.nml
+ else
+   DIRNAME=/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/
+   OUTPUTFILE=grid_fv3.nc
+   WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc
+   NUM_TYPES=5
+   DATATYPES="'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',"
+
+   sed -e "s?DIRNAME?${DIRNAME}?g" \
+       -e "s?OUTPUTFILE?${OUTPUTFILE}?g" \
+       -e "s?WEIGHTFILE?${WEIGHTFILE}?g" \
+       -e "s?NUM_TYPES?${NUM_TYPES}?g" \
+       -e "s?DATATYPES?${DATATYPES}?g" \
+       input.nml.template > input.nml
+ fi
 
  executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
-#ln -sf /work/noaa/gsienkf/weihuang/tools/UFS-RNR-tools/JEDI.FV3-increments/grid/C96 .
 
  ${executable}
 

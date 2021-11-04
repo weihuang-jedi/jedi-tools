@@ -46,7 +46,7 @@ if __name__ == '__main__':
   debug = 1
   output = 0
   addobs = 0
-  filename = 'latlon_grid.nc'
+  filename = 'grid_fv3.nc'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs=', 'filename='])
 
@@ -72,6 +72,7 @@ if __name__ == '__main__':
 
   lat, lon, u3d = pom.get_var('ua')
   lat, lon, v3d = pom.get_var('va')
+  lat, lon, w3d = pom.get_var('W')
 
  #print('lon = ', lon)
  #print('lat = ', lat)
@@ -100,6 +101,7 @@ if __name__ == '__main__':
 
   print('v3d.shape = ', v3d.shape)
 
+  """
   for lev in range(5, nlev, 5):
     u = u3d[lev,:,:]
     v = v3d[lev,:,:]
@@ -112,6 +114,7 @@ if __name__ == '__main__':
     pt.simple_barbs(u, v, intv=10)
 
   sys.exit(-1)
+  """
 
 #------------------------------------------------------------------------------
   clevs = np.arange(-0.5, 0.51, 0.01)
@@ -119,17 +122,20 @@ if __name__ == '__main__':
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
 
- #lons = [40, 105, 170, 270, 300]
-  lons = [60]
+  lons = [40, 105, 170, 270, 300]
+ #lons = [60]
 
   for lon in lons:
-    pvar = var[:,:,lon]
+    v = v3d[:,:,lon]
+    w = w3d[:,:,lon]
     title = '%s longitude %d' %(titleprefix, lon)
     pt.set_title(title)
 
     imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
     pt.set_imagename(imgname)
-    pt.plot_meridional_section(pvar)
+    pt.plot_meridional_vector(v, w, intv=5)
+
+  sys.exit(-1)
 
 #------------------------------------------------------------------------------
  #lats = [-30, 0, 45, 70]

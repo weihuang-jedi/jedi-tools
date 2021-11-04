@@ -942,8 +942,8 @@ class PlotTools():
       self.plt.xlim((-7, 7))
       self.plt.ylim((-7, 7))
     elif(varname == 'eastward_wind' or varname == 'northward_wind'):
-      self.plt.xlim((-5, 5))
-      self.plt.ylim((-5, 5))
+      self.plt.xlim((-10, 10))
+      self.plt.ylim((-10, 10))
     elif(varname == 'specific_humidity'):
       self.plt.xlim((-5, 5))
       self.plt.ylim((-5, 5))
@@ -1109,6 +1109,122 @@ class PlotTools():
 
     cb.ax.tick_params(labelsize=self.labelsize)
     self.set_format(cb)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def set_meridional_vector_grid(self, v, w, hor, ver, intv=5):
+    nver, nhor = v.shape
+    nhb = int(intv/2)
+    nvb = int(intv/2)
+    mhor = int(nhor/intv)
+    mver = int(nver/intv)
+
+    hax = np.zeros((mver, mhor), dtype=float)
+    vax = np.zeros((mver, mhor), dtype=float)
+    v2d = np.zeros((mver, mhor), dtype=float)
+    w2d = np.zeros((mver, mhor), dtype=float)
+
+    for i in range(mver):
+      for n in range(mhor):
+        vax[i, n] = ver[nvb+i*intv]
+    for n in range(mver):
+      for i in range(mhor):
+        hax[n, i] = hor[nhb+i*intv]
+        v2d[n, i] = v[nvb+n*intv, nhb+i*intv]
+        w2d[n, i] = 100.0*w[nvb+n*intv, nhb+i*intv]
+
+    hax1d = np.reshape(hax, (hax.size, ))
+    vax1d = np.reshape(vax, (vax.size, ))
+
+    v1d = np.reshape(v2d, (v2d.size, ))
+    w1d = np.reshape(w2d, (w2d.size, ))
+
+    return hax1d, vax1d, v1d, w1d
+
+  def plot_meridional_vector(self, v, w, intv=5):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
+    print(msg)
+    msg = ('vector w min: %s, max: %s' % (w.min(), w.max()))
+    print(msg)
+
+    hor = self.lat
+    nver, nhor = v.shape
+    ver = np.linspace(0.0, float(nver-1), nver)
+
+    hax1d, vax1d, v1d, w1d = self.set_meridional_vector_grid(v, w, hor, ver, intv=intv)
+
+    clevs = np.arange(-100, 105, 5)
+    blevs = np.arange(-100, 120, 20)
+
+   #(x, y) = self.basemap(lon1d, lat1d)
+    vector = self.plt.quiver(hax1d, vax1d, v1d, w1d, width=0.002,
+                             scale=self.scale, scale_units=self.scale_units,
+                             alpha=self.alpha, cmap=self.cmapname)
+    vectorkey = self.plt.quiverkey(vector, 0.95, 1.02, 20, '20m/s', labelpos='N')
+
+    cb = self.fig.colorbar(vector, orientation=self.orientation,
+                           pad=self.pad, ticks=blevs)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.streamplot.html#matplotlib.pyplot.streamplot
+ #matplotlib.pyplot.streamplot(x, y, u, v, density=1, linewidth=None,
+ #    color=None, cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
+ #    minlength=0.1, transform=None, zorder=None, start_points=None,
+ #    maxlength=4.0, integration_direction='both', *, data=None)
+  def plot_meridional_stream(self, u, v, intv=5):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('vector u min: %s, max: %s' % (u.min(), u.max()))
+    print(msg)
+    msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
+    print(msg)
+
+    lat, lon = self.set_stream_grid()
+
+    clevs = np.arange(-100, 105, 5)
+    blevs = np.arange(-100, 120, 20)
+
+   #(x, y) = self.basemap(lon, lat)
+   #stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2)
+    stream = self.basemap.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
+ 				     arrowsize=1, arrowstyle='-|>',
+                                     cmap=self.cmapname)
+
+   #cb = self.fig.colorbar(stream, orientation=self.orientation,
+   #                       pad=self.pad, ticks=blevs)
+   #cb.set_label(label=self.label, size=self.size, weight=self.weight)
+   #cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
 
     self.display(output=self.output, image_name=self.image_name)
 
