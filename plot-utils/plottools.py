@@ -1141,7 +1141,7 @@ class PlotTools():
 
     return hax1d, vax1d, v1d, w1d
 
-  def plot_meridional_vector(self, v, w, intv=5):
+  def plot_section_vector(self, v, w, hor, ver, intv=5):
     self.plt = matplotlib.pyplot
     try:
       self.plt.close('all')
@@ -1157,8 +1157,6 @@ class PlotTools():
     msg = ('vector w min: %s, max: %s' % (w.min(), w.max()))
     print(msg)
 
-    hor = self.lat
-    nver, nhor = v.shape
     ver = np.linspace(0.0, float(nver-1), nver)
 
     hax1d, vax1d, v1d, w1d = self.set_meridional_vector_grid(v, w, hor, ver, intv=intv)
@@ -1183,14 +1181,23 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
- #https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.streamplot.html#matplotlib.pyplot.streamplot
- #matplotlib.pyplot.streamplot(x, y, u, v, density=1, linewidth=None,
- #    color=None, cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
- #    minlength=0.1, transform=None, zorder=None, start_points=None,
- #    maxlength=4.0, integration_direction='both', *, data=None)
-  def plot_meridional_stream(self, u, v, intv=5):
-    self.basemap = self.build_basemap()
+ #----------------------------------------------------------------------------------------------
+  def set_section_stream_grid(self, hor, ver):
+    mver = len(ver)
+    mhor = len(hor)
 
+    h2d = np.zeros((mver, mhor), dtype=float)
+    v2d = np.zeros((mver, mhor), dtype=float)
+
+    for k in range(mver):
+      for i in range(mhor):
+        v2d[k, i] = ver[k]
+        h2d[k, i] = hor[i]
+
+    return h2d, v2d
+
+ #----------------------------------------------------------------------------------------------
+  def plot_section_stream(self, v, w, hor, ver):
     self.plt = matplotlib.pyplot
     try:
       self.plt.close('all')
@@ -1201,21 +1208,21 @@ class PlotTools():
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
 
-    msg = ('vector u min: %s, max: %s' % (u.min(), u.max()))
-    print(msg)
     msg = ('vector v min: %s, max: %s' % (v.min(), v.max()))
     print(msg)
+    msg = ('vector w min: %s, max: %s' % (w.min(), w.max()))
+    print(msg)
 
-    lat, lon = self.set_stream_grid()
+    hor, ver = self.set_section_stream_grid(hor, ver)
+    w = 500.0*w
 
     clevs = np.arange(-100, 105, 5)
     blevs = np.arange(-100, 120, 20)
 
    #(x, y) = self.basemap(lon, lat)
-   #stream = self.basemap.streamplot(lon, lat, u, v, density=1, linewidth=0.2)
-    stream = self.basemap.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
- 				     arrowsize=1, arrowstyle='-|>',
-                                     cmap=self.cmapname)
+    stream = self.plt.streamplot(hor, ver, v, w, density=10, linewidth=0.2,
+				 arrowsize=1, arrowstyle='-|>',
+                                 cmap=self.cmapname)
 
    #cb = self.fig.colorbar(stream, orientation=self.orientation,
    #                       pad=self.pad, ticks=blevs)
@@ -1223,8 +1230,6 @@ class PlotTools():
    #cb.ax.tick_params(labelsize=self.labelsize)
 
     self.ax.set_title(self.title)
-
-    self.plot_coast_lat_lon_line()
 
     self.display(output=self.output, image_name=self.image_name)
 

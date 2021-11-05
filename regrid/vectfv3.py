@@ -122,31 +122,37 @@ if __name__ == '__main__':
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
 
-  lons = [40, 105, 170, 270, 300]
- #lons = [60]
-
-  for lon in lons:
-    v = v3d[:,:,lon]
-    w = w3d[:,:,lon]
-    title = '%s longitude %d' %(titleprefix, lon)
-    pt.set_title(title)
-
-    imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
-    pt.set_imagename(imgname)
-    pt.plot_meridional_vector(v, w, intv=5)
-
-  sys.exit(-1)
+  ver = np.arange(0.0, float(nlev), 1.0)
+  ver = -ver[::-1]
 
 #------------------------------------------------------------------------------
  #lats = [-30, 0, 45, 70]
   lats = [50, 55]
 
-  for lat in lats:
-    pvar = var[:,90+lat,:]
-    pt.set_title(title)
-    title = '%s latitude %d' %(titleprefix, lat)
+  for j in lats:
+    u = u3d[::-1,90+j,:]
+    w = w3d[::-1,90+j,:]
 
-    imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
+    title = '%s latitude %d' %(titleprefix, j)
+    pt.set_title(title)
+
+    imgname = '%s_lat_%d_level.png' %(imageprefix, j)
     pt.set_imagename(imgname)
-    pt.plot_zonal_section(pvar)
+   #pt.plot_section_vector(u, w, lon, ver, intv=5)
+    pt.plot_section_stream(u, w, lon, ver)
+
+#------------------------------------------------------------------------------
+  lons = [40, 105, 170, 270, 300]
+ #lons = [60]
+
+  for i in lons:
+    v = v3d[::-1,:,i]
+    w = w3d[::-1,:,i]
+    title = '%s longitude %d' %(titleprefix, i)
+    pt.set_title(title)
+
+    imgname = '%s_lon_%d_level.png' %(imageprefix, i)
+    pt.set_imagename(imgname)
+   #pt.plot_section_vector(v, w, lat, ver, intv=5)
+    pt.plot_section_stream(v, w, lat, ver)
 
