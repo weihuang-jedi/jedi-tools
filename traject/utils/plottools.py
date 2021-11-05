@@ -1214,7 +1214,8 @@ class PlotTools():
     print(msg)
 
     hor, ver = self.set_section_stream_grid(hor, ver)
-    w = 500.0*w
+   #w = 100.0*w
+    w = 50.0*w
 
     clevs = np.arange(-100, 105, 5)
     blevs = np.arange(-100, 120, 20)

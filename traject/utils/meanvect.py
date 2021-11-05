@@ -12,7 +12,7 @@ import matplotlib.pyplot
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
-sys.path.append('../plot-utils')
+#sys.path.append('../plot-utils')
 from plottools import PlotTools
 
 #=========================================================================
@@ -25,14 +25,14 @@ class PlotFV3Model():
     if(self.debug):
       print('self.filename = ', self.filename)
 
-  def get_var(self, varname, ndim=3, time=0):
+  def get_var(self, varname, ndim=3):
     ncfile = netCDF4.Dataset(self.filename, 'r')
-    lat = ncfile.variables['lat'][:]
-    lon = ncfile.variables['lon'][:]
+    lat = ncfile.variables['lat_0'][:]
+    lon = ncfile.variables['lon_0'][:]
     if(ndim == 3):
-      var = ncfile.variables[varname][time, :, :, :]
+      var = ncfile.variables[varname][:, :, :]
     else:
-      var = ncfile.variables[varname][time, :, :]
+      var = ncfile.variables[varname][:, :]
     ncfile.close()
 
     if(self.debug):
@@ -45,18 +45,15 @@ class PlotFV3Model():
 if __name__ == '__main__':
   debug = 1
   output = 0
-  addobs = 0
-  filename = 'grid_fv3.nc'
+  filename = 'output/gfs_4_20211016_1200_000.nc'
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'addobs=', 'filename='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filename='])
 
   for o, a in opts:
     if o in ('--debug'):
       debug = int(a)
     elif o in ('--output'):
       output = int(a)
-    elif o in ('--addobs'):
-      addobs = int(a)
     elif o in ('--filename'):
       filename = a
    #else:
@@ -64,15 +61,14 @@ if __name__ == '__main__':
 
   print('debug = ', debug)
   print('output = ', output)
-  print('addobs = ', addobs)
   print('filename = ', filename)
 
 #------------------------------------------------------------------------------
   pom = PlotFV3Model(debug=debug, output=output, filename=filename)
 
-  lat, lon, u3d = pom.get_var('ua')
-  lat, lon, v3d = pom.get_var('va')
-  lat, lon, w3d = pom.get_var('W')
+  lat, lon, u3d = pom.get_var('UGRD_P0_L100_GLL0')
+  lat, lon, v3d = pom.get_var('VGRD_P0_L100_GLL0')
+  lat, lon, w3d = pom.get_var('VVEL_P0_L100_GLL0')
 
  #print('lon = ', lon)
  #print('lat = ', lat)
@@ -81,14 +77,6 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
- #if(addobs):
- #  filename = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
- #  rgo = ReadGSIobs(debug=debug, filename=filename)
- #  obslat, obslon = rgo.get_latlon()
-
- #  pt.set_obs_latlon(obslat=obslat, obslon=obslon)
-
-#------------------------------------------------------------------------------
   pt.set_label('Vector')
 
   imageprefix = 'fv3_vector'
@@ -127,18 +115,21 @@ if __name__ == '__main__':
 
   print('u3d.shape = ', u3d.shape)
 
-  vmean = np.mean(v3d[:,:,150:210], axis=2)
-  wmean = np.mean(w3d[:,:,150:210], axis=2)
+ #vmean = np.mean(v3d[:,:,150*2:210*2], axis=2)
+ #wmean = np.mean(w3d[:,:,150*2:210*2], axis=2)
 
-  print('vmean.shape = ', vmean.shape)
+ #v = vmean[::-1,:]
+ #w = wmean[::-1,:]
 
-  v = vmean[::-1,:]
-  w = wmean[::-1,:]
-  title = '%s zonal mean between 150-210' %(titleprefix)
-  pt.set_title(title)
+  for i in [180, 240, 300, 360, 720]:
+    v = v3d[::-1,:,i]
+    w = w3d[::-1,:,i]
 
-  imgname = '%s_zonal_mean_150-210.png' %(imageprefix)
-  pt.set_imagename(imgname)
- #pt.plot_section_vector(v, w, lat, ver, intv=5)
-  pt.plot_section_stream(v, w, lat, ver)
+    title = '%s zonal mean between 150-210' %(titleprefix)
+    pt.set_title(title)
+
+    imgname = '%s_zonal_mean_150-210.png' %(imageprefix)
+    pt.set_imagename(imgname)
+   #pt.plot_section_vector(v, w, lat, ver, intv=5)
+    pt.plot_section_stream(v, w, lat, ver)
 
