@@ -125,34 +125,20 @@ if __name__ == '__main__':
   ver = np.arange(0.0, float(nlev), 1.0)
   ver = -ver[::-1]
 
-#------------------------------------------------------------------------------
- #lons = [40, 105, 170, 270, 300]
-  lons = [0, 180]
+  print('u3d.shape = ', u3d.shape)
 
-  for i in lons:
-    v = v3d[::-1,:,i]
-    w = w3d[::-1,:,i]
-    title = '%s longitude %d' %(titleprefix, i)
-    pt.set_title(title)
+  vmean = np.mean(v3d[:,:,150:210], axis=2)
+  wmean = np.mean(w3d[:,:,150:210], axis=2)
 
-    imgname = '%s_lon_%d_level.png' %(imageprefix, i)
-    pt.set_imagename(imgname)
-   #pt.plot_section_vector(v, w, lat, ver, intv=5)
-    pt.plot_section_stream(v, w, lat, ver)
+  print('vmean.shape = ', vmean.shape)
 
-#------------------------------------------------------------------------------
- #lats = [-30, 0, 45, 70]
-  lats = [50, 55]
+  v = vmean[::-1,:]
+  w = wmean[::-1,:]
+  title = '%s zonal mean between 150-210' %(titleprefix)
+  pt.set_title(title)
 
-  for j in lats:
-    u = u3d[::-1,90+j,:]
-    w = w3d[::-1,90+j,:]
-
-    title = '%s latitude %d' %(titleprefix, j)
-    pt.set_title(title)
-
-    imgname = '%s_lat_%d_level.png' %(imageprefix, j)
-    pt.set_imagename(imgname)
-   #pt.plot_section_vector(u, w, lon, ver, intv=5)
-    pt.plot_section_stream(u, w, lon, ver)
+  imgname = '%s_zonal_mean_150-210.png' %(imageprefix)
+  pt.set_imagename(imgname)
+ #pt.plot_section_vector(v, w, lat, ver, intv=5)
+  pt.plot_section_stream(v, w, lat, ver)
 
