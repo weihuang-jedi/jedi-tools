@@ -1,6 +1,6 @@
 !-------------------------------------------------------------
 
-MODULE namelist_module
+MODULE module_namelist
 
   implicit none
 
@@ -54,5 +54,5 @@ contains
 
   end subroutine read_namelist
 
-END MODULE namelist_module
+END MODULE module_namelist
 

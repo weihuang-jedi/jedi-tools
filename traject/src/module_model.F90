@@ -2,7 +2,7 @@
 !  The model module read both model specification, and model data.
 !-----------------------------------------------------------------------
 
-module module_io
+module module_model
 
   use netcdf
 
@@ -62,7 +62,7 @@ contains
     type(modelgrid),  intent(out) :: model
     character(len=*), intent(in)  :: filename
 
-    integer :: i, k, ik, rc
+    integer :: i, j, k, n, nk, rc
     integer :: include_parents, dimlen
 
     character(len=1024) :: dimname, varname
@@ -95,10 +95,10 @@ contains
 
     print *, 'dimids: ', model%dimids
 
-    do i = 1, model%nDims
-       rc = nf90_inquire_dimension(model%fileid, model%dimids(i), dimname, dimlen)
+    do n = 1, model%nDims
+       rc = nf90_inquire_dimension(model%fileid, model%dimids(n), dimname, dimlen)
        call check_status(rc)
-       print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
+       print *, 'Dim No. ', n, ': ', trim(dimname), ', dimlen=', dimlen
 
        if(trim(dimname) == 'lon') then
           model%nlon = dimlen
@@ -112,8 +112,8 @@ contains
           model%ntim = dimlen
        end if
 
-       model%dimlen(i) = dimlen
-       model%dimnames(i) = trim(dimname)
+       model%dimlen(n) = dimlen
+       model%dimnames(n) = trim(dimname)
     end do
 
    !Allocate memory.
@@ -125,78 +125,97 @@ contains
 
     print *, 'nvars = ', model%nVars, ', varids: ', model%varids
 
-    do i = 1, model%nVars
-       rc = nf90_inquire_variable(model%fileid, model%varids(i), &
-                                  ndims=model%vars(i)%nDims, natts=model%vars(i)%nAtts)
+    do n = 1, model%nVars
+       rc = nf90_inquire_variable(model%fileid, model%varids(n), &
+                                  ndims=model%vars(n)%nDims, natts=model%vars(i)%nAtts)
        call check_status(rc)
-       print *, 'Var No. ', i, ': ndims = ', model%vars(i)%nDims
+       print *, 'Var No. ', n, ': ndims = ', model%vars(n)%nDims
 
-       allocate(model%vars(i)%dimids(model%vars(i)%nDims))
-       allocate(model%vars(i)%dimlen(model%vars(i)%nDims))
-       allocate(model%vars(i)%dimnames(model%vars(i)%nDims))
+       allocate(model%vars(n)%dimids(model%vars(n)%nDims))
+       allocate(model%vars(n)%dimlen(model%vars(n)%nDims))
+       allocate(model%vars(n)%dimnames(model%vars(n)%nDims))
 
-       rc = nf90_inquire_variable(model%fileid, model%varids(i), &
-                                  dimids=model%vars(i)%dimids)
+       rc = nf90_inquire_variable(model%fileid, model%varids(n), &
+                                  dimids=model%vars(n)%dimids)
        call check_status(rc)
-       print *, 'Var No. ', i, ': model%vars(i)%dimids = ', model%vars(i)%dimids
+       print *, 'Var No. ', n, ': model%vars(n)%dimids = ', model%vars(n)%dimids
 
-       rc = nf90_inquire_variable(model%fileid, model%varids(i), &
-                name=model%vars(i)%varname)
+       rc = nf90_inquire_variable(model%fileid, model%varids(n), &
+                name=model%vars(n)%varname)
        call check_status(rc)
-       print *, 'Var No. ', i, ': ', trim(model%vars(i)%varname)
+       print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
 
-      !rc = nf90_inquire_variable(model%fileid, model%varids(i), &
-      !         model%vars(i)%varname, model%vars(i)%xtype, &
-      !         model%vars(i)%ndims, model%vars(i)%dimids, &
-      !         model%vars(i)%nAtts, model%vars(i)%contiguous, &
-      !         model%vars(i)%chunksizes, model%vars(i)%deflate_level, &
-      !         model%vars(i)%shuffle, model%vars(i)%fletcher32, &
-      !         model%vars(i)%endianness)
+      !rc = nf90_inquire_variable(model%fileid, model%varids(n), &
+      !         model%vars(n)%varname, model%vars(n)%xtype, &
+      !         model%vars(n)%ndims, model%vars(n)%dimids, &
+      !         model%vars(n)%nAtts, model%vars(n)%contiguous, &
+      !         model%vars(n)%chunksizes, model%vars(n)%deflate_level, &
+      !         model%vars(n)%shuffle, model%vars(n)%fletcher32, &
+      !         model%vars(n)%endianness)
       !call check_status(rc)
 
-       if(trim(model%vars(i)%varname) == 'lon') then
+       if(trim(model%vars(n)%varname) == 'lon') then
           allocate(model%lon(model%nlon))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%lon)
-       else if(trim(model%vars(i)%varname) == 'lat') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%lon)
+       else if(trim(model%vars(n)%varname) == 'lat') then
           allocate(model%lat(model%nlat))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%lat)
-       else if(trim(model%vars(i)%varname) == 'lev') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%lat)
+       else if(trim(model%vars(n)%varname) == 'lev') then
           allocate(model%lev(model%nlev))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%lev)
-       else if(trim(model%vars(i)%varname) == 'Time') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%lev)
+       else if(trim(model%vars(n)%varname) == 'Time') then
           if(.not. allocated(model%time)) allocate(model%time(model%ntim))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%time)
-       else if(trim(model%vars(i)%varname) == 'hor') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%time)
+       else if(trim(model%vars(n)%varname) == 'hor') then
           if(.not. allocated(model%hor)) allocate(model%hor(model%nhor))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%hor)
-       else if(trim(model%vars(i)%varname) == 'ua') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%hor)
+       else if(trim(model%vars(n)%varname) == 'ua') then
           allocate(model%u(model%nlon, model%nlat, model%nlev))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%u)
-       else if(trim(model%vars(i)%varname) == 'ua') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%u)
+       else if(trim(model%vars(n)%varname) == 'ua') then
           allocate(model%v(model%nlon, model%nlat, model%nlev))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%v)
-       else if(trim(model%vars(i)%varname) == 'W') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%v)
+       else if(trim(model%vars(n)%varname) == 'W') then
           allocate(model%w(model%nlon, model%nlat, model%nlev))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%w)
-       else if(trim(model%vars(i)%varname) == 'T') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%w)
+       else if(trim(model%vars(n)%varname) == 'T') then
           allocate(model%t(model%nlon, model%nlat, model%nlev))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%t)
-       else if(trim(model%vars(i)%varname) == 'DZ') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%t)
+       else if(trim(model%vars(n)%varname) == 'phis') then
+          allocate(model%phis(model%nlon, model%nlat, model%nhor))
+          rc = nf90_get_var(model%fileid, model%varids(n), model%phis)
+       else if(trim(model%vars(n)%varname) == 'DZ') then
           allocate(model%dz(model%nlon, model%nlat, model%nlev))
           allocate(model%z(model%nlon, model%nlat, model%nlev+1))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%dz)
-       else if(trim(model%vars(i)%varname) == 'delp') then
+          rc = nf90_get_var(model%fileid, model%varids(n), model%dz)
+          do j = 1, model%nlat
+          do i = 1, model%nlon
+             model%z(i, j, model%nlev+1) = model%phis(i,j,1)
+             do k = model%nlev, 1, -1
+                model%z(i, j, k) = model%z(i, j, k+1) + model%dz(i, j, k)
+             end do
+          end do
+          end do
+       else if(trim(model%vars(n)%varname) == 'delp') then
           allocate(model%delp(model%nlon, model%nlat, model%nlev))
           allocate(model%p(model%nlon, model%nlat, model%nlev+1))
-          rc = nf90_get_var(model%fileid, model%varids(i), model%delp)
+          rc = nf90_get_var(model%fileid, model%varids(n), model%delp)
+          do j = 1, model%nlat
+          do i = 1, model%nlon
+             model%p(i, j, 1) = 100.0
+             do k = 1, model%nlev
+                model%p(i, j, k+1) = model%p(i, j, k) + model%delp(i, j, k)
+             end do
+          end do
+          end do
        end if
 
        call check_status(rc)
 
-       do k = 1, model%vars(i)%ndims
-          ik = model%vars(i)%dimids(k)
-          model%vars(i)%dimnames(k) = trim(model%dimnames(ik))
-          model%vars(i)%dimlen(k) = model%dimlen(ik)
+       do k = 1, model%vars(n)%ndims
+          nk = model%vars(n)%dimids(k)
+          model%vars(n)%dimnames(k) = trim(model%dimnames(nk))
+          model%vars(n)%dimlen(k) = model%dimlen(nk)
        end do
     end do
 
@@ -260,5 +279,5 @@ contains
     end if
   end subroutine check_status  
 
-end module module_io
+end module module_model
 

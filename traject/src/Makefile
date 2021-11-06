@@ -33,38 +33,38 @@ OBJS =	module_namelist.o \
 	nc_putGlobalIntAttr.o \
 	nc_putGlobalRealAttr.o \
 	nc_putGlobalCharAttr.o \
-	module_io.o \
-	latlon_module.o \
-	output_latlongrid.o \
+	module_model.o \
+	module_trajectory.o \
+	output_trajectory.o \
 	interp_vars.o
 
 ####################################################
 
-deflt :	clean_modulde nc4_lib fv3interp2latlon
+deflt :	clean_modulde nc4_lib trajectory
 
 clean_modulde :
-	$(RM) latlon_module.f90 latlon_module.mod latlon_module.o module_io.f90 module_io.mod module_io.o
+	$(RM) module_trajectory.f90 module_trajectory.mod module_trajectory.o module_model.f90 module_model.mod module_model.o
 
 nc4_lib : $(OBJS)
 	$(RM) libnc4.a
 	$(AR) libnc4.a $(OBJS)
 	$(RANLIB) libnc4.a
 
-fv3interp2latlon : fv3interp2latlon.o
-	$(FC) -o fv3interp2latlon.exe fv3interp2latlon.o $(FFLAGS) $(LOC_LIBS) \
+trajectory : trajectory.o
+	$(FC) -o trajectory.exe trajectory.o $(FFLAGS) $(LOC_LIBS) \
 	libnc4.a
 
 clean :
-	$(RM) libnc4.a $(OBJS) $(TEST_OBJS) \
+	$(RM) libnc4.a $(OBJS) $(TEST_OBJS) trajectory.o \
 	*.f90 *.mod *.exe
 
 ####################################################
 
 # DEPENDENCIES : only dependencies after this line (don't remove the word DEPENDENCIES)
 
-#fv3interp2latlon.o : module_io.o
+#trajectory.o : module_model.o
 
-module_io.o : module_io.F90
+module_model.o : module_model.F90
 
-latlon_module.o : latlon_module.F90
+module_trajectory.o : module_trajectory.F90
 
