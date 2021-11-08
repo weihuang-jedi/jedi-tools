@@ -64,7 +64,9 @@ clean :
 
 #trajectory.o : module_model.o
 
-module_model.o : module_model.F90
+#module_model.o : module_model.F90
 
-module_trajectory.o : module_trajectory.F90
+#module_trajectory.o : module_trajectory.F90
+
+output_trajectory.o : module_trajectory.o
 

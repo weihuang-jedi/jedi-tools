@@ -18,8 +18,8 @@ module module_trajectory
   type trajectorytype
      character(len=1024)                :: filename
      integer                            :: ncid
-     integer                            :: dimidlon, dimidlat, dimidalt, &
-                                           dimidtime
+     integer                            :: dimidx, dimidy, dimidz, dimidt
+     integer                            :: nx, ny, nz, nt
      real(kind=8), dimension(2)         :: time
 
      integer, dimension(:, :, :), allocatable :: x, y, z
@@ -39,13 +39,17 @@ contains
 
     integer :: i, j, k
 
-    allocate(trajectory%x(model%nlon, model%nlat, model%nlev))
-    allocate(trajectory%y(model%nlon, model%nlat, model%nlev))
-    allocate(trajectory%z(model%nlon, model%nlat, model%nlev))
+    trajectory%nx = model%nlon
+    trajectory%ny = model%nlon
+    trajectory%nz = model%nlon
 
-    do k = 1, model%nlev
-    do j = 1, model%nlat
-    do i = 1, model%nlon
+    allocate(trajectory%x(trajectory%nx, trajectory%ny, trajectory%nz))
+    allocate(trajectory%y(trajectory%nx, trajectory%ny, trajectory%nz))
+    allocate(trajectory%z(trajectory%nx, trajectory%ny, trajectory%nz))
+
+    do k = 1, trajectory%nz
+    do j = 1, trajectory%ny
+    do i = 1, trajectory%nx
        trajectory%x(i,j,k) = model%lon(i)
        trajectory%y(i,j,k) = model%lat(j)
        trajectory%z(i,j,k) = 0.5*(model%z(i, j, k) + model%z(i, j, k+1))
