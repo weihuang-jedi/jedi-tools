@@ -141,6 +141,8 @@ subroutine create_coord(nt, time, latlon, flnm)
    integer, dimension(2) :: dimids
 
    real, dimension(1) :: hor
+   real, dimension(latlon%nlev) :: lev
+   real, dimension(latlon%nlay) :: lay
 
    logical :: fileExists
 
@@ -151,8 +153,8 @@ subroutine create_coord(nt, time, latlon, flnm)
 
   !print *, 'latlon%nlon = ',  latlon%nlon
   !print *, 'latlon%nlat = ',  latlon%nlat
-  !print *, 'latlon%nlev = ',  latlon%nlev
-  !print *, 'latlon%nlay = ',  latlon%nlay
+   print *, 'latlon%nlev = ',  latlon%nlev
+   print *, 'latlon%nlay = ',  latlon%nlay
 
    latlon%filename = trim(flnm)
 
@@ -160,15 +162,22 @@ subroutine create_coord(nt, time, latlon, flnm)
 
    do i = 1, latlon%nlev
       latlon%lev(i) = real(i-1)
+      lev(i) = real(i-1)
    end do
 
    allocate(latlon%lay(latlon%nlay))
 
    do i = 1, latlon%nlay
       latlon%lay(i) = real(i-1)
+      lay(i) = real(i-1)
    end do
 
    hor(1) = 0.0
+
+  !print *, 'latlon%lon = ',  latlon%lon
+  !print *, 'latlon%lat = ',  latlon%lat
+   print *, 'latlon%lev = ',  latlon%lev
+   print *, 'latlon%lay = ',  latlon%lay
 
    rc = nf90_noerr
 
@@ -260,10 +269,12 @@ subroutine create_coord(nt, time, latlon, flnm)
    call nc_put1Dvar0(ncid, 'lat', latlon%lat, 1, latlon%nlat)
 
    !write lev
-   call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
+  !call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
+   call nc_put1Dvar0(ncid, 'lev', lev, 1, latlon%nlev)
 
    !write lay
-   call nc_put1Dvar0(ncid, 'lay', latlon%lay, 1, latlon%nlay)
+  !call nc_put1Dvar0(ncid, 'lay', latlon%lay, 1, latlon%nlay)
+   call nc_put1Dvar0(ncid, 'lay', lay, 1, latlon%nlay)
 
    !write hor
    call nc_put1Dvar0(ncid, 'hor', hor, 1, 1)

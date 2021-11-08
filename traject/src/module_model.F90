@@ -47,6 +47,8 @@ module module_model
      real, dimension(:, :, :), allocatable :: u, v, w, t, phis, dz, delp, p, z
 
      type(vartype), dimension(:), allocatable :: vars
+
+     real :: dlon, dlat
   end type modelgrid
 
   !-----------------------------------------------------------------------
@@ -67,8 +69,8 @@ contains
 
     character(len=1024) :: dimname, varname
 
-    print *, 'Enter initialize_modelgrid'
-    print *, 'filename: <', trim(filename), '>'
+   !print *, 'Enter initialize_modelgrid'
+   !print *, 'filename: <', trim(filename), '>'
 
     include_parents = 0
 
@@ -219,7 +221,10 @@ contains
        end do
     end do
 
-    print *, 'Leave initialize_modelgrid'
+    model%dlon = 360.0/model%nlon
+    model%dlat = 180.0/(model%nlat - 1)
+
+   !print *, 'Leave initialize_modelgrid'
 
   end subroutine initialize_modelgrid
 

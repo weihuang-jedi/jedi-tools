@@ -35,8 +35,7 @@ OBJS =	module_namelist.o \
 	nc_putGlobalCharAttr.o \
 	module_model.o \
 	module_trajectory.o \
-	output_trajectory.o \
-	interp_vars.o
+	output_trajectory.o
 
 ####################################################
 

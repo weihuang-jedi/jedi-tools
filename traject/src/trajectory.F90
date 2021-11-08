@@ -8,22 +8,22 @@ PROGRAM trajectory
    IMPLICIT NONE
 
    type(modelgrid)  :: model
-   type(trajectorytype) :: trajectory
+   type(trajectorytype) :: traject
 
    call read_namelist('input.nml')
 
    call initialize_modelgrid(model, trim(filename))
 
-   call initialize_trajectory(model, trajectory)
+   call initialize_trajectory(model, traject)
 
-   call generate_header(model, trajectory, output_flnm)
+   call generate_header(model, traject, output_flnm)
 
-   call calculate_trajectory(model, trajectory)
+   call calculate_trajectory(model, traject)
 
    call finalize_modelgrid(model)
 
-   call closefile(trajectory)
-   call finalize_trajectory(trajectory)
+   call closefile(traject)
+   call finalize_trajectory(traject)
 
 END PROGRAM trajectory
 
