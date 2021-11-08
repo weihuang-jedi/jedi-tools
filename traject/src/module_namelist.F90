@@ -9,6 +9,7 @@ MODULE module_namelist
   CHARACTER(LEN=1024) :: program_name
   character(len=1024) :: filename
   character(len=1024) :: output_flnm
+  real    :: dt
   logical :: debug_on
 
 contains
@@ -28,6 +29,8 @@ contains
     filename = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/grid_latlon.nc'
 
     output_flnm = 'trajectory.nc'
+
+    dt = 60.0
 
     debug_on = .false.
 

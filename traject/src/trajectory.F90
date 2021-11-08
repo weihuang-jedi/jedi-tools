@@ -10,19 +10,25 @@ PROGRAM trajectory
    type(modelgrid)  :: model
    type(trajectorytype) :: traject
 
+   integer :: n
+
    call read_namelist('input.nml')
 
    call initialize_modelgrid(model, trim(filename))
 
    call initialize_trajectory(model, traject)
 
-   call generate_header(model, traject, output_flnm)
+   call create_header(traject, output_flnm)
 
-   call calculate_trajectory(model, traject)
+   do n = 1, 2
+      call output_trajectory(traject, n, dt)
+      call advance_trajectory(model, traject, dt)
+   end do
+
+   call output_trajectory(traject, 3, dt)
 
    call finalize_modelgrid(model)
 
-   call closefile(traject)
    call finalize_trajectory(traject)
 
 END PROGRAM trajectory

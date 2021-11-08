@@ -1,6 +1,5 @@
 !----------------------------------------------------------------------------------------
-
-subroutine write_trajectory(trajectory, flnm)
+subroutine create_header(trajectory, flnm)
 
    use netcdf
    use module_trajectory
@@ -24,12 +23,16 @@ subroutine write_trajectory(trajectory, flnm)
    end do
 
    do j = 1, trajectory%ny
-      lat = trajectory%y(1,j,1)
+      lat(j) = trajectory%y(1,j,1)
    end do
 
-   do k = 1, trajectory%nx
-      alt = trajectory%z(1,1,k)
+   do k = 1, trajectory%nz
+      alt(k) = real(k-1)
    end do
+
+  !print *, 'lon = ', lon
+  !print *, 'lat = ', lat
+  !print *, 'alt = ', alt
 
    time(1) = 0.0
 
@@ -88,22 +91,23 @@ subroutine write_trajectory(trajectory, flnm)
   !write time
   !call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, 1)
 
-   rc =  nf90_close(trajectory%ncid)
+  !rc =  nf90_close(trajectory%ncid)
+  !trajectory%ncid = -1111
 
-   print *, 'nf90_close rc = ', rc
-   print *, 'nf90_noerr = ', nf90_noerr
+  !print *, 'nf90_close rc = ', rc
+  !print *, 'nf90_noerr = ', nf90_noerr
 
-   if(rc /= nf90_noerr) then
-      write(unit=0, fmt='(a,i6,a)') "Problem to close ncid: <", trajectory%ncid, ">."
-      write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
-      write(unit=0, fmt='(3a, i4)') &
-           "Stop in file: <", __FILE__, ">, line: ", __LINE__
-      stop
-   end if
+  !if(rc /= nf90_noerr) then
+  !   write(unit=0, fmt='(a,i6,a)') "Problem to close ncid: <", trajectory%ncid, ">."
+  !   write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
+  !   write(unit=0, fmt='(3a, i4)') &
+  !        "Stop in file: <", __FILE__, ">, line: ", __LINE__
+  !   stop
+  !end if
 
-   print *, 'Finished Write to file: ', trim(flnm)
+   print *, 'Finished create file: ', trim(flnm)
 
-end subroutine write_trajectory
+end subroutine create_header
 
 !-------------------------------------------------------------------------------------
 subroutine write_var_attr(trajectory)
@@ -143,7 +147,7 @@ subroutine write_var_attr(trajectory)
 
    dimids(1) = trajectory%dimidz
    nd = 1
-!--Field pnt
+!--Field alt
    call nc_putAxisAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
                       "alt", &
                       "Altitude Coordinate", &
@@ -155,9 +159,9 @@ subroutine write_var_attr(trajectory)
 !--Field time
    call nc_putAxisAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
                       "time", &
-                      "Time", &
+                      "time", &
                       "seconds", &
-                      "Time" )
+                      "time" )
 
    dimids(1) = trajectory%dimidx
    dimids(2) = trajectory%dimidy
@@ -166,20 +170,20 @@ subroutine write_var_attr(trajectory)
    nd = 4
 
 !--Field x
-   call nc_putAttrInt(trajectory%ncid, nd, dimids, NF90_REAL, &
+   call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
                    "x", &
                    "Longitude of Trajectory", &
                    "degree_east", &
-                   "pnt lat lon", &
-                   missing_int)
+                   "time alt lat lon", &
+                   missing_real)
 
 !--Field y
-   call nc_putAttrInt(trajectory%ncid, nd, dimids, NF90_REAL, &
+   call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
                    "y", &
                    "Latitude of Trajectory", &
                    "degree_north", &
                    "time alt lat lon", &
-                   missing_int)
+                   missing_real)
 
 !--Field z
    call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
@@ -205,4 +209,37 @@ subroutine write_global_attr(ncid, filename, title, gridtype)
    call nc_putGlobalCharAttr(ncid, 'grid_type', trim(gridtype))
 
 end subroutine write_global_attr
+
+!-------------------------------------------------------------------------------------
+subroutine output_trajectory(trajectory, n, dt)
+
+   use netcdf
+   use module_trajectory
+
+   implicit none
+
+   type(trajectorytype), intent(in) :: trajectory
+   integer, intent(in) :: n
+   real, intent(in) :: dt
+
+   integer :: rc, nd
+   real, dimension(1) :: time
+
+   print *, 'Enter output_trajectory'
+   print *, 'n = ', n, ', dt = ', dt
+   print *, 'trajectory%ncid = ', trajectory%ncid
+
+   time(1) = n * dt
+
+   call nc_put1Dvar(trajectory%ncid, 'time', time, n, 1, 1)
+   call nc_put3Dvar(trajectory%ncid, 'x', trajectory%x, n, &
+        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+   call nc_put3Dvar(trajectory%ncid, 'y', trajectory%y, n, &
+        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+   call nc_put3Dvar(trajectory%ncid, 'z', trajectory%z, n, &
+        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+
+   print *, 'Leave output_trajectory'
+
+end subroutine output_trajectory
 
