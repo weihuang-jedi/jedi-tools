@@ -20,16 +20,16 @@ PROGRAM trajectory
 
    call create_header(traject, output_flnm)
 
+   call output_trajectory(traject, 0, dt)
+
    do n = 1, 2
-      call output_trajectory(traject, n, dt)
       call advance_trajectory(model, traject, dt)
+      call output_trajectory(traject, n, dt)
    end do
 
-   call output_trajectory(traject, 3, dt)
+   call finalize_trajectory(traject)
 
    call finalize_modelgrid(model)
-
-   call finalize_trajectory(traject)
 
 END PROGRAM trajectory
 

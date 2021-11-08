@@ -231,7 +231,7 @@ contains
     do i = 1, model%nlon
        model%z(i, j, model%nlev+1) = model%phis(i,j,1)
        do k = model%nlev, 1, -1
-          model%z(i, j, k) = model%z(i, j, k+1) + model%dz(i, j, k)
+          model%z(i, j, k) = model%z(i, j, k+1) - model%dz(i, j, k)
        end do
     end do
     end do

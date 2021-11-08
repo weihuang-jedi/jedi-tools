@@ -13,7 +13,7 @@ subroutine create_header(trajectory, flnm)
    real, dimension(1:trajectory%nx) :: lon
    real, dimension(1:trajectory%ny) :: lat
    real, dimension(1:trajectory%nz) :: alt
-   real, dimension(1)               :: time
+   real, dimension(3)               :: time
 
    integer :: i, j, k, rc
    logical :: fileExists
@@ -35,6 +35,8 @@ subroutine create_header(trajectory, flnm)
   !print *, 'alt = ', alt
 
    time(1) = 0.0
+   time(2) = 60.0
+   time(3) = 120.0
 
    rc = nf90_noerr
 
@@ -51,13 +53,13 @@ subroutine create_header(trajectory, flnm)
 
    print *, 'trajectory%ncid = ', trajectory%ncid
 
+   rc = nf90_def_dim(trajectory%ncid, 'time', NF90_UNLIMITED, trajectory%dimidt)
+   call check_status(rc)
    rc = nf90_def_dim(trajectory%ncid, 'lon', trajectory%nx, trajectory%dimidx)
    call check_status(rc)
    rc = nf90_def_dim(trajectory%ncid, 'lat', trajectory%ny, trajectory%dimidy)
    call check_status(rc)
    rc = nf90_def_dim(trajectory%ncid, 'alt', trajectory%nz, trajectory%dimidz)
-   call check_status(rc)
-   rc = nf90_def_dim(trajectory%ncid, 'time', NF90_UNLIMITED, trajectory%dimidt)
    call check_status(rc)
 
    print *, 'dimidx = ', trajectory%dimidx
@@ -89,21 +91,7 @@ subroutine create_header(trajectory, flnm)
    call nc_put1Dvar0(trajectory%ncid, 'alt', alt, 1, trajectory%nz)
 
   !write time
-  !call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, 1)
-
-  !rc =  nf90_close(trajectory%ncid)
-  !trajectory%ncid = -1111
-
-  !print *, 'nf90_close rc = ', rc
-  !print *, 'nf90_noerr = ', nf90_noerr
-
-  !if(rc /= nf90_noerr) then
-  !   write(unit=0, fmt='(a,i6,a)') "Problem to close ncid: <", trajectory%ncid, ">."
-  !   write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
-  !   write(unit=0, fmt='(3a, i4)') &
-  !        "Stop in file: <", __FILE__, ">, line: ", __LINE__
-  !   stop
-  !end if
+   call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, 3)
 
    print *, 'Finished create file: ', trim(flnm)
 
@@ -223,20 +211,39 @@ subroutine output_trajectory(trajectory, n, dt)
    real, intent(in) :: dt
 
    integer :: rc, nd
-   real, dimension(1) :: time
+   real, dimension(1:1) :: time
+
+   real, dimension(trajectory%nx, trajectory%ny, trajectory%nz) :: var
 
    print *, 'Enter output_trajectory'
    print *, 'n = ', n, ', dt = ', dt
    print *, 'trajectory%ncid = ', trajectory%ncid
+   print *, 'trajectory%nx = ', trajectory%nx
+   print *, 'trajectory%ny = ', trajectory%ny
+   print *, 'trajectory%nz = ', trajectory%nz
 
    time(1) = n * dt
+  !print *, 'trajectory%x = ', trajectory%x(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
+   print *, 'time = ', time
 
-   call nc_put1Dvar(trajectory%ncid, 'time', time, n, 1, 1)
-   call nc_put3Dvar(trajectory%ncid, 'x', trajectory%x, n, &
+  !call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
+
+   var = trajectory%x
+  !print *, 'var x = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
+  !call nc_put3Dvar(trajectory%ncid, 'x', trajectory%x, n+1, &
+   call nc_put3Dvar(trajectory%ncid, 'x', var, n+1, &
         1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
-   call nc_put3Dvar(trajectory%ncid, 'y', trajectory%y, n, &
+
+   var = trajectory%y
+  !print *, 'var y = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
+  !call nc_put3Dvar(trajectory%ncid, 'y', trajectory%y, n+1, &
+   call nc_put3Dvar(trajectory%ncid, 'y', var, n+1, &
         1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
-   call nc_put3Dvar(trajectory%ncid, 'z', trajectory%z, n, &
+
+   var = trajectory%z
+  !print *, 'var z = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
+  !call nc_put3Dvar(trajectory%ncid, 'z', trajectory%z, n+1, &
+   call nc_put3Dvar(trajectory%ncid, 'z', var, n+1, &
         1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
 
    print *, 'Leave output_trajectory'
