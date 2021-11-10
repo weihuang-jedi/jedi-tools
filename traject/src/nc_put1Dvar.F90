@@ -18,7 +18,7 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
 !--Return Code
    integer :: rc
 
-   integer :: start(2), length(2)
+   integer, dimension(2) :: start, length
 
    start(1) = m1s
    start(2) = nrec
@@ -26,7 +26,15 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
    length(1) = m1e - m1s + 1
    length(2) = 1
 
+   print *, 'var_name = ', trim(var_name)
+   print *, 'start = ', start
+   print *, 'length = ', length
+
    rc = nf90_inq_varid(ncid, trim(var_name), varid)
+
+   print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
+   print *, 'varid = ', varid
+
    if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to get varid for: <", trim(var_name), ">.", &
                                 "Error status: ", trim(nf90_strerror(rc))
@@ -36,6 +44,8 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
    end if
 
    rc = nf90_put_var(ncid,varid,v1d,start=start,count=length)
+
+   print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
    if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to write variable: <", trim(var_name), ">.", &
                                 "Error status: ", trim(nf90_strerror(rc))
