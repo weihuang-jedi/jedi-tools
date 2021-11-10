@@ -198,13 +198,13 @@ subroutine create_coord(nt, time, latlon, flnm)
    latlon%ncid = ncid
   !print *, 'ncid = ', ncid
 
-   rc = nf90_def_dim(ncid, 'lon', latlon%nlon, latlon%dimidx)
+   rc = nf90_def_dim(ncid, 'longitude', latlon%nlon, latlon%dimidx)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lat', latlon%nlat, latlon%dimidy)
+   rc = nf90_def_dim(ncid, 'latitude', latlon%nlat, latlon%dimidy)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lev', latlon%nlev, latlon%dimidz)
+   rc = nf90_def_dim(ncid, 'level', latlon%nlev, latlon%dimidz)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'lay', latlon%nlay, latlon%dimidl)
+   rc = nf90_def_dim(ncid, 'layer', latlon%nlay, latlon%dimidl)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'hor', 1, latlon%dimidh)
    call check_status(rc)
@@ -217,7 +217,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    nd = 1
 !--Field lon
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      "lon", &
+                      'longitude', &
                       "Lontitude Coordinate", &
                       "degree_east", &
                       "Longitude" )
@@ -225,7 +225,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    dimids(1) = latlon%dimidy
 !--Field lat
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      "lat", &
+                      'latitude', &
                       "Latitude Coordinate", &
                       "degree_north", &
                       "Latitude" )
@@ -233,7 +233,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    dimids(1) = latlon%dimidz
 !--Field lev
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      "lev", &
+                      'level', &
                       "Altitude Coordinate", &
                       "top_down", &
                       "Altitude" )
@@ -241,7 +241,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    dimids(1) = latlon%dimidl
 !--Field lay
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      "lay", &
+                      'layer', &
                       "Layer Coordinate", &
                       "top_down", &
                       "Altitude" )
@@ -263,18 +263,18 @@ subroutine create_coord(nt, time, latlon, flnm)
                       "Time" )
 
    !write lon
-   call nc_put1Dvar0(ncid, 'lon', latlon%lon, 1, latlon%nlon)
+   call nc_put1Dvar0(ncid, 'longitude', latlon%lon, 1, latlon%nlon)
 
    !write lat
-   call nc_put1Dvar0(ncid, 'lat', latlon%lat, 1, latlon%nlat)
+   call nc_put1Dvar0(ncid, 'latitude', latlon%lat, 1, latlon%nlat)
 
    !write lev
-  !call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
-   call nc_put1Dvar0(ncid, 'lev', lev, 1, latlon%nlev)
+  !call nc_put1Dvar0(ncid, 'level', latlon%lev, 1, latlon%nlev)
+   call nc_put1Dvar0(ncid, 'level', lev, 1, latlon%nlev)
 
    !write lay
-  !call nc_put1Dvar0(ncid, 'lay', latlon%lay, 1, latlon%nlay)
-   call nc_put1Dvar0(ncid, 'lay', lay, 1, latlon%nlay)
+  !call nc_put1Dvar0(ncid, 'layer', latlon%lay, 1, latlon%nlay)
+   call nc_put1Dvar0(ncid, 'layer', lay, 1, latlon%nlay)
 
    !write hor
    call nc_put1Dvar0(ncid, 'hor', hor, 1, 1)
@@ -322,7 +322,7 @@ subroutine create_fv_core_var_attr(tile, latlon)
 
       long_name = 'unknown'
       units = 'unknown'
-      coordinates = 'Time lev lat lon'
+      coordinates = 'Time level latitude longitude'
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
       dimids(3) = latlon%dimidz
@@ -333,7 +333,7 @@ subroutine create_fv_core_var_attr(tile, latlon)
       if((trim(tile(1)%vars(i)%name) == 'ps') .or. &
          (trim(tile(1)%vars(i)%name) == 'phis')) then
          dimids(3) = latlon%dimidh
-         coordinates = 'Time hor lat lon'
+         coordinates = 'Time hor latitude longitude'
          if(trim(tile(1)%vars(i)%name) == 'ps') then
             long_name = 'surface_pressure'
             units = 'Pa'
@@ -410,11 +410,11 @@ subroutine create_sfc_data_var_attr(tile, latlon)
       dimids(2) = latlon%dimidy
 
       if(3 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time lat lon'
+        coordinates = 'Time latitude longitude'
         dimids(3) = latlon%dimidt
         nd = 3
       else if(4 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time lay lat lon'
+        coordinates = 'Time layer latitude longitude'
         dimids(3) = latlon%dimidl
         dimids(4) = latlon%dimidt
         nd = 4
@@ -474,7 +474,7 @@ subroutine create_fv_tracer_var_attr(tile, latlon)
 
       long_name = trim(tile(1)%vars(i)%name)
       units = 'none'
-      coordinates = 'Time lev lat lon'
+      coordinates = 'Time level latitude longitude'
 
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
@@ -536,7 +536,7 @@ subroutine create_fv_srf_wnd_var_attr(tile, latlon)
 
       long_name = trim(tile(1)%vars(i)%name)
       units = 'none'
-      coordinates = 'Time lat lon'
+      coordinates = 'Time latitude longitude'
 
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
@@ -601,11 +601,11 @@ subroutine create_phy_data_var_attr(tile, latlon)
       dimids(2) = latlon%dimidy
 
       if(3 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time lat lon'
+        coordinates = 'Time latitude longitude'
         dimids(3) = latlon%dimidt
         nd = 3
       else if(4 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time lev lat lon'
+        coordinates = 'Time level latitude longitude'
         dimids(3) = latlon%dimidz
         dimids(4) = latlon%dimidt
         nd = 4
