@@ -22,7 +22,7 @@ module latlon_module
      integer                               :: dimidx, dimidy, dimidz, &
                                               dimidl, dimidh, dimidt
      integer                               :: nlon, nlat, nlev, nlay, npnt
-     integer, dimension(:),    allocatable :: lon, lat, lev, lay, pnt
+     real,    dimension(:),    allocatable :: lon, lat, lev, lay, pnt
      integer, dimension(:, :), allocatable :: counter
      integer, dimension(:, :, :), allocatable :: tile
      integer, dimension(:, :, :), allocatable :: ilon, jlat
@@ -48,7 +48,7 @@ contains
    !print *, 'enter initialize_latlongrid'
 
     dlon = 360.0/nlon
-    dlat = 180.0/(nlat - 1)
+    dlat = 180.0/nlat
 
     latlon%nlon = nlon
     latlon%nlat = nlat
@@ -69,11 +69,11 @@ contains
     allocate(latlon%pnt(npnt))
     
     do i = 1, nlon
-      latlon%lon(i) = dlon*real(i-1)
+      latlon%lon(i) = dlon*real(i-1) + 0.5*dlat
     end do
     
     do j = 1, nlat
-      latlon%lat(j) = dlat*real(j-1) - 90.0
+      latlon%lat(j) = dlat*real(j-1) - 90.0 + 0.5*dlat
       do i = 1, nlon
         latlon%pos(i, j) = -1.0
         latlon%counter(i, j) = 0

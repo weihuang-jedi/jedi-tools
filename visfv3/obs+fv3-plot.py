@@ -51,7 +51,8 @@ if __name__ == '__main__':
  #datadir = '%s/anna-request/analysis.getkf.80members.36procs.1/increment/' %(casedir)
  #datadir = '%s/anna-request/analysis.getkf.80members.36procs.2/increment/' %(casedir)
  #datadir = '%s/anna-request/analysis.getkf.80members.36procs.3/increment/' %(casedir)
-  datadir = '%s/manual-obs/analysis.getkf.80members.36procs.tmp/increment/' %(casedir)
+ #datadir = '%s/manual-obs/analysis.getkf.80members.36procs.tmp/increment/' %(casedir)
+  datadir = '%s/analysis.getkf.80members.36procs/increment/' %(casedir)
 
   datafiles = []
   gridspecfiles = []
@@ -108,8 +109,10 @@ if __name__ == '__main__':
  #title_preix = 'GETKF PS only logp as vert loc. Temperature at'
  #image_prefix = 'LETKF_PSonly_logp_exp_3'
  #title_preix = 'LETKF PS only logp as vert loc. Temperature at'
-  image_prefix = 'manual_Obs_temperature'
-  title_preix = 'Manual Observation Temperature at'
+ #image_prefix = 'manual_Obs_temperature'
+ #title_preix = 'Manual Observation Temperature at'
+  image_prefix = 'use_delp_temperature'
+  title_preix = 'use_delp Temperature at'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
@@ -120,16 +123,16 @@ if __name__ == '__main__':
  #cblevs = np.arange(-1.0, 1.2, 0.2)
  #clevs = np.arange(-0.001, 0.001, 0.00001)
  #cblevs = np.arange(-0.001, 0.002, 0.001)
-  clevs = np.arange(-0.75, 0.76, 0.01)
-  cblevs = np.arange(-0.75, 1.00, 0.25)
+  clevs = np.arange(-0.2, 0.21, 0.01)
+  cblevs = np.arange(-0.2, 0.3, 0.1)
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
   pt.set_precision(precision=2)
 
  #------------------------------------------------------------------------------
- #levs = [0, 1, 62, 63]
+  levs = [0, 1, 40, 50, 62, 63]
  #levs = [61, 62, 63]
-  levs = [12, 24, 40, 50]
+ #levs = [12, 24, 40, 50]
   for lev in levs:
     pvar = var[lev,:,:]
     imgname = '%s_lev_%d.png' %(image_prefix, lev)
@@ -149,8 +152,8 @@ if __name__ == '__main__':
   pt.set_cblevs(cblevs=cblevs)
 
  #lons = [60, 200]
- #lons = [40, 105, 170, 270, 300]
-  lons = [170]
+  lons = [40, 105, 170, 270, 300]
+ #lons = [170]
   for lon in lons:
     pvar = var[:,:,lon]
     title = '%s longitude %d' %(title_preix, lon)
@@ -166,8 +169,8 @@ if __name__ == '__main__':
 
  #------------------------------------------------------------------------------
  #lats = [50, 55]
- #lats = [-30, 0, 45, 70]
-  lats = [-41, -23, 0, 22, 41]
+  lats = [-30, 0, 45, 70]
+ #lats = [-41, -23, 0, 22, 41]
   for lat in lats:
     pvar = var[:,90+lat,:]
     title = '%s latitude %d' %(title_preix, lat)

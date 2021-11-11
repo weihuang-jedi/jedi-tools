@@ -6,7 +6,7 @@
  wgt_flnm = 'WEIGHTFILE',
 
  nlon = 360
- nlat = 181
+ nlat = 180
  npnt = 4
 
  num_types = NUM_TYPES,

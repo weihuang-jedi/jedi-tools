@@ -153,8 +153,8 @@ subroutine create_coord(nt, time, latlon, flnm)
 
   !print *, 'latlon%nlon = ',  latlon%nlon
   !print *, 'latlon%nlat = ',  latlon%nlat
-   print *, 'latlon%nlev = ',  latlon%nlev
-   print *, 'latlon%nlay = ',  latlon%nlay
+  !print *, 'latlon%nlev = ',  latlon%nlev
+  !print *, 'latlon%nlay = ',  latlon%nlay
 
    latlon%filename = trim(flnm)
 
@@ -176,8 +176,8 @@ subroutine create_coord(nt, time, latlon, flnm)
 
   !print *, 'latlon%lon = ',  latlon%lon
   !print *, 'latlon%lat = ',  latlon%lat
-   print *, 'latlon%lev = ',  latlon%lev
-   print *, 'latlon%lay = ',  latlon%lay
+  !print *, 'latlon%lev = ',  latlon%lev
+  !print *, 'latlon%lay = ',  latlon%lay
 
    rc = nf90_noerr
 
@@ -198,18 +198,18 @@ subroutine create_coord(nt, time, latlon, flnm)
    latlon%ncid = ncid
   !print *, 'ncid = ', ncid
 
-   rc = nf90_def_dim(ncid, 'longitude', latlon%nlon, latlon%dimidx)
+   rc = nf90_def_dim(ncid, 'lon', latlon%nlon, latlon%dimidx)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'latitude', latlon%nlat, latlon%dimidy)
+   rc = nf90_def_dim(ncid, 'lat', latlon%nlat, latlon%dimidy)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'level', latlon%nlev, latlon%dimidz)
+   rc = nf90_def_dim(ncid, 'lev', latlon%nlev, latlon%dimidz)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'layer', latlon%nlay, latlon%dimidl)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'hor', 1, latlon%dimidh)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'Time', NF90_UNLIMITED, latlon%dimidt)
-   call check_status(rc)
+  !rc = nf90_def_dim(ncid, 'Time', NF90_UNLIMITED, latlon%dimidt)
+  !call check_status(rc)
 
    call create_global_attr(ncid, flnm, 'FV3 to Lat-Lon Grid', 'Lat-Lon Grid')
 
@@ -217,7 +217,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    nd = 1
 !--Field lon
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      'longitude', &
+                      'lon', &
                       "Lontitude Coordinate", &
                       "degree_east", &
                       "Longitude" )
@@ -225,7 +225,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    dimids(1) = latlon%dimidy
 !--Field lat
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      'latitude', &
+                      'lat', &
                       "Latitude Coordinate", &
                       "degree_north", &
                       "Latitude" )
@@ -233,7 +233,7 @@ subroutine create_coord(nt, time, latlon, flnm)
    dimids(1) = latlon%dimidz
 !--Field lev
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      'level', &
+                      'lev', &
                       "Altitude Coordinate", &
                       "top_down", &
                       "Altitude" )
@@ -251,36 +251,36 @@ subroutine create_coord(nt, time, latlon, flnm)
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
                       "hor", &
                       "Horizontal Coordinate", &
-                      "one_level", &
+                      "one_lev", &
                       "Horizontal" )
 
    dimids(1) = latlon%dimidt
 !--Field time
-   call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL8, &
-                      "Time", &
-                      "Time Coordinate", &
-                      "time level", &
-                      "Time" )
+  !call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL8, &
+  !                   "Time", &
+  !                   "Time Coordinate", &
+  !                   "time lev", &
+  !                   "Time" )
 
-   !write lon
-   call nc_put1Dvar0(ncid, 'longitude', latlon%lon, 1, latlon%nlon)
+  !write lon
+   call nc_put1Dvar0(ncid, 'lon', latlon%lon, 1, latlon%nlon)
 
-   !write lat
-   call nc_put1Dvar0(ncid, 'latitude', latlon%lat, 1, latlon%nlat)
+  !write lat
+   call nc_put1Dvar0(ncid, 'lat', latlon%lat, 1, latlon%nlat)
 
-   !write lev
-  !call nc_put1Dvar0(ncid, 'level', latlon%lev, 1, latlon%nlev)
-   call nc_put1Dvar0(ncid, 'level', lev, 1, latlon%nlev)
+  !write lev
+  !call nc_put1Dvar0(ncid, 'lev', latlon%lev, 1, latlon%nlev)
+   call nc_put1Dvar0(ncid, 'lev', lev, 1, latlon%nlev)
 
-   !write lay
+  !write lay
   !call nc_put1Dvar0(ncid, 'layer', latlon%lay, 1, latlon%nlay)
    call nc_put1Dvar0(ncid, 'layer', lay, 1, latlon%nlay)
 
-   !write hor
+  !write hor
    call nc_put1Dvar0(ncid, 'hor', hor, 1, 1)
 
-   !write time
-   call nc_put1Ddbl0(ncid, 'Time', time, 1, nt)
+  !write time
+  !call nc_put1Ddbl0(ncid, 'Time', time, 1, nt)
 
   !print *, 'Leave create_coord'
 end subroutine create_coord
@@ -322,18 +322,20 @@ subroutine create_fv_core_var_attr(tile, latlon)
 
       long_name = 'unknown'
       units = 'unknown'
-      coordinates = 'Time level latitude longitude'
+     !coordinates = 'Time lev lat lon'
+      coordinates = 'lev lat lon'
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
       dimids(3) = latlon%dimidz
-      dimids(4) = latlon%dimidt
-      nd = 4
+     !dimids(4) = latlon%dimidt
+     !nd = 4
+      nd = 3
 
       long_name = trim(tile(1)%vars(i)%name)
       if((trim(tile(1)%vars(i)%name) == 'ps') .or. &
          (trim(tile(1)%vars(i)%name) == 'phis')) then
          dimids(3) = latlon%dimidh
-         coordinates = 'Time hor latitude longitude'
+         coordinates = 'hor lat lon'
          if(trim(tile(1)%vars(i)%name) == 'ps') then
             long_name = 'surface_pressure'
             units = 'Pa'
@@ -410,14 +412,18 @@ subroutine create_sfc_data_var_attr(tile, latlon)
       dimids(2) = latlon%dimidy
 
       if(3 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time latitude longitude'
-        dimids(3) = latlon%dimidt
-        nd = 3
+       !coordinates = 'Time lat lon'
+        coordinates = 'lat lon'
+       !dimids(3) = latlon%dimidt
+       !nd = 3
+        nd = 2
       else if(4 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time layer latitude longitude'
+       !coordinates = 'Time layer lat lon'
+        coordinates = 'layer lat lon'
         dimids(3) = latlon%dimidl
-        dimids(4) = latlon%dimidt
-        nd = 4
+       !dimids(4) = latlon%dimidt
+       !nd = 4
+        nd = 3
       else
         print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                  '>, ndims = ', tile(1)%vars(i)%ndims
@@ -474,13 +480,15 @@ subroutine create_fv_tracer_var_attr(tile, latlon)
 
       long_name = trim(tile(1)%vars(i)%name)
       units = 'none'
-      coordinates = 'Time level latitude longitude'
+     !coordinates = 'Time lev lat lon'
+      coordinates = 'lev lat lon'
 
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
       dimids(3) = latlon%dimidz
-      dimids(4) = latlon%dimidt
-      nd = 4
+     !dimids(4) = latlon%dimidt
+     !nd = 4
+      nd = 3
 
       if(4 /= tile(1)%vars(i)%ndims) then
         print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
@@ -536,12 +544,14 @@ subroutine create_fv_srf_wnd_var_attr(tile, latlon)
 
       long_name = trim(tile(1)%vars(i)%name)
       units = 'none'
-      coordinates = 'Time latitude longitude'
+     !coordinates = 'Time lat lon'
+      coordinates = 'lat lon'
 
       dimids(1) = latlon%dimidx
       dimids(2) = latlon%dimidy
-      dimids(3) = latlon%dimidt
-      nd = 3
+     !dimids(3) = latlon%dimidt
+     !nd = 3
+      nd = 2
 
       if(3 /= tile(1)%vars(i)%ndims) then
         print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
@@ -601,14 +611,18 @@ subroutine create_phy_data_var_attr(tile, latlon)
       dimids(2) = latlon%dimidy
 
       if(3 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time latitude longitude'
-        dimids(3) = latlon%dimidt
-        nd = 3
+       !coordinates = 'Time lat lon'
+        coordinates = 'lat lon'
+       !dimids(3) = latlon%dimidt
+       !nd = 3
+        nd = 2
       else if(4 == tile(1)%vars(i)%ndims) then
-        coordinates = 'Time level latitude longitude'
+       !coordinates = 'Time lev lat lon'
+        coordinates = 'lev lat lon'
         dimids(3) = latlon%dimidz
-        dimids(4) = latlon%dimidt
-        nd = 4
+       !dimids(4) = latlon%dimidt
+       !nd = 4
+        nd = 3
       else
         print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                  '>, ndims = ', tile(1)%vars(i)%ndims
@@ -694,8 +708,10 @@ subroutine process_fv_core(tile, latlon)
       if((trim(tile(1)%vars(i)%name) == 'ps') .or. &
          (trim(tile(1)%vars(i)%name) == 'phis')) then
          call interp2dvar(tile, latlon, var2d)
-         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var2d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
+        !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var2d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
+         call nc_put3Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
       else if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
               (trim(tile(1)%vars(i)%name) == 'va') .or. &
               (trim(tile(1)%vars(i)%name) == 'W') .or. &
@@ -703,8 +719,10 @@ subroutine process_fv_core(tile, latlon)
               (trim(tile(1)%vars(i)%name) == 'DZ') .or. &
               (trim(tile(1)%vars(i)%name) == 'T')) then
          call interp3dvar(tile, latlon, var3d)
-         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+        !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+         call nc_put3Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
       end if
    end do
 
@@ -798,12 +816,16 @@ subroutine process_sfc_data(tile, latlon)
 
       if(3 == tile(1)%vars(i)%ndims) then
          call interp2dvar4sfc(tile, latlon, var2d)
-         call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+        !call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+         call nc_put2Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, latlon%nlon, 1, latlon%nlat)
       else if(4 == tile(1)%vars(i)%ndims) then
          call interp3dvar4sfc(tile, latlon, var3d)
-         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlay)
+        !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlay)
+         call nc_put3Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlay)
       else
          print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                   '>, ndims = ', tile(1)%vars(i)%ndims
@@ -897,8 +919,10 @@ subroutine process_fv_tracer(tile, latlon)
 
       if(4 == tile(1)%vars(i)%ndims) then
          call interp3dvar(tile, latlon, var3d)
-         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+        !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+         call nc_put3Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
       else
          print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                   '>, ndims = ', tile(1)%vars(i)%ndims
@@ -991,8 +1015,10 @@ subroutine process_fv_srf_wnd(tile, latlon)
 
       if(3 == tile(1)%vars(i)%ndims) then
          call interp2dvar4sfc(tile, latlon, var2d)
-         call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+        !call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+         call nc_put2Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, latlon%nlon, 1, latlon%nlat)
       else
          print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                   '>, ndims = ', tile(1)%vars(i)%ndims
@@ -1090,12 +1116,16 @@ subroutine process_phy_data(tile, latlon)
 
       if(3 == tile(1)%vars(i)%ndims) then
          call interp2dvar4sfc(tile, latlon, var2d)
-         call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+        !call nc_put3Dvar1(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var2d, 1, 1, latlon%nlon, 1, latlon%nlat)
+         call nc_put2Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var2d, 1, latlon%nlon, 1, latlon%nlat)
       else if(4 == tile(1)%vars(i)%ndims) then
          call interp3dvar(tile, latlon, var3d)
-         call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
-              var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+        !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
+        !     var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+         call nc_put3Dvar0(latlon%ncid, trim(tile(1)%vars(i)%name), &
+              var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
       else
          print *, 'Var ', i, ' name: <', trim(tile(1)%vars(i)%dimnames(1)), &
                   '>, ndims = ', tile(1)%vars(i)%ndims

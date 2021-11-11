@@ -41,7 +41,7 @@ contains
     wgt_flnm = 'weights.nc'
 
     nlon = 360
-    nlat = 181
+    nlat = 180
     npnt = 4
     num_types = 1
 

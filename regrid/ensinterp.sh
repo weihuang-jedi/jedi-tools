@@ -23,7 +23,7 @@
  executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
 
  ensdir=/work/noaa/gsienkf/weihuang/jedi/EnsembleDaVal/Data/ens
- latlondir=/work/noaa/gsienkf/weihuang/jedi/src/my.compile/saber/test/latlondata
+ latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
 
  number_members=80
 
@@ -33,21 +33,25 @@
    if [ $n -lt 10 ]
    then
      member_str=mem00${n}
+     ensfile=ens1_00000${n}.nc
    elif [ $n -lt 100 ]
    then
      member_str=mem0${n}
+     ensfile=ens1_0000${n}.nc
    else
      member_str=mem${n}
+     ensfile=ens1_000${n}.nc
    fi
 
    datadir=${ensdir}/${member_str}/
+   grid_fv3=${latlondir}/${ensfile}
 
    if [ "generate_weights" -eq "1" ]
    then
      cp input.nml.weights input.nml
    else
      DIRNAME=${datadir}
-     OUTPUTFILE=grid_fv3.nc
+     OUTPUTFILE=${grid_fv3}
      WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc
      NUM_TYPES=5
      DATATYPES="'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',"
@@ -61,18 +65,6 @@
    fi
 
    ${executable}
-
-   if [ $n -lt 10 ]
-   then
-     ensfile=ens1_00000${n}.nc
-   elif [ $n -lt 100 ]
-   then
-     ensfile=ens1_0000${n}.nc
-   else
-     ensfile=ens1_000${n}.nc
-   fi
-
-   mv grid_fv3.nc ${latlondir}/${ensfile}
 
    n=$(( $n + 1 ))
  done
