@@ -23,14 +23,14 @@ class Ocean2LatLon():
 
    #specify an default input/output resolution
     self.ires = 'mx100'
-    self.ores='360x181'
+    self.ores='360x180'
 
     self.set_ires(ires=self.ires)
 
   def set_ires(self, ires='mx100'):
     self.ires = ires
 
-  def set_ores(self, ores='360x181'):
+  def set_ores(self, ores='360x180'):
     self.ores = ores
 
   def set_wgtdir(self, wgtdir='./'):
@@ -66,9 +66,9 @@ class Ocean2LatLon():
 
     print('output_t_grid=', output_t_grid)
 
-   #define target grid  need to change to (0,360,0.25)   and (-90,90.25,0.25)
-    lon1d=np.arange(0,360,1.0)
-    lat1d=np.arange(-90,91,1.0)
+   #define target grid
+    lon1d=np.arange(0.5,360.5,1.0)
+    lat1d=np.arange(-89.5,90.5,1.0)
 
     lons, lats=np.meshgrid(lon1d,lat1d)
     da_out_lons=xr.DataArray(lons,dims=['nx','ny'])
@@ -117,8 +117,8 @@ class Ocean2LatLon():
     ds_in_v=ds_in.rename({'lonh': 'lon', 'latq': 'lat'})
 
    #output grid
-    lon1d=np.arange(0,360,1.0)
-    lat1d=np.arange(-90,91,1.0)
+    lon1d=np.arange(0.5,360.5,1.0)
+    lat1d=np.arange(-89.5,90.5,1.0)
     lons,lats=np.meshgrid(lon1d,lat1d)
 
     da_out_lons=xr.DataArray(lons,dims=['nx','ny'])
@@ -279,7 +279,7 @@ if __name__ == '__main__':
 
   o2ll = Ocean2LatLon(debug=debug, wgtdir=wgtdir)
   inres = 'mx100'
-  outres='360x181'
+  outres='360x180'
 
   o2ll.set_ires(ires=inres)
   o2ll.set_ores(ores=outres)

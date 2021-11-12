@@ -24,12 +24,12 @@ class Ice2LatLon():
 
    #specify an default input/output resolution
     self.ires = 'mx100'
-    self.ores='360x181'
+    self.ores='360x180'
 
   def set_ires(self, ires='mx100'):
     self.ires = ires
 
-  def set_ores(self, ores='360x181'):
+  def set_ores(self, ores='360x180'):
     self.ores = ores
 
   def set_wgtdir(self, wgtdir='./'):
@@ -52,9 +52,9 @@ class Ice2LatLon():
    #rename lat and lons from grid files for ESMF interpolation
     output_t_grid=self.output_t_grid
 
-   #define target grid  need to change to (0,360,0.25)   and (-90,90.25,0.25)
-    lon1d=np.arange(0,360,1.0)
-    lat1d=np.arange(-90,91,1.0)
+   #define target grid
+    lon1d=np.arange(0.5,360.5,1.0)
+    lat1d=np.arange(-89.5,90.5,1.0)
 
     lons, lats=np.meshgrid(lon1d,lat1d)
     da_out_lons=xr.DataArray(lons,dims=['nx','ny'])
@@ -89,8 +89,8 @@ class Ice2LatLon():
     ds_in_t=self.output_t_grid
 
    #output grid
-    lon1d=np.arange(0,360,1.0)
-    lat1d=np.arange(-90,91,1.0)
+    lon1d=np.arange(0.5,360.5,1.0)
+    lat1d=np.arange(-89.5,90.5,1.0)
     lons, lats=np.meshgrid(lon1d,lat1d)
 
     da_out_lons=xr.DataArray(lons,dims=['nx','ny'])
@@ -179,7 +179,7 @@ if __name__ == '__main__':
 
   i2ll = Ice2LatLon(debug=debug, wgtdir=wgtdir)
   inres = 'mx100'
-  outres='360x181'
+  outres='360x180'
 
   i2ll.set_ires(ires=inres)
   i2ll.set_ores(ores=outres)
