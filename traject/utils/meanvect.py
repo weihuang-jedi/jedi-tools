@@ -45,7 +45,8 @@ class PlotFV3Model():
 if __name__ == '__main__':
   debug = 1
   output = 0
-  filename = 'output/gfs_4_20211016_1200_000.nc'
+ #filename = 'output/gfs_4_20211016_1200_000.nc'
+  filename = 'output/gfs_4_20210416_1200_000.nc'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filename='])
 
@@ -89,8 +90,8 @@ if __name__ == '__main__':
 
   print('v3d.shape = ', v3d.shape)
 
-  """
-  for lev in range(5, nlev, 5):
+  levs = [40, 39, 38, 5, 4]
+  for lev in levs:
     u = u3d[lev,:,:]
     v = v3d[lev,:,:]
     imgname = '%s_lev_%d.png' %(imageprefix, lev)
@@ -98,11 +99,8 @@ if __name__ == '__main__':
     pt.set_imagename(imgname)
     pt.set_title(title)
    #pt.simple_vector(u, v, intv=10)
-   #pt.simple_stream(u, v, intv=5)
-    pt.simple_barbs(u, v, intv=10)
-
-  sys.exit(-1)
-  """
+    pt.simple_stream(u, v)
+   #pt.simple_barbs(u, v, intv=10)
 
 #------------------------------------------------------------------------------
   clevs = np.arange(-0.5, 0.51, 0.01)
@@ -115,20 +113,28 @@ if __name__ == '__main__':
 
   print('u3d.shape = ', u3d.shape)
 
- #vmean = np.mean(v3d[:,:,150*2:210*2], axis=2)
- #wmean = np.mean(w3d[:,:,150*2:210*2], axis=2)
+  vmean = np.mean(v3d[:,:,150*2:210*2], axis=2)
+  wmean = np.mean(w3d[:,:,150*2:210*2], axis=2)
 
- #v = vmean[::-1,:]
- #w = wmean[::-1,:]
+  v = vmean[::-1,:]
+  w = wmean[::-1,:]
 
-  for i in [180, 240, 300, 360, 720]:
+  title = '%s zonal mean between 150-210' %(titleprefix)
+  imgname = '%s_zonal_mean_150-210.png' %(imageprefix)
+
+  pt.set_title(title)
+  pt.set_imagename(imgname)
+ #pt.plot_section_vector(v, w, lat, ver, intv=5)
+  pt.plot_section_stream(v, w, lat, ver)
+
+  for i in [180, 240, 300, 360, 540]:
     v = v3d[::-1,:,i]
     w = w3d[::-1,:,i]
 
-    title = '%s zonal mean between 150-210' %(titleprefix)
-    pt.set_title(title)
+    title = '%s at longitude %d' %(titleprefix, i/2)
+    imgname = '%s_at_longitude_%d.png' %(imageprefix, i/2)
 
-    imgname = '%s_zonal_mean_150-210.png' %(imageprefix)
+    pt.set_title(title)
     pt.set_imagename(imgname)
    #pt.plot_section_vector(v, w, lat, ver, intv=5)
     pt.plot_section_stream(v, w, lat, ver)

@@ -382,7 +382,7 @@ class PlotTools():
  #    color=None, cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
  #    minlength=0.1, transform=None, zorder=None, start_points=None,
  #    maxlength=4.0, integration_direction='both', *, data=None)
-  def simple_stream(self, u, v, intv=5):
+  def simple_stream(self, u, v):
     self.basemap = self.build_basemap()
 
     self.plt = matplotlib.pyplot
@@ -616,8 +616,8 @@ class PlotTools():
       pass
 
     lev = np.arange(0.0, float(nlev), 1.0)
-    dlat = 180.0/(nlat-1)
-    lat = np.arange(-90.0, 90.0+dlat, dlat)
+    dlat = 180.0/nlat
+    lat = np.arange(-90.0+0.5*dlat, 90.0+0.5*dlat, dlat)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -669,8 +669,8 @@ class PlotTools():
       pass
 
     lev = np.arange(0.0, float(nlev), 1.0)
-    dlat = 180.0/(nlat-1)
-    lat = np.arange(-90.0, 90.0+dlat, dlat)
+    dlat = 180.0/nlat
+    lat = np.arange(-90.0+0.5*dlat, 90.0+0.5*dlat, dlat)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -723,7 +723,7 @@ class PlotTools():
     lev = np.arange(0.0, float(nlev), 1.0)
    #lev = -lev[::-1]
     dlon = 360.0/nlon
-    lon = np.arange(0.0, 360, dlon)
+    lon = np.arange(0.5, 360.5, dlon)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()

@@ -382,7 +382,7 @@ class PlotTools():
  #    color=None, cmap=None, norm=None, arrowsize=1, arrowstyle='-|>',
  #    minlength=0.1, transform=None, zorder=None, start_points=None,
  #    maxlength=4.0, integration_direction='both', *, data=None)
-  def simple_stream(self, u, v, intv=5):
+  def simple_stream(self, u, v):
     self.basemap = self.build_basemap()
 
     self.plt = matplotlib.pyplot
@@ -616,8 +616,8 @@ class PlotTools():
       pass
 
     lev = np.arange(0.0, float(nlev), 1.0)
-    dlat = 180.0/(nlat-1)
-    lat = np.arange(-90.0, 90.0+dlat, dlat)
+    dlat = 180.0/nlat
+    lat = np.arange(-90.0+0.5*dlat, 90.0+0.5*dlat, dlat)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -669,8 +669,8 @@ class PlotTools():
       pass
 
     lev = np.arange(0.0, float(nlev), 1.0)
-    dlat = 180.0/(nlat-1)
-    lat = np.arange(-90.0, 90.0+dlat, dlat)
+    dlat = 180.0/nlat
+    lat = np.arange(-90.0+0.5*dlat, 90.0+0.5*dlat, dlat)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -723,7 +723,7 @@ class PlotTools():
     lev = np.arange(0.0, float(nlev), 1.0)
    #lev = -lev[::-1]
     dlon = 360.0/nlon
-    lon = np.arange(0.0, 360, dlon)
+    lon = np.arange(0.5, 360.5, dlon)
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -1214,16 +1214,37 @@ class PlotTools():
     print(msg)
 
     hor, ver = self.set_section_stream_grid(hor, ver)
-   #w = 100.0*w
-    w = 50.0*w
+    w = 500.0*w
+
+    spd = np.sqrt(v**2 + w**2)
 
     clevs = np.arange(-100, 105, 5)
     blevs = np.arange(-100, 120, 20)
 
-   #(x, y) = self.basemap(lon, lat)
-    stream = self.plt.streamplot(hor, ver, v, w, density=10, linewidth=0.2,
-				 arrowsize=1, arrowstyle='-|>',
-                                 cmap=self.cmapname)
+   #stream = self.plt.streamplot(hor, ver, v, w, density=10, linewidth=0.2,
+   #                             arrowsize=1, arrowstyle='-|>',
+   #                             cmap=self.cmapname)
+    lw = 5*spd / spd.max()
+    stream = self.plt.streamplot(hor, ver, v, w, density=[5, 10], linewidth=lw,
+				 arrowsize=1, arrowstyle='->',
+                                 color=spd, cmap=self.cmapname)
+
+#  Varying density along a streamline
+#ax0 = fig.add_subplot(gs[0, 0])
+#ax0.streamplot(X, Y, U, V, density=[0.5, 1])
+#ax0.set_title('Varying Density')
+
+# Varying color along a streamline
+#ax1 = fig.add_subplot(gs[0, 1])
+#strm = ax1.streamplot(X, Y, U, V, color=U, linewidth=2, cmap='autumn')
+#fig.colorbar(strm.lines)
+#ax1.set_title('Varying Color')
+
+#  Varying line width along a streamline
+#ax2 = fig.add_subplot(gs[1, 0])
+#lw = 5*speed / speed.max()
+#ax2.streamplot(X, Y, U, V, density=0.6, color='k', linewidth=lw)
+#ax2.set_title('Varying Line Width')
 
    #cb = self.fig.colorbar(stream, orientation=self.orientation,
    #                       pad=self.pad, ticks=blevs)

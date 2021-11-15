@@ -168,16 +168,19 @@ if __name__ == '__main__':
 #=======================================================================================================================
   fv3_griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48/'
 
+  gsi_data_dir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+
   if(uvOnly):
-    gsi_bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = 'jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean'
+    gsi_bkg = '%s/jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean' %(gsi_data_dir)
+    gsi_anl = '%s/jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean' %(gsi_data_dir)
 
     datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_uvonly/increment/'
   else:
-    gsi_bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
-    gsi_anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
+    gsi_bkg = '%s/jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean' %(gsi_data_dir)
+    gsi_anl = '%s/jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean' %(gsi_data_dir)
 
-    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_psonly/increment/'
+   #datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.new_psonly/increment/'
+    datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs/increment/'
 
   datafiles = []
   gridspecfiles = []

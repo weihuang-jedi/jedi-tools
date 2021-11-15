@@ -70,7 +70,7 @@ with open('profile_data.txt', 'r') as filehandle:
  #plt.title('uvOnly Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
  #plt.title('PS Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
  #plt.title('New uv Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
-  plt.title('New PS Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
+  plt.title('use delp PS Only Sqrt(Mean(GSI^2)), Sqrt(Mean((JEDI)^2)) and Sqrt(Mean((GSI-JEDI)^2))', fontsize=10)
   plt.ylabel('Level', fontsize=14)
   plt.grid(True)
 

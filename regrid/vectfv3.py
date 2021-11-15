@@ -30,9 +30,9 @@ class PlotFV3Model():
     lat = ncfile.variables['lat'][:]
     lon = ncfile.variables['lon'][:]
     if(ndim == 3):
-      var = ncfile.variables[varname][time, :, :, :]
+      var = ncfile.variables[varname][:, :, :]
     else:
-      var = ncfile.variables[varname][time, :, :]
+      var = ncfile.variables[varname][:, :]
     ncfile.close()
 
     if(self.debug):
@@ -74,8 +74,8 @@ if __name__ == '__main__':
   lat, lon, v3d = pom.get_var('va')
   lat, lon, w3d = pom.get_var('W')
 
- #print('lon = ', lon)
- #print('lat = ', lat)
+  print('lon = ', lon)
+  print('lat = ', lat)
  #print('u3d = ', u3d)
  #print('v3d = ', v3d)
 
@@ -101,8 +101,9 @@ if __name__ == '__main__':
 
   print('v3d.shape = ', v3d.shape)
 
-  """
-  for lev in range(5, nlev, 5):
+# """
+ #for lev in range(5, nlev, 5):
+  for lev in [63, 60, 50]:
     u = u3d[lev,:,:]
     v = v3d[lev,:,:]
     imgname = '%s_lev_%d.png' %(imageprefix, lev)
@@ -111,10 +112,11 @@ if __name__ == '__main__':
     pt.set_title(title)
    #pt.simple_vector(u, v, intv=10)
    #pt.simple_stream(u, v, intv=5)
-    pt.simple_barbs(u, v, intv=10)
+    pt.simple_stream(u, v)
+   #pt.simple_barbs(u, v, intv=10)
 
-  sys.exit(-1)
-  """
+# sys.exit(-1)
+# """
 
 #------------------------------------------------------------------------------
   clevs = np.arange(-0.5, 0.51, 0.01)
