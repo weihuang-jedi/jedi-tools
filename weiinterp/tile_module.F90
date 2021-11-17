@@ -83,16 +83,16 @@ contains
     do n = 1, 6
       write(tile(n)%filename, fmt='(2a, i1, a)') &
             trim(dirname), trim(prefix), n, '.nc'
-     !print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
+      print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
       rc = nf90_open(trim(tile(n)%filename), nf90_nowrite, tile(n)%fileid)
       call check_status(rc)
-     !print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
+      print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
 
       rc = nf90_inquire(tile(n)%fileid, tile(n)%nDims, tile(n)%nVars, &
                tile(n)%nGlobalAtts, tile(n)%unlimdimid)
       call check_status(rc)
-     !print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
-     !print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
+      print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
+      print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
 
       ! Allocate memory.
       allocate(tile(n)%dimids(tile(n)%nDims))
@@ -219,7 +219,7 @@ contains
       end do
     end do
 
-   !print *, 'Leave initialize_tilegrid'
+    print *, 'Leave initialize_tilegrid'
 
   end subroutine initialize_tilegrid
 

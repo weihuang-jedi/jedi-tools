@@ -18,11 +18,11 @@ PROGRAM trajectory
 
    call initialize_trajectory(model, traject)
 
-   call create_header(traject, output_flnm)
+   call create_header(traject, output_flnm, numbstep, dt)
 
    call output_trajectory(traject, 0, dt)
 
-   do n = 1, 2
+   do n = 1, numbstep
       call advance_trajectory(model, traject, dt)
       call output_trajectory(traject, n, dt)
    end do

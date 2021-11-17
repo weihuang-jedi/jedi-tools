@@ -9,10 +9,12 @@ MODULE module_namelist
   CHARACTER(LEN=1024) :: program_name
   character(len=1024) :: filename
   character(len=1024) :: output_flnm
+  integer :: numbstep
   real    :: dt
   logical :: debug_on
 
 contains
+
   subroutine read_namelist(file_path)
     implicit none
 
@@ -22,6 +24,7 @@ contains
 
     ! Namelist definition.
     namelist /control_param/ program_name, filename, &
+                             numbstep, dt, &
                              output_flnm, debug_on
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
@@ -29,6 +32,8 @@ contains
     filename = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/grid_latlon.nc'
 
     output_flnm = 'trajectory.nc'
+
+    numbstep = 1
 
     dt = 60.0
 

@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------------------------
-subroutine create_header(trajectory, flnm)
+subroutine create_header(trajectory, flnm, numbstep, dt)
 
    use netcdf
    use module_trajectory
@@ -9,11 +9,13 @@ subroutine create_header(trajectory, flnm)
 
    type(trajectorytype), intent(inout) :: trajectory
    character(len=*), intent(in) :: flnm
+   integer, intent(in) :: numbstep
+   real, intent(in) :: dt
 
    real, dimension(1:trajectory%nx) :: lon
    real, dimension(1:trajectory%ny) :: lat
    real, dimension(1:trajectory%nz) :: alt
-   real, dimension(3)               :: time
+   real, dimension(numbstep+1)      :: time
 
    integer :: i, j, k, rc
    logical :: fileExists
@@ -34,9 +36,9 @@ subroutine create_header(trajectory, flnm)
   !print *, 'lat = ', lat
   !print *, 'alt = ', alt
 
-   time(1) = 0.0
-   time(2) = 60.0
-   time(3) = 120.0
+   do i = 0, numbstep
+      time(i) = i * dt
+   end do
 
    rc = nf90_noerr
 
@@ -51,7 +53,7 @@ subroutine create_header(trajectory, flnm)
    rc = nf90_create(trim(flnm), NF90_NETCDF4, trajectory%ncid)
    call check_status(rc)
 
-   print *, 'trajectory%ncid = ', trajectory%ncid
+  !print *, 'trajectory%ncid = ', trajectory%ncid
 
    rc = nf90_def_dim(trajectory%ncid, 'time', NF90_UNLIMITED, trajectory%dimidt)
    call check_status(rc)
@@ -62,10 +64,10 @@ subroutine create_header(trajectory, flnm)
    rc = nf90_def_dim(trajectory%ncid, 'alt', trajectory%nz, trajectory%dimidz)
    call check_status(rc)
 
-   print *, 'dimidx = ', trajectory%dimidx
-   print *, 'dimidy = ', trajectory%dimidy
-   print *, 'dimidz = ', trajectory%dimidz
-   print *, 'dimidt = ', trajectory%dimidt
+  !print *, 'dimidx = ', trajectory%dimidx
+  !print *, 'dimidy = ', trajectory%dimidy
+  !print *, 'dimidz = ', trajectory%dimidz
+  !print *, 'dimidt = ', trajectory%dimidt
 
    call write_global_attr(trajectory%ncid, flnm, 'Trajectory', 'Start from model grid')
 
@@ -91,9 +93,9 @@ subroutine create_header(trajectory, flnm)
    call nc_put1Dvar0(trajectory%ncid, 'alt', alt, 1, trajectory%nz)
 
   !write time
-   call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, 3)
+   call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, numbstep+1)
 
-   print *, 'Finished create file: ', trim(flnm)
+  !print *, 'Finished create file: ', trim(flnm)
 
 end subroutine create_header
 
@@ -215,16 +217,16 @@ subroutine output_trajectory(trajectory, n, dt)
 
    real, dimension(trajectory%nx, trajectory%ny, trajectory%nz) :: var
 
-   print *, 'Enter output_trajectory'
-   print *, 'n = ', n, ', dt = ', dt
-   print *, 'trajectory%ncid = ', trajectory%ncid
-   print *, 'trajectory%nx = ', trajectory%nx
-   print *, 'trajectory%ny = ', trajectory%ny
-   print *, 'trajectory%nz = ', trajectory%nz
+  !print *, 'Enter output_trajectory'
+   print *, 'n = ', n, ', dt = ', dt, ', time = ', n*dt
+  !print *, 'trajectory%ncid = ', trajectory%ncid
+  !print *, 'trajectory%nx = ', trajectory%nx
+  !print *, 'trajectory%ny = ', trajectory%ny
+  !print *, 'trajectory%nz = ', trajectory%nz
 
    time(1) = n * dt
   !print *, 'trajectory%x = ', trajectory%x(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
-   print *, 'time = ', time
+  !print *, 'time = ', time
 
   !call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
 
@@ -246,7 +248,7 @@ subroutine output_trajectory(trajectory, n, dt)
    call nc_put3Dvar(trajectory%ncid, 'z', var, n+1, &
         1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
 
-   print *, 'Leave output_trajectory'
+  !print *, 'Leave output_trajectory'
 
 end subroutine output_trajectory
 

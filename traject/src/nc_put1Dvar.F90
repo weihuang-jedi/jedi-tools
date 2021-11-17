@@ -1,7 +1,5 @@
 !----------------------------------------------------------------------------------
-
-subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
-                       m1s, m1e)
+subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, m1s, m1e)
 
    use netcdf
 
@@ -26,14 +24,14 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
    length(1) = m1e - m1s + 1
    length(2) = 1
 
-   print *, 'var_name = ', trim(var_name)
-   print *, 'start = ', start
-   print *, 'length = ', length
+  !print *, 'var_name = ', trim(var_name)
+  !print *, 'start = ', start
+  !print *, 'length = ', length
 
    rc = nf90_inq_varid(ncid, trim(var_name), varid)
 
-   print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
-   print *, 'varid = ', varid
+  !print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
+  !print *, 'varid = ', varid
 
    if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to get varid for: <", trim(var_name), ">.", &
@@ -43,9 +41,9 @@ subroutine nc_put1Dvar(ncid, var_name, v1d, nrec, &
       stop
    end if
 
-   rc = nf90_put_var(ncid,varid,v1d,start=start,count=length)
+   rc = nf90_put_var(ncid,varid,v1d,start=start(1:2),count=length(1:2))
 
-   print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
+  !print *, 'rc = ', rc, ', nf90_noerr = ', nf90_noerr
    if(rc /= nf90_noerr) then
       write(unit=0, fmt='(3a)') "Problem to write variable: <", trim(var_name), ">.", &
                                 "Error status: ", trim(nf90_strerror(rc))

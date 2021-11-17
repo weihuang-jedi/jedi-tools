@@ -1,7 +1,8 @@
 &control_param
  filename = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/grid_latlon.nc',
  output_flnm = 'trajectory.nc',
- dt = 60.0,
+ numbstep = 200,
+ dt = 300.0,
  debug_on = .true.,
 /
 
