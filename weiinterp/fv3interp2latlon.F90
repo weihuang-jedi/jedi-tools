@@ -11,6 +11,7 @@ PROGRAM fv3interp2latlon
       type(tilegrid), dimension(6) :: tile
    end type tiletype
 
+   type(tilespec_type), dimension(6)    :: spec
    type(tiletype), dimension(max_types) :: types
    type(latlongrid)                     :: latlon
    integer :: n
@@ -18,11 +19,15 @@ PROGRAM fv3interp2latlon
 
    call read_namelist('input.nml')
 
+   if(use_uv_directly) then
+      call initialize_tilespec(spec, trim(griddirname), trim(grid_type))
+   end if
+
    call initialize_latlongrid(nlon, nlat, npnt, latlon)
 
    do n = 1, num_types
-      print *, 'dirname: <', trim(dirname), &
-               '>, data_types(', n, ') = <', trim(data_types(n)), '>'
+     !print *, 'dirname: <', trim(dirname), &
+     !         '>, data_types(', n, ') = <', trim(data_types(n)), '>'
       call initialize_tilegrid(types(n)%tile, trim(dirname), trim(data_types(n)))
 
       if(trim(data_types(n)) == 'fv_core.res.tile') then
@@ -40,14 +45,14 @@ PROGRAM fv3interp2latlon
 
       do n = 1, num_types
          last = (n == num_types)
-         print *, 'n = ', n
-         print *, 'last = ', last
+        !print *, 'n = ', n
+        !print *, 'last = ', last
          call generate_header(n, types(n)%tile, latlon, &
                               trim(data_types(n)), output_flnm, last)
       end do
 
       do n = 1, num_types
-         call interp2latlongrid(trim(data_types(n)), types(n)%tile, latlon)
+         call interp2latlongrid(trim(data_types(n)), spec, types(n)%tile, latlon)
       end do
    end if
 
@@ -55,8 +60,11 @@ PROGRAM fv3interp2latlon
       call finalize_tilegrid(types(n)%tile)
    end do
 
-   call closefile(latlon)
    call finalize_latlongrid(latlon)
+
+   if(use_uv_directly) then
+      call finalize_tilespec(spec)
+   end if
 
 END PROGRAM fv3interp2latlon
 

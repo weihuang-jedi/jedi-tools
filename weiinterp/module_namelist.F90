@@ -10,6 +10,8 @@ MODULE namelist_module
   CHARACTER(LEN=1024) :: program_name
   character(len=1024) :: dirname
   character(len=1024) :: output_flnm, wgt_flnm, prefix
+  character(len=1024) :: griddirname
+  character(len=128)  :: grid_type
   character(len=128), dimension(max_types) :: data_types
   integer :: nlat, nlon, npnt, num_types
   logical :: generate_weights, debug_on, has_prefix, use_uv_directly
@@ -28,15 +30,15 @@ contains
                              nlat, nlon, npnt, &
                              num_types, data_types, &
                              generate_weights, prefix, &
+                             griddirname, grid_type, &
                              has_prefix, use_uv_directly
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
 
-   !if(generate_weights) then
-   !  dirname = 'C96/'
-   !else
-      dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
-   !end if
+    dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
+
+    griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
+    grid_type = 'C96_grid.tile'
 
     output_flnm = 'latlon_grid.nc'
     wgt_flnm = 'weights.nc'

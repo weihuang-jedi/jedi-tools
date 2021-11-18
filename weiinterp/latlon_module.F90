@@ -102,9 +102,13 @@ contains
  !----------------------------------------------------------------------
   subroutine finalize_latlongrid(latlon)
 
+    use netcdf
+   !use tile_module, only : check_status
+
     implicit none
 
     type(latlongrid), intent(inout) :: latlon
+    integer :: rc
 
     deallocate(latlon%lon)
     deallocate(latlon%lat)
@@ -119,6 +123,10 @@ contains
     deallocate(latlon%dist)
     deallocate(latlon%wgt)
     deallocate(latlon%pos)
+
+    rc =  nf90_close(latlon%ncid)
+    call check_status(rc)
+    print *, 'Finished Write to file: ', trim(latlon%filename)
 
   end subroutine finalize_latlongrid
 

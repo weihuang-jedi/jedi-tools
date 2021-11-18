@@ -1,5 +1,9 @@
 &control_param
  generate_weights = .false.
+
+ griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/', 
+ grid_type = 'C96_grid.tile', 
+
  dirname = '/work2/noaa/gsienkf/weihuang/data/UFSRNR_GSI_SOCA_LETKF_COUPLED_012016_FROLOV_IAU/20160111060000/intercom/forecast/mem080/bkgrd/',
 
  output_flnm = 'grid_latlon.nc',
