@@ -9,10 +9,10 @@ MODULE namelist_module
 
   CHARACTER(LEN=1024) :: program_name
   character(len=1024) :: dirname
-  character(len=1024) :: output_flnm, wgt_flnm
+  character(len=1024) :: output_flnm, wgt_flnm, prefix
   character(len=128), dimension(max_types) :: data_types
   integer :: nlat, nlon, npnt, num_types
-  logical :: generate_weights, debug_on
+  logical :: generate_weights, debug_on, has_prefix, use_uv_directly
 
 contains
   subroutine read_namelist(file_path)
@@ -27,7 +27,8 @@ contains
                              output_flnm, wgt_flnm, &
                              nlat, nlon, npnt, &
                              num_types, data_types, &
-                             generate_weights
+                             generate_weights, prefix, &
+                             has_prefix, use_uv_directly
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
 
@@ -39,6 +40,10 @@ contains
 
     output_flnm = 'latlon_grid.nc'
     wgt_flnm = 'weights.nc'
+    prefix = 'None'
+
+    has_prefix = .false.
+    use_uv_directly = .false.
 
     nlon = 360
     nlat = 180

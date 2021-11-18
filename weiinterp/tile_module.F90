@@ -4,6 +4,7 @@
 
 module tile_module
 
+  use namelist_module
   use netcdf
 
   implicit none
@@ -49,7 +50,7 @@ module tile_module
 
      real, dimension(:),       allocatable :: var1d
      real, dimension(:, :),    allocatable :: var2d
-     real, dimension(:, :, :), allocatable :: var3d
+     real, dimension(:, :, :), allocatable :: var3d, var3du, var3dv
 
      type(vartype), dimension(:), allocatable :: vars
   end type tilegrid
@@ -60,29 +61,33 @@ contains
 
   !-----------------------------------------------------------------------
 
-  subroutine initialize_tilegrid(tile, dirname, prefix)
+  subroutine initialize_tilegrid(tile, dname, ftype)
 
     implicit none
 
     type(tilegrid), dimension(6), intent(out) :: tile
-    character(len=*),             intent(in)  :: dirname, prefix
+    character(len=*),             intent(in)  :: dname, ftype
 
     integer :: i, k, n, rc
-    integer :: ny2, ik
+    integer :: ik
     integer :: include_parents, dimlen
 
     character(len=1024) :: dimname, varname
 
    !print *, 'Enter initialize_tilegrid'
-   !print *, 'dirname: <', trim(dirname), '>'
-   !print *, 'prefix: <', trim(prefix), '>'
+   !print *, 'dname: <', trim(dname), '>'
+   !print *, 'ftype: <', trim(ftype), '>'
 
     include_parents = 0
-    ny2 = -1
 
     do n = 1, 6
-      write(tile(n)%filename, fmt='(2a, i1, a)') &
-            trim(dirname), trim(prefix), n, '.nc'
+      if(has_prefix) then
+         write(tile(n)%filename, fmt='(3a, i1, a)') &
+               trim(dname), trim(prefix), trim(ftype), n, '.nc'
+      else
+         write(tile(n)%filename, fmt='(2a, i1, a)') &
+               trim(dname), trim(ftype), n, '.nc'
+      end if
       print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
       rc = nf90_open(trim(tile(n)%filename), nf90_nowrite, tile(n)%fileid)
       call check_status(rc)
@@ -119,9 +124,6 @@ contains
             tile(n)%nx = dimlen
          else if(trim(dimname) == 'yaxis_1') then
             tile(n)%ny = dimlen
-         else if(trim(dimname) == 'yaxis_2') then
-            tile(n)%ny = dimlen
-            ny2 = dimlen
          else if(trim(dimname) == 'zaxis_1') then
             tile(n)%nz = dimlen
          else if(trim(dimname) == 'zaxis_2') then
@@ -133,8 +135,6 @@ contains
          tile(n)%dimlen(i) = dimlen
          tile(n)%dimnames(i) = trim(dimname)
       end do
-
-      if(ny2 > 0) tile(n)%ny = ny2
 
      !print *, 'tile(n)%nx = ', tile(n)%nx, ', tile(n)%ny = ', tile(n)%ny, &
      !       ', tile(n)%nz = ', tile(n)%nz, ', tile(n)%nt = ', tile(n)%nt
@@ -148,6 +148,8 @@ contains
       allocate(tile(n)%var1d(tile(n)%nx))
       allocate(tile(n)%var2d(tile(n)%nx, tile(n)%ny))
       allocate(tile(n)%var3d(tile(n)%nx, tile(n)%ny, tile(n)%nz))
+      allocate(tile(n)%var3du(tile(n)%nx, tile(n)%ny+1, tile(n)%nz))
+      allocate(tile(n)%var3dv(tile(n)%nx+1, tile(n)%ny, tile(n)%nz))
 
       rc = nf90_inq_varids(tile(n)%fileid, tile(n)%nVars, tile(n)%varids)
       call check_status(rc)
@@ -256,6 +258,8 @@ contains
       if(allocated(tile(n)%var1d)) deallocate(tile(n)%var1d)
       if(allocated(tile(n)%var2d)) deallocate(tile(n)%var2d)
       if(allocated(tile(n)%var3d)) deallocate(tile(n)%var3d)
+      if(allocated(tile(n)%var3du)) deallocate(tile(n)%var3du)
+      if(allocated(tile(n)%var3dv)) deallocate(tile(n)%var3dv)
 
      !print *, 'Tile ', n, ', close filename: ', trim(tile(n)%filename)
       rc = nf90_close(tile(n)%fileid)

@@ -1,16 +1,20 @@
 &control_param
  generate_weights = .false.
- dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/Data/bkg/'
+ dirname = '/work2/noaa/gsienkf/weihuang/data/UFSRNR_GSI_SOCA_LETKF_COUPLED_012016_FROLOV_IAU/20160111060000/intercom/forecast/mem080/bkgrd/',
 
- output_flnm = 'grid_latlon.nc'
- wgt_flnm = 'weights.nc'
+ output_flnm = 'grid_latlon.nc',
+ wgt_flnm = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc',
+
+ prefix = '20160111.120000.',
+
+ has_prefix = .true.,
+ use_uv_directly = .true.,
 
  nlon = 360
  nlat = 180
  npnt = 4
 
  num_types = 5,
- data_types = 'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',
+ data_types = 'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',,
 /
- data_types = 'fv_core.res.tile',
 

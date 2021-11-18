@@ -33,7 +33,6 @@ OBJS =	module_namelist.o \
 	nc_putGlobalIntAttr.o \
 	nc_putGlobalRealAttr.o \
 	nc_putGlobalCharAttr.o \
-	nc_write_dimInfo.o \
 	tile_module.o \
 	latlon_module.o \
 	read_weights.o \
@@ -58,7 +57,7 @@ fv3interp2latlon : fv3interp2latlon.o
 	libnc4.a
 
 clean :
-	$(RM) libnc4.a $(OBJS) $(TEST_OBJS) \
+	$(RM) libnc4.a $(OBJS) fv3interp2latlon.o \
 	*.f90 *.mod *.exe
 
 ####################################################

@@ -40,8 +40,8 @@ PROGRAM fv3interp2latlon
 
       do n = 1, num_types
          last = (n == num_types)
-        !print *, 'n = ', n
-        !print *, 'last = ', last
+         print *, 'n = ', n
+         print *, 'last = ', last
          call generate_header(n, types(n)%tile, latlon, &
                               trim(data_types(n)), output_flnm, last)
       end do

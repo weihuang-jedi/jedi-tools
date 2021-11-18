@@ -15,26 +15,35 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
 
    integer :: rc
 
-  !print *, 'Enter generate_header'
-  !print *, 'k = ', k
-  !print *, 'gridtype = ', trim(gridtype)
-  !print *, 'flnm = ', trim(flnm)
+   print *, 'Enter generate_header'
+   print *, 'k = ', k
+   print *, 'gridtype = ', trim(gridtype)
+   print *, 'flnm = ', trim(flnm)
   
    if(k == 1) then
       call create_coord(tile(1)%nt, tile(1)%time(1:tile(1)%nt), latlon, flnm)
    end if
+  
+   print *, 'Part 1'
 
    if('fv_core.res.tile' == trim(gridtype)) then
+      print *, 'Part 1.1'
       call create_fv_core_var_attr(tile, latlon)
    else if('sfc_data.tile' == trim(gridtype)) then
+      print *, 'Part 1.2'
       call create_sfc_data_var_attr(tile, latlon)
    else if('fv_tracer.res.tile' == trim(gridtype)) then
+      print *, 'Part 1.3'
       call create_fv_tracer_var_attr(tile, latlon)
    else if('fv_srf_wnd.res.tile' == trim(gridtype)) then
+      print *, 'Part 1.4'
       call create_fv_srf_wnd_var_attr(tile, latlon)
    else if('phy_data.tile' == trim(gridtype)) then
+      print *, 'Part 1.5'
       call create_phy_data_var_attr(tile, latlon)
    end if
+  
+   print *, 'Part 2'
 
    if(last) then
      !End define mode.
@@ -48,7 +57,7 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
       end if
    end if
 
-  !print *, 'Leave generate_header'
+   print *, 'Leave generate_header'
 
 end subroutine generate_header
 
@@ -289,6 +298,7 @@ end subroutine create_coord
 subroutine create_fv_core_var_attr(tile, latlon)
 
    use netcdf
+   use namelist_module
    use tile_module
    use latlon_module
 
@@ -314,8 +324,6 @@ subroutine create_fv_core_var_attr(tile, latlon)
          (trim(tile(1)%vars(i)%name) == 'yaxis_1') .or. &
          (trim(tile(1)%vars(i)%name) == 'yaxis_2') .or. &
          (trim(tile(1)%vars(i)%name) == 'zaxis_1') .or. &
-         (trim(tile(1)%vars(i)%name) == 'u') .or. &
-         (trim(tile(1)%vars(i)%name) == 'v') .or. &
          (trim(tile(1)%vars(i)%name) == 'Time')) then
          cycle
       end if
@@ -345,19 +353,39 @@ subroutine create_fv_core_var_attr(tile, latlon)
          end if
       else if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
               (trim(tile(1)%vars(i)%name) == 'va') .or. &
+              (trim(tile(1)%vars(i)%name) == 'u') .or. &
+              (trim(tile(1)%vars(i)%name) == 'v') .or. &
               (trim(tile(1)%vars(i)%name) == 'W') .or. &
               (trim(tile(1)%vars(i)%name) == 'delp') .or. &
               (trim(tile(1)%vars(i)%name) == 'DZ') .or. &
               (trim(tile(1)%vars(i)%name) == 'T')) then
-         if(trim(tile(1)%vars(i)%name) == 'ua') then
+         if(trim(tile(1)%vars(i)%name) == 'T') then
+            long_name = 'air_temperature'
+            units = 'K'
+         else if(trim(tile(1)%vars(i)%name) == 'ua') then
             long_name = 'eastward_wind'
             units = 'm/s'
+            if(use_uv_directly) then
+               cycle
+            end if
          else if(trim(tile(1)%vars(i)%name) == 'va') then
             long_name = 'northward_wind'
             units = 'm/s'
-         else if(trim(tile(1)%vars(i)%name) == 'T') then
-            long_name = 'air_temperature'
-            units = 'K'
+            if(use_uv_directly) then
+               cycle
+            end if
+         else if(trim(tile(1)%vars(i)%name) == 'u') then
+            long_name = 'eastward_wind'
+            units = 'm/s'
+            if(.not. use_uv_directly) then
+               cycle
+            end if
+         else if(trim(tile(1)%vars(i)%name) == 'v') then
+            long_name = 'northward_wind'
+            units = 'm/s'
+            if(.not. use_uv_directly) then
+               cycle
+            end if
          end if
       end if
 
@@ -644,6 +672,7 @@ end subroutine create_phy_data_var_attr
 subroutine process_fv_core(tile, latlon)
 
    use netcdf
+   use namelist_module
    use tile_module
    use latlon_module
 
@@ -696,10 +725,32 @@ subroutine process_fv_core(tile, latlon)
             call check_status(rc)
          else if((trim(tile(n)%vars(i)%name) == 'ua') .or. &
                  (trim(tile(n)%vars(i)%name) == 'va') .or. &
+                 (trim(tile(n)%vars(i)%name) == 'u') .or. &
+                 (trim(tile(n)%vars(i)%name) == 'v') .or. &
                  (trim(tile(n)%vars(i)%name) == 'W') .or. &
                  (trim(tile(n)%vars(i)%name) == 'delp') .or. &
                  (trim(tile(n)%vars(i)%name) == 'DZ') .or. &
                  (trim(tile(n)%vars(i)%name) == 'T')) then
+            if(use_uv_directly) then
+               if(trim(tile(1)%vars(i)%name) == 'u') then
+                  rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var3du)
+               else if(trim(tile(1)%vars(i)%name) == 'v') then
+                  rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var3du)
+               end if
+
+               if(trim(tile(1)%vars(i)%name) == 'ua') then
+                  cycle
+               else if(trim(tile(1)%vars(i)%name) == 'va') then
+                  cycle
+               end if
+            else
+               if(trim(tile(1)%vars(i)%name) == 'u') then
+                  cycle
+               else if(trim(tile(1)%vars(i)%name) == 'v') then
+                  cycle
+               end if
+            end if
+
             rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%var3d)
             call check_status(rc)
          end if
@@ -714,10 +765,29 @@ subroutine process_fv_core(tile, latlon)
               var2d, 1, latlon%nlon, 1, latlon%nlat, 1, 1)
       else if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
               (trim(tile(1)%vars(i)%name) == 'va') .or. &
+              (trim(tile(1)%vars(i)%name) == 'u') .or. &
+              (trim(tile(1)%vars(i)%name) == 'v') .or. &
               (trim(tile(1)%vars(i)%name) == 'W') .or. &
               (trim(tile(1)%vars(i)%name) == 'delp') .or. &
               (trim(tile(1)%vars(i)%name) == 'DZ') .or. &
               (trim(tile(1)%vars(i)%name) == 'T')) then
+         if(use_uv_directly) then
+            if((trim(tile(1)%vars(i)%name) == 'ua') .or. &
+               (trim(tile(1)%vars(i)%name) == 'va')) then
+               cycle
+            end if
+
+            if(trim(tile(1)%vars(i)%name) == 'u') then
+               call u2ua(tile)
+            else if(trim(tile(1)%vars(i)%name) == 'v') then
+               call v2va(tile)
+            end if
+         else
+            if((trim(tile(1)%vars(i)%name) == 'u') .or. &
+               (trim(tile(1)%vars(i)%name) == 'v')) then
+               cycle
+            end if
+         end if
          call interp3dvar(tile, latlon, var3d)
         !call nc_put3Dvar(latlon%ncid, trim(tile(1)%vars(i)%name), &
         !     var3d, 1, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
@@ -730,6 +800,52 @@ subroutine process_fv_core(tile, latlon)
    deallocate(var3d)
 
 end subroutine process_fv_core
+
+!----------------------------------------------------------------------
+subroutine u2ua(tile)
+
+  use tile_module
+
+  implicit none
+
+  type(tilegrid), dimension(6), intent(inout) :: tile
+
+  integer :: i, j, k, n
+
+  do n = 1, 6
+  do j = 1, tile(n)%ny
+  do i = 1, tile(n)%nx
+  do k = 1, tile(n)%nz
+     tile(n)%var3d(i, j, k) = 0.5*(tile(n)%var3du(i,j,k) + tile(n)%var3du(i,j+1,k))
+  end do
+  end do
+  end do
+  end do
+
+end subroutine u2ua
+
+!----------------------------------------------------------------------
+subroutine v2va(tile)
+
+  use tile_module
+
+  implicit none
+
+  type(tilegrid), dimension(6), intent(inout) :: tile
+
+  integer :: i, j, k, n
+
+  do n = 1, 6
+  do j = 1, tile(n)%ny
+  do i = 1, tile(n)%nx
+  do k = 1, tile(n)%nz
+     tile(n)%var3d(i, j, k) = 0.5*(tile(n)%var3dv(i,j,k) + tile(n)%var3dv(i+1,j,k))
+  end do
+  end do
+  end do
+  end do
+
+end subroutine v2va
 
 !----------------------------------------------------------------------------------------
 subroutine process_sfc_data(tile, latlon)
