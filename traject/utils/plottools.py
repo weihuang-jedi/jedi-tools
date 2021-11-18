@@ -331,6 +331,50 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
+  def simple_contour_quiver(self, u, v, pvar, intv=5):
+    self.basemap = self.build_basemap()
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    (self.x, self.y) = self.basemap(self.lon1d, self.lat1d)
+    v1d = np.reshape(pvar, (pvar.size, ))
+
+    contfill = self.basemap.contourf(self.x, self.y, v1d, tri=True,
+                                     extend=self.extend,
+                                     alpha=self.alpha, cmap=self.cmapname)
+
+    lat1d, lon1d, u1d, v1d = self.set_vector_grid(u, v, intv=intv)
+
+    (x, y) = self.basemap(lon1d, lat1d)
+    vector = self.basemap.quiver(x, y, u1d, v1d, width=0.002,
+                                 scale=self.scale, scale_units=self.scale_units,
+                                 alpha=self.alpha, cmap=self.cmapname)
+    vectorkey = self.plt.quiverkey(vector, 0.95, 1.02, 10, '10m/s', labelpos='N')
+
+    cb = self.fig.colorbar(contfill, orientation=self.orientation,
+                           pad=self.pad)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+
+    self.ax.set_title(self.title)
+
+    self.plot_coast_lat_lon_line()
+
+    self.display(output=self.output, image_name=self.image_name)
+
   def simple_vector(self, u, v, intv=5):
     self.basemap = self.build_basemap()
 
@@ -1011,8 +1055,9 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
-  def plot4hemisphere(self, pvar, hemisphere='N'):
-    self.basemap = self.build_basemap4stereo_projection(hemisphere=hemisphere)
+  def plot4hemisphere(self, pvar, hemisphere='N', projection='ortho'):
+    self.basemap = self.build_basemap4stereo_projection(hemisphere=hemisphere,
+                                                        projection=projection)
 
     self.plt = matplotlib.pyplot
     try:
@@ -1104,6 +1149,145 @@ class PlotTools():
 
     cb = self.fig.colorbar(f_s, ax=ax, orientation=self.orientation,
                            pad=self.pad, ticks=self.cblevs, shrink=0.6)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def simple_panel2hemispheres(self, pvar):
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    self.hemisphere = 'N'
+    self.projection = 'ortho'
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig, ax = self.plt.subplots(nrows=1, ncols=2)
+    self.fig.suptitle(self.title)
+
+   #north_map = Basemap(ax=ax[0], projection='ortho', lon_0=-105, lat_0=90, resolution='c')
+   #south_map = Basemap(ax=ax[1], projection='ortho', lon_0=75, lat_0=-90, resolution='c')
+
+    north_map = Basemap(ax=ax[0], projection='npstere', boundinglat=0, round=True,
+                        lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+    south_map = Basemap(ax=ax[1], projection='spstere', boundinglat=0, round=True,
+                        lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
+
+    v1d = np.reshape(pvar, (pvar.size, ))
+
+    small_val = 1.0e-6
+   #mask = np.ma.masked_where(v1d < small_val, v1d)
+   #var = v1d.copy()
+   #var[mask < small_val] = np.nan
+   #var = v1d
+    var = np.ma.array(v1d, mask = v1d < small_val)
+
+    (nx, ny) = north_map(self.lon1d, self.lat1d)
+    f_n = north_map.contourf(nx, ny, var, tri=True,
+                             extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+    self.hemisphere = 'N'
+    self.plot_coast_lat_lon_line4hemisphere(north_map)
+
+    (sx, sy) = south_map(self.lon1d, self.lat1d)
+    f_s = south_map.contourf(sx, sy, var, tri=True,
+                             extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+    self.hemisphere = 'S'
+    self.plot_coast_lat_lon_line4hemisphere(south_map)
+
+    cb = self.fig.colorbar(f_s, ax=ax, orientation=self.orientation,
+                           pad=self.pad, shrink=0.6)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def simple_panel2hemispheres_streamline_over_contour(self, u, v, pvar):
+    msg = ('plot variable min: %s, max: %s' % (pvar.min(), pvar.max()))
+    print(msg)
+
+    self.hemisphere = 'N'
+    self.projection = 'ortho'
+
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    self.fig, ax = self.plt.subplots(nrows=1, ncols=2)
+    self.fig.suptitle(self.title)
+
+   #north_map = Basemap(ax=ax[0], projection='ortho', lon_0=-105, lat_0=90, resolution='c')
+   #south_map = Basemap(ax=ax[1], projection='ortho', lon_0=75, lat_0=-90, resolution='c')
+
+    north_map = Basemap(ax=ax[0], projection='npstere', boundinglat=0, round=True,
+                        lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+    south_map = Basemap(ax=ax[1], projection='spstere', boundinglat=0, round=True,
+                        lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
+
+    p1d = np.reshape(pvar, (pvar.size, ))
+
+    small_val = 1.0e-6
+   #mask = np.ma.masked_where(p1d < small_val, p1d)
+   #var = p1d.copy()
+   #var[mask < small_val] = np.nan
+   #var = p1d
+    var = np.ma.array(p1d, mask = p1d < small_val)
+
+    lat, lon = self.set_stream_grid()
+
+    (nx, ny) = north_map(self.lon1d, self.lat1d)
+    f_n = north_map.contourf(nx, ny, var, tri=True,
+                             extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+   #s_n = north_map.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
+   #                           arrowsize=1, arrowstyle='-|>',
+   #                           cmap=self.cmapname)
+
+    intv = 10
+    lat1d, lon1d, u1d, v1d = self.set_vector_grid(u, v, intv=intv)
+    (x, y) = north_map(lon1d, lat1d)
+    v_n = north_map.quiver(x, y, u1d, v1d, width=0.002,
+                           scale=self.scale, scale_units=self.scale_units,
+                           alpha=self.alpha, cmap=self.cmapname)
+   #vectorkey = self.plt.quiverkey(v_n, 0.95, 1.02, 10, '10m/s', labelpos='N')
+
+    self.hemisphere = 'N'
+    self.plot_coast_lat_lon_line4hemisphere(north_map)
+
+    (sx, sy) = south_map(self.lon1d, self.lat1d)
+    f_s = south_map.contourf(sx, sy, var, tri=True,
+                             extend=self.extend,
+                             alpha=self.alpha, cmap=self.cmapname)
+   #s_s = south_map.streamplot(lon, lat, u, v, density=10, linewidth=0.2,
+   #                           arrowsize=1, arrowstyle='-|>',
+   #                           cmap=self.cmapname)
+    (x, y) = south_map(lon1d, lat1d)
+    v_s = south_map.quiver(x, y, u1d, v1d, width=0.002,
+                           scale=self.scale, scale_units=self.scale_units,
+                           alpha=self.alpha, cmap=self.cmapname)
+    vectorkey = self.plt.quiverkey(v_s, 0.95, 1.02, 10, '10m/s', labelpos='N')
+
+    self.hemisphere = 'S'
+    self.plot_coast_lat_lon_line4hemisphere(south_map)
+
+    cb = self.fig.colorbar(f_s, ax=ax, orientation=self.orientation,
+                           pad=self.pad, shrink=0.6)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 
