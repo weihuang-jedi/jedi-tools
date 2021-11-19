@@ -148,7 +148,8 @@ if __name__ == '__main__':
    #pt.plot4hemisphere(rho, hemisphere='N', projection='npstere')
    #pt.simple_panel2hemispheres(rho)
    #pt.simple_panel2hemispheres(t)
-    pt.simple_panel2hemispheres_streamline_over_contour(u, v, rho)
+    pt.simple_panel2hemispheres_streamline_over_contour(u, v, t)
+   #pt.simple_panel2hemispheres_streamline_over_contour(u, v, rho)
 
    #pt.simple_vector(u, v, intv=10)
    #pt.simple_stream(u, v)
