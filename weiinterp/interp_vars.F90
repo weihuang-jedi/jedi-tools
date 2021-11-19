@@ -53,16 +53,19 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
 end subroutine generate_header
 
 !----------------------------------------------------------------------------------------
-subroutine interp2latlongrid(gridtype, spec, tile, latlon)
+subroutine interp2latlongrid(gridtype, spec, gridstruct, tile, latlon)
 
    use netcdf
    use tile_module
+   use fv_grid_mod
+   use fv_grid_utils_mod
    use latlon_module
 
    implicit none
 
    character(len=*),                  intent(in)    :: gridtype
    type(tilespec_type), dimension(6), intent(in)    :: spec
+   type(fv_grid_type), dimension(6), intent(in)     :: gridstruct
    type(tilegrid), dimension(6),      intent(inout) :: tile
    type(latlongrid),                  intent(inout) :: latlon
 
@@ -70,7 +73,7 @@ subroutine interp2latlongrid(gridtype, spec, tile, latlon)
   !print *, 'gridtype = ', trim(gridtype)
 
    if('fv_core.res.tile' == trim(gridtype)) then
-      call process_fv_core(spec, tile, latlon)
+      call process_fv_core(spec, tile, gridstruct, latlon)
    else if('sfc_data.tile' == trim(gridtype)) then
       call process_sfc_data(tile, latlon)
    else if('fv_tracer.res.tile' == trim(gridtype)) then
@@ -646,17 +649,20 @@ subroutine create_phy_data_var_attr(tile, latlon)
 end subroutine create_phy_data_var_attr
 
 !----------------------------------------------------------------------------------------
-subroutine process_fv_core(spec, tile, latlon)
+subroutine process_fv_core(spec, tile, gridstruct, latlon)
 
    use netcdf
    use namelist_module
    use tile_module
+   use fv_grid_mod
+   use fv_grid_utils_mod
    use latlon_module
 
    implicit none
 
    type(tilespec_type), dimension(6), intent(in)    :: spec
    type(tilegrid), dimension(6),      intent(inout) :: tile
+   type(fv_grid_type), dimension(6),  intent(in)    :: gridstruct
    type(latlongrid),                  intent(inout) :: latlon
 
    integer :: i, n, rc, uv_count
@@ -784,13 +790,26 @@ subroutine process_fv_core(spec, tile, latlon)
                else if(2 == uv_count) then
                  !print *, 'Interpolate u/v here.'
                   uv_count = 0
-                  call u2ua(spec, tile)
-                  call interp3dvar(tile, latlon, var3d)
-                  call nc_put3Dvar0(latlon%ncid, 'u', &
-                       var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
-                  call v2va(tile)
+                 !call u2ua(spec, tile)
+                 !call interp3dvar(tile, latlon, var3d)
+                 !call nc_put3Dvar0(latlon%ncid, 'u', &
+                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+                 !call v2va(tile)
+                 !call interp3dvar(tile, latlon, var3d)
+                 !call nc_put3Dvar0(latlon%ncid, 'v', &
+                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+
+                  do n = 1, 6
+                     call cubed_to_latlon(tile(n)%var3du, tile(n)%var3dv, tile(n)%u, tile(n)%var3d, &
+                                          gridstruct(n), tile(n)%nx, tile(n)%ny, tile(n)%nz)
+                  end do
+
                   call interp3dvar(tile, latlon, var3d)
                   call nc_put3Dvar0(latlon%ncid, 'v', &
+                       var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+                  call copy_u2var3d(tile)
+                  call interp3dvar(tile, latlon, var3d)
+                  call nc_put3Dvar0(latlon%ncid, 'u', &
                        var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
                   cycle
                end if
@@ -1417,6 +1436,28 @@ subroutine v2va(tile)
 
 end subroutine v2va
 
+!=====================================================================  
+subroutine copy_u2var3d(tile)
+
+  use tile_module
+
+  implicit none
+
+  type(tilegrid), dimension(6),      intent(inout) :: tile
+
+  integer :: i, j, k, n
+
+  do n = 1, 6
+  do k = 1, tile(n)%nz
+  do j = 1, tile(n)%ny
+  do i = 1, tile(n)%nx
+     tile(n)%var3d(i,j,k) = tile(n)%u(i,j,k)
+  end do
+  end do
+  end do
+  end do
+
+end subroutine copy_u2var3d
 !===================================================================== 
 
 SUBROUTINE MOVECT(FLAT,FLON,TLAT,TLON,CROT,SROT)

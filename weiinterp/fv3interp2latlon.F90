@@ -4,6 +4,8 @@ PROGRAM fv3interp2latlon
    use namelist_module
    use tile_module
    use latlon_module
+   use fv_grid_mod
+   use fv_grid_utils_mod
 
    IMPLICIT NONE
 
@@ -14,10 +16,17 @@ PROGRAM fv3interp2latlon
    type(tilespec_type), dimension(6)    :: spec
    type(tiletype), dimension(max_types) :: types
    type(latlongrid)                     :: latlon
+   type(fv_grid_type), dimension(6)     :: gridstruct
+
    integer :: n
    logical :: last
 
    call read_namelist('input.nml')
+
+   if(num_types < 1) then
+      print *, 'num_types must great than 0. eg. must have at least 1 type.'
+      stop 111
+   end if
 
    if(use_uv_directly) then
       call initialize_tilespec(spec, trim(griddirname), trim(grid_type))
@@ -43,6 +52,13 @@ PROGRAM fv3interp2latlon
    else
       call read_weights(latlon, wgt_flnm)
 
+      if(use_uv_directly) then
+         do n = 1, 6
+            call grid_utils_init(spec(n), gridstruct(n), &
+                                 types(1)%tile(n)%nx, types(1)%tile(n)%ny)
+         end do
+      end if
+
       do n = 1, num_types
          last = (n == num_types)
         !print *, 'n = ', n
@@ -52,8 +68,15 @@ PROGRAM fv3interp2latlon
       end do
 
       do n = 1, num_types
-         call interp2latlongrid(trim(data_types(n)), spec, types(n)%tile, latlon)
+         call interp2latlongrid(trim(data_types(n)), spec, gridstruct, &
+                                types(n)%tile, latlon)
       end do
+
+      if(use_uv_directly) then
+         do n = 1, 6
+            call grid_utils_exit(gridstruct(n))
+         end do
+      end if
    end if
 
    do n = 1, num_types

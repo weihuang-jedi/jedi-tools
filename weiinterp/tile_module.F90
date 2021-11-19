@@ -53,7 +53,7 @@ module tile_module
 
      real, dimension(:),       allocatable :: var1d
      real, dimension(:, :),    allocatable :: var2d
-     real, dimension(:, :, :), allocatable :: var3d, var3du, var3dv
+     real, dimension(:, :, :), allocatable :: var3d, var3du, var3dv, u
 
      type(vartype), dimension(:), allocatable :: vars
   end type tilegrid
@@ -173,6 +173,7 @@ contains
       allocate(tile(n)%var3d(tile(n)%nx, tile(n)%ny, tile(n)%nz))
       allocate(tile(n)%var3du(tile(n)%nx, tile(n)%ny+1, tile(n)%nz))
       allocate(tile(n)%var3dv(tile(n)%nx+1, tile(n)%ny, tile(n)%nz))
+      allocate(tile(n)%u(tile(n)%nx, tile(n)%ny, tile(n)%nz))
 
       rc = nf90_inq_varids(tile(n)%fileid, tile(n)%nVars, tile(n)%varids)
       call check_status(rc)
@@ -283,6 +284,7 @@ contains
       if(allocated(tile(n)%var3d)) deallocate(tile(n)%var3d)
       if(allocated(tile(n)%var3du)) deallocate(tile(n)%var3du)
       if(allocated(tile(n)%var3dv)) deallocate(tile(n)%var3dv)
+      if(allocated(tile(n)%u)) deallocate(tile(n)%u)
 
      !print *, 'Tile ', n, ', close filename: ', trim(tile(n)%filename)
       rc = nf90_close(tile(n)%fileid)

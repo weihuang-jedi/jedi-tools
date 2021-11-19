@@ -1,6 +1,7 @@
 module fv_grid_utils_mod
 
  use fv_grid_mod
+ use tile_module
 
  implicit none
 
@@ -8,22 +9,24 @@ module fv_grid_utils_mod
 
  real, parameter::  big_number=1.d8
  real, parameter:: tiny_number=1.d-8
+ real, parameter:: pi = 3.1415926536
+ real, parameter:: deg2arc = pi/180.0
 
- public cos_angle
- public latlon2xyz, unit_vect_latlon,  &
-        cubed_to_latlon, v_prod
- public mid_pt_cart, vect_cross, grid_utils_init, &
-        inner_prod, normalize_vect, get_latlon_vector
+ public grid_utils_init, grid_utils_exit, cubed_to_latlon
+!public latlon2xyz, unit_vect_latlon, v_prod
+!public mid_pt_cart, vect_cross, &
+!       inner_prod, normalize_vect
 
  contains
 
- subroutine grid_utils_init(gridstruct, nx, ny, nz)
+ subroutine grid_utils_init(gridspec, gridstruct, nx, ny)
 
    implicit none
 
 !> Initialize 2D memory and geometrical factors
-   type(fv_grid_type), intent(inout) :: gridstruct
-   integer,            intent(in)    :: nx, ny, nz
+   type(tilespec_type), intent(in)    :: gridspec
+   type(fv_grid_type),  intent(inout) :: gridstruct
+   integer,             intent(in)    :: nx, ny
 !
 ! Super (composite) grid:
  
@@ -40,9 +43,11 @@ module fv_grid_utils_mod
    integer i, j, k, n, ip
 
   !----------------------------------------------------------------------------------
-
-   allocate(gridstruct%grid(nx, ny, 2))
+   allocate(gridstruct%grid(nx+1, ny+1, 2))
    allocate(gridstruct%agrid(nx, ny, 2))
+
+   allocate(gridstruct%dx(nx, ny+1))
+   allocate(gridstruct%dy(nx+1, ny))
 
    allocate(gridstruct%ec1(3, nx, ny))
    allocate(gridstruct%ec2(3, nx, ny))
@@ -60,10 +65,12 @@ module fv_grid_utils_mod
 
    gridstruct%cos_sg(:,:,:) =  big_number
    gridstruct%sin_sg(:,:,:) = tiny_number
-  !----------------------------------------------------------------------------------
 
+  !----------------------------------------------------------------------------------
    do j=1, ny+1
    do i=1, nx+1
+      gridstruct%grid(i,j,1) = gridspec%y(2*i-1, 2*j-1)*deg2arc
+      gridstruct%grid(i,j,2) = gridspec%x(2*i-1, 2*j-1)*deg2arc
       call latlon2xyz(gridstruct%grid(i,j,1:2), grid3(1:3,i,j))
    enddo
    enddo
@@ -71,36 +78,21 @@ module fv_grid_utils_mod
    call get_center_vect( nx, ny, grid3, gridstruct%ec1, gridstruct%ec2 )
 
    do j=1, ny
-   do i=1, nx+1
-      call mid_pt_cart( gridstruct%grid(i,j,1:2), gridstruct%grid(i,j+1,1:2), pp)
-      if (i==1) then
-         call latlon2xyz( gridstruct%agrid(i,j,1:2), p1)
-         call vect_cross(p2, pp, p1)
-      elseif(i==nx+1) then
-         call latlon2xyz( gridstruct%agrid(i-1,j,1:2), p1)
-         call vect_cross(p2, p1, pp)
-      else
-         call latlon2xyz( gridstruct%agrid(i-1,j,1:2), p3)
-         call latlon2xyz( gridstruct%agrid(i,  j,1:2), p1)
-         call vect_cross(p2, p3, p1)
-      endif
+   do i=1, nx
+      gridstruct%agrid(i,j,1) = gridspec%y(2*i, 2*j)*deg2arc
+      gridstruct%agrid(i,j,2) = gridspec%x(2*i, 2*j)*deg2arc
    enddo
    enddo
 
    do j=1, ny+1
    do i=1, nx
-      call mid_pt_cart(gridstruct%grid(i,j,1:2), gridstruct%grid(i+1,j,1:2), pp)
-      if (j==1) then
-         call latlon2xyz( gridstruct%agrid(i,j,1:2), p1)
-         call vect_cross(p2, pp, p1)
-      elseif (j==ny+1) then
-         call latlon2xyz( gridstruct%agrid(i,j-1,1:2), p1)
-         call vect_cross(p2, p1, pp)
-      else 
-         call latlon2xyz( gridstruct%agrid(i,j  ,1:2), p1)
-         call latlon2xyz( gridstruct%agrid(i,j-1,1:2), p3)
-         call vect_cross(p2, p3, p1)
-      endif
+      gridstruct%dx(i,j) = gridspec%dx(2*i, 2*j-1)*deg2arc
+   enddo
+   enddo
+
+   do j=1, ny
+   do i=1, nx+1
+      gridstruct%dy(i,j) = gridspec%dy(2*i-1, 2*j)*deg2arc
    enddo
    enddo
 
@@ -111,6 +103,7 @@ module fv_grid_utils_mod
 !     |       |
 !     6---2---7
 
+   !--------------------------------------------------------------------------------------------------
     do j=1, ny
     do i=1, nx
       ! Testing using spherical formular: exact if coordinate lines are along great circles
@@ -157,8 +150,35 @@ module fv_grid_utils_mod
    !Initialize cubed_sphere to lat-lon transformation:
     call init_cubed_to_latlon( gridstruct, nx, ny )
 
-end subroutine grid_utils_init
+  end subroutine grid_utils_init
 
+  subroutine grid_utils_exit(gridstruct)
+
+   implicit none
+
+   type(fv_grid_type),  intent(inout) :: gridstruct
+
+   deallocate(gridstruct%grid)
+   deallocate(gridstruct%agrid)
+
+   deallocate(gridstruct%dx)
+   deallocate(gridstruct%dy)
+
+   deallocate(gridstruct%ec1)
+   deallocate(gridstruct%ec2)
+
+   deallocate(gridstruct%a11)
+   deallocate(gridstruct%a12)
+   deallocate(gridstruct%a21)
+   deallocate(gridstruct%a22)
+
+   deallocate(gridstruct%cos_sg)
+   deallocate(gridstruct%sin_sg)
+
+   deallocate(gridstruct%vlon)
+   deallocate(gridstruct%vlat)
+
+  end subroutine grid_utils_exit
 
 real function inner_prod(v1, v2)
    real,intent(in):: v1(3), v2(3)
@@ -297,185 +317,6 @@ end function inner_prod
     call mid_pt3_cart(e1, e2, e3)
 
  end subroutine mid_pt_cart
-
- !>@brief The subroutine 'intersect' calculates the intersection of two great circles.       
- !>@details input:                                                           
- !> a1, a2,  -   pairs of points on sphere in cartesian coordinates  
- !> b1, b2       defining great circles                              
- !> radius   -   radius of the sphere                                                                                                
- !> output:                                                          
- !> x_inter  -   nearest intersection point of the great circles     
- !> local_a  -   true if x1 between (a1, a2)                         
- !> local_b  -   true if x1 between (b1, b2)                                        
- !>@date July 2006                                                 
- !>@version: 0.1        
- subroutine intersect(a1,a2,b1,b2,radius,x_inter,local_a,local_b)
-
-    real, dimension(3), intent(in)  :: a1, a2, b1, b2
-    real, intent(in) :: radius
-    real, dimension(3), intent(out) :: x_inter
-    logical, intent(out) :: local_a,local_b
-    !------------------------------------------------------------------!
-    ! local variables                                                  !
-    !------------------------------------------------------------------!
-    real :: a2_xy, b1_xy, b2_xy, a2_xz, b1_xz, b2_xz,                   &
-            b1_xyz, b2_xyz, length
-    !------------------------------------------------------------------!
-    ! calculate intersection point                                     !
-    !------------------------------------------------------------------!
-    a2_xy=a2(1)*a1(2)-a2(2)*a1(1)
-    b1_xy=b1(1)*a1(2)-b1(2)*a1(1)
-    b2_xy=b2(1)*a1(2)-b2(2)*a1(1)
-
-    a2_xz=a2(1)*a1(3)-a2(3)*a1(1)
-    b1_xz=b1(1)*a1(3)-b1(3)*a1(1)
-    b2_xz=b2(1)*a1(3)-b2(3)*a1(1)
-
-    b1_xyz=b1_xy*a2_xz-b1_xz*a2_xy
-    b2_xyz=b2_xy*a2_xz-b2_xz*a2_xy
-
-    if (b1_xyz==0.0d0) then
-       x_inter(:)=b1(:)
-    elseif (b2_xyz==0.0d0) then
-       x_inter(:)=b2(:)
-    else
-       x_inter(:)=b2(:)-b1(:)*b2_xyz/b1_xyz
-       length=sqrt(x_inter(1)*x_inter(1)+x_inter(2)*x_inter(2)+x_inter(3)*x_inter(3))
-       x_inter(:)=radius/length*x_inter(:)
-    endif
-    !------------------------------------------------------------------!
-    ! check if intersection is between pairs of points on sphere       !
-    !------------------------------------------------------------------!
-    call get_nearest()
-    call check_local(a1,a2,local_a)
-    call check_local(b1,b2,local_b)
-
-  contains
-    !------------------------------------------------------------------!
-    subroutine get_nearest()
-      real, dimension(3) :: center, dx
-      real :: dist1,dist2
-
-      center(:)=0.25*(a1(:)+a2(:)+b1(:)+b2(:))
-      dx(:)=+x_inter(:)-center(:)
-      dist1=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-      dx(:)=-x_inter(:)-center(:)
-      dist2=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-
-      if (dist2<dist1) x_inter(:)=-x_inter(:)
-
-    end subroutine get_nearest
-    !------------------------------------------------------------------!
-    subroutine check_local(x1,x2,local)
-      real, dimension(3), intent(in) :: x1,x2
-      logical, intent(out) :: local
-
-      real, dimension(3) :: dx
-      real :: dist, dist1, dist2
-
-      dx(:)=x1(:)-x2(:)
-      dist=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-    
-      dx(:)=x1(:)-x_inter(:)
-      dist1=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-      dx(:)=x2(:)-x_inter(:)
-      dist2=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-
-      if (dist1<=dist .and. dist2<=dist) then
-         local=.true.
-      else
-         local=.false.
-      endif
-      
-    end subroutine check_local
-    !------------------------------------------------------------------!
-  end subroutine intersect
- 
- !>@brief The subroutine 'intersect_cross' calculates the intersection of two great circles.       
- !>@details input:                                                           
- !> a1, a2,  -   pairs of points on sphere in cartesian coordinates  
- !> b1, b2       defining great circles                              
- !> radius   -   radius of the sphere                                
- !>                                                                  
- !> output:                                                          
- !> x_inter  -   nearest intersection point of the great circles     
- !> local_a  -   true if x1 between (a1, a2)                         
- !> local_b  -   true if x1 between (b1, b2)     
- subroutine intersect_cross(a1,a2,b1,b2,radius,x_inter,local_a,local_b)
-  
-    real, dimension(3), intent(in)  :: a1, a2, b1, b2
-    real, intent(in) :: radius
-    real, dimension(3), intent(out) :: x_inter
-    logical, intent(out) :: local_a,local_b
-    real, dimension(3) :: v1, v2
-
-    !> A great circle is the intersection of a plane through the center
-    !! of the sphere with the sphere. That plane is specified by a
-    !! vector v1, which is the cross product of any two vectors lying
-    !! in the plane; here, we use position vectors, which are unit
-    !! vectors lying in the plane and rooted at the center of the
-    !! sphere. 
-    !> The intersection of two great circles is where the the
-    !! intersection of the planes, a line, itself intersects the
-    !! sphere. Since the planes are defined by perpendicular vectors
-    !! v1, v2 respectively, the intersecting line is perpendicular
-    !! to both v1 and v2, and so lies along the cross product of v1
-    !! and v2.
-    !> The two intersection points of the great circles is therefore +/- v1 x v2.
-    call vect_cross(v1, a1, a2)
-    call vect_cross(v2, b1, b2)
-
-    v1 = v1/sqrt(v1(1)**2 + v1(2)**2 + v1(3)**2)
-    v2 = v2/sqrt(v2(1)**2 + v2(2)**2 + v2(3)**2)
-    call vect_cross(x_inter, v1, v2)
-
-    !Normalize
-    x_inter = x_inter/sqrt(x_inter(1)**2 + x_inter(2)**2 + x_inter(3)**2)
-
-    ! check if intersection is between pairs of points on sphere 
-    call get_nearest()
-    call check_local(a1,a2,local_a)
-    call check_local(b1,b2,local_b)
-
-  contains
-    subroutine get_nearest()
-      real, dimension(3) :: center, dx
-      real :: dist1,dist2
-
-      center(:)=0.25*(a1(:)+a2(:)+b1(:)+b2(:))
-      dx(:)=+x_inter(:)-center(:)
-      dist1=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-      dx(:)=-x_inter(:)-center(:)
-      dist2=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-
-      if (dist2<dist1) x_inter(:)=-x_inter(:)
-
-    end subroutine get_nearest
-
-    subroutine check_local(x1,x2,local)
-      real, dimension(3), intent(in) :: x1,x2
-      logical, intent(out) :: local
-
-      real, dimension(3) :: dx
-      real :: dist, dist1, dist2
-
-      dx(:)=x1(:)-x2(:)
-      dist=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-    
-      dx(:)=x1(:)-x_inter(:)
-      dist1=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-      dx(:)=x2(:)-x_inter(:)
-      dist2=dx(1)*dx(1)+dx(2)*dx(2)+dx(3)*dx(3)
-
-      if (dist1<=dist .and. dist2<=dist) then
-         local=.true.
-      else
-         local=.false.
-      endif
-      
-    end subroutine check_local
-    !------------------------------------------------------------------!
-  end subroutine intersect_cross
 
 
 
@@ -618,6 +459,7 @@ end subroutine cubed_to_latlon
  end subroutine cell_center3
 
 
+!-------------------------------------------------------------------
  real function cos_angle(p1, p2, p3)
 ! As spherical_angle, but returns the cos(angle)
 !       p3
@@ -663,22 +505,6 @@ end subroutine cubed_to_latlon
    cos_angle = angle
 
  end function cos_angle
-
- subroutine get_latlon_vector(pp, elon, elat)
-    real, intent(IN)  :: pp(2)
-    real, intent(OUT) :: elon(3), elat(3)
-
-    elon(1) = -SIN(pp(1))
-    elon(2) =  COS(pp(1))
-    elon(3) =  0.0
-    elat(1) = -SIN(pp(2))*COS(pp(1))
-    elat(2) = -SIN(pp(2))*SIN(pp(1))
-!!! RIGHT_HAND
-    elat(3) =  COS(pp(2))
-! Left-hand system needed to be consistent with rest of the codes
-!   elat(3) = -COS(pp(2))
-
- end subroutine get_latlon_vector
 
 end module fv_grid_utils_mod
   
