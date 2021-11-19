@@ -306,27 +306,27 @@ contains
 
     character(len=1024) :: dimname, varname
 
-    print *, 'Enter initialize_tilespec'
-    print *, 'dname: <', trim(dname), '>'
-    print *, 'ftype: <', trim(ftype), '>'
+   !print *, 'Enter initialize_tilespec'
+   !print *, 'dname: <', trim(dname), '>'
+   !print *, 'ftype: <', trim(ftype), '>'
 
     include_parents = 0
 
     do n = 1, 6
       write(tile(n)%filename, fmt='(2a, i1, a)') &
             trim(dname), trim(ftype), n, '.nc'
-      print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
+     !print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
 
       rc = nf90_open(trim(tile(n)%filename), nf90_nowrite, tile(n)%fileid)
       call check_status(rc)
 
-      print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
+     !print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
 
       rc = nf90_inquire(tile(n)%fileid, tile(n)%nDims, tile(n)%nVars, &
                tile(n)%nGlobalAtts, tile(n)%unlimdimid)
       call check_status(rc)
-      print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
-      print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
+     !print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
+     !print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
 
      !Allocate memory.
       allocate(tile(n)%dimids(tile(n)%nDims))
@@ -336,12 +336,12 @@ contains
       rc = nf90_inq_dimids(tile(n)%fileid, tile(n)%nDims, tile(n)%dimids, include_parents)
       call check_status(rc)
 
-      print *, 'Tile ', n, ', dimids: ', tile(n)%dimids
+     !print *, 'Tile ', n, ', dimids: ', tile(n)%dimids
 
       do i = 1, tile(n)%nDims
          rc = nf90_inquire_dimension(tile(n)%fileid, tile(n)%dimids(i), dimname, dimlen)
          call check_status(rc)
-         print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
+        !print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
 
          if(trim(dimname) == 'nx') then
             tile(n)%nx = dimlen
@@ -357,7 +357,7 @@ contains
          tile(n)%dimnames(i) = trim(dimname)
       end do
 
-      print *, 'tile(n)%nx = ', tile(n)%nx, ', tile(n)%ny = ', tile(n)%ny
+     !print *, 'tile(n)%nx = ', tile(n)%nx, ', tile(n)%ny = ', tile(n)%ny
 
      !Allocate memory.
       allocate(tile(n)%varids(tile(n)%nVars))
@@ -372,7 +372,7 @@ contains
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
                                     ndims=tile(n)%vars(i)%nDims, natts=tile(n)%vars(i)%nAtts)
          call check_status(rc)
-         print *, 'Var No. ', i, ': ndims = ', tile(n)%vars(i)%nDims
+        !print *, 'Var No. ', i, ': ndims = ', tile(n)%vars(i)%nDims
 
          allocate(tile(n)%vars(i)%dimids(tile(n)%vars(i)%nDims))
          allocate(tile(n)%vars(i)%dimlen(tile(n)%vars(i)%nDims))
@@ -381,12 +381,12 @@ contains
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
                                     dimids=tile(n)%vars(i)%dimids)
          call check_status(rc)
-         print *, 'Var No. ', i, ': tile(n)%vars(i)%dimids = ', tile(n)%vars(i)%dimids
+        !print *, 'Var No. ', i, ': tile(n)%vars(i)%dimids = ', tile(n)%vars(i)%dimids
 
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
                   name=tile(n)%vars(i)%varname)
          call check_status(rc)
-         print *, 'Var No. ', i, ': ', trim(tile(n)%vars(i)%varname)
+        !print *, 'Var No. ', i, ': ', trim(tile(n)%vars(i)%varname)
 
          if(trim(tile(n)%vars(i)%varname) == 'x') then
             allocate(tile(n)%x(tile(n)%nxp, tile(n)%nyp))
@@ -476,7 +476,7 @@ contains
 
       if(allocated(tile(n)%vars)) deallocate(tile(n)%vars)
 
-      print *, 'Tile ', n, ', close filename: ', trim(tile(n)%filename)
+     !print *, 'Tile ', n, ', close filename: ', trim(tile(n)%filename)
       rc = nf90_close(tile(n)%fileid)
       call check_status(rc)
     end do

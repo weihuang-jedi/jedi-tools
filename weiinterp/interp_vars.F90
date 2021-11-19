@@ -664,7 +664,7 @@ subroutine process_fv_core(spec, tile, latlon)
    real, dimension(:,:,:), allocatable :: var2d
    real, dimension(:,:,:), allocatable :: var3d
 
-   print *, 'Enter process_fv_core'
+  !print *, 'Enter process_fv_core'
 
    allocate(var2d(latlon%nlon, latlon%nlat, 1))
    allocate(var3d(latlon%nlon, latlon%nlat, latlon%nlev))
@@ -685,12 +685,12 @@ subroutine process_fv_core(spec, tile, latlon)
                name=tile(1)%vars(i)%varname)
       call check_status(rc)
 
-      print *, 'Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
+     !print *, 'Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
      !print *, 'Var No. ', i, ': varid: ', tile(1)%varids(i)
 
       if(tile(1)%vars(i)%nDims < 2) cycle
 
-      print *, 'P 1, Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
+     !print *, 'P 1, Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
 
       do n = 1, 6
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &
@@ -698,7 +698,7 @@ subroutine process_fv_core(spec, tile, latlon)
          call check_status(rc)
 
         !print *, 'Tile ', n, ', Var No. ', i, ': varid: ', tile(n)%varids(i)
-         print *, 'Tile ', n, ', Var ', i, ': ', trim(tile(n)%vars(i)%varname)
+        !print *, 'Tile ', n, ', Var ', i, ': ', trim(tile(n)%vars(i)%varname)
 
          if((trim(tile(n)%vars(i)%varname) == 'ps') .or. &
             (trim(tile(n)%vars(i)%varname) == 'phis')) then
@@ -741,7 +741,7 @@ subroutine process_fv_core(spec, tile, latlon)
          end if
       end do
 
-      print *, 'P 2, Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
+     !print *, 'P 2, Var No. ', i, ': name: ', trim(tile(1)%vars(i)%varname)
 
       if((trim(tile(1)%vars(i)%varname) == 'ps') .or. &
          (trim(tile(1)%vars(i)%varname) == 'phis')) then
@@ -782,7 +782,7 @@ subroutine process_fv_core(spec, tile, latlon)
                if(1 == uv_count) then
                   cycle
                else if(2 == uv_count) then
-                  print *, 'Interpolate u/v here.'
+                 !print *, 'Interpolate u/v here.'
                   uv_count = 0
                   call u2ua(spec, tile)
                   call interp3dvar(tile, latlon, var3d)
@@ -1372,8 +1372,10 @@ subroutine u2ua(spec, tile)
   do n = 1, 6
      do j = 1, tile(n)%ny
      do i = 1, tile(n)%nx
+       !CALL MOVECT(spec(n)%lat(i,j), spec(n)%lon(i,j), &
+       !            spec(n)%lat(i,j), 0.0, cxy(i,j), sxy(i,j))
         CALL MOVECT(spec(n)%lat(i,j), spec(n)%lon(i,j), &
-                    spec(n)%lat(i,j), 0.0, cxy(i,j), sxy(i,j))
+                    0.0, 0.0, cxy(i,j), sxy(i,j))
      end do
      end do
 
