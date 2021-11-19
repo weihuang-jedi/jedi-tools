@@ -71,9 +71,8 @@ module tile_module
      integer                            :: nxp, nyp
      integer                            :: nx, ny
 
-     real, dimension(:, :), allocatable :: x, y, dx, dy, area, &
-                                           angle_dx, angle_dy
-     real, dimension(:, :), allocatable :: lat, lon
+     real, dimension(:, :), allocatable :: x, y, dx, dy
+    !real, dimension(:, :), allocatable :: area, angle_dx, angle_dy
   end type tilespec_type
 
 contains
@@ -404,18 +403,18 @@ contains
             allocate(tile(n)%dy(tile(n)%nxp, tile(n)%ny))
             rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%dy)
             call check_status(rc)
-         else if(trim(tile(n)%vars(i)%varname) == 'angle_dx') then
-            allocate(tile(n)%angle_dx(tile(n)%nxp, tile(n)%nyp))
-            rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%angle_dx)
-            call check_status(rc)
-         else if(trim(tile(n)%vars(i)%varname) == 'angle_dy') then
-            allocate(tile(n)%angle_dy(tile(n)%nxp, tile(n)%nyp))
-            rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%angle_dy)
-            call check_status(rc)
-         else if(trim(tile(n)%vars(i)%varname) == 'area') then
-            allocate(tile(n)%area(tile(n)%nx, tile(n)%ny))
-            rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%area)
-            call check_status(rc)
+        !else if(trim(tile(n)%vars(i)%varname) == 'angle_dx') then
+        !   allocate(tile(n)%angle_dx(tile(n)%nxp, tile(n)%nyp))
+        !   rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%angle_dx)
+        !   call check_status(rc)
+        !else if(trim(tile(n)%vars(i)%varname) == 'angle_dy') then
+        !   allocate(tile(n)%angle_dy(tile(n)%nxp, tile(n)%nyp))
+        !   rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%angle_dy)
+        !   call check_status(rc)
+        !else if(trim(tile(n)%vars(i)%varname) == 'area') then
+        !   allocate(tile(n)%area(tile(n)%nx, tile(n)%ny))
+        !   rc = nf90_get_var(tile(n)%fileid, tile(n)%varids(i), tile(n)%area)
+        !   call check_status(rc)
          end if
 
          do k = 1, tile(n)%vars(i)%ndims
@@ -423,16 +422,6 @@ contains
             tile(n)%vars(i)%dimnames(k) = trim(tile(n)%dimnames(j))
             tile(n)%vars(i)%dimlen(k) = tile(n)%dimlen(j)
          end do
-      end do
-
-      allocate(tile(n)%lat(tile(n)%nx/2, tile(n)%ny/2))
-      allocate(tile(n)%lon(tile(n)%nx/2, tile(n)%ny/2))
-
-      do j = 1, tile(n)%ny/2
-      do i = 1, tile(n)%ny/2
-         tile(n)%lat(i,j) = tile(n)%x(2*i, 2*j)
-         tile(n)%lon(i,j) = tile(n)%y(2*i, 2*j)
-      end do
       end do
     end do
 
@@ -459,12 +448,9 @@ contains
       if(allocated(tile(n)%y)) deallocate(tile(n)%y)
       if(allocated(tile(n)%dx)) deallocate(tile(n)%dx)
       if(allocated(tile(n)%dy)) deallocate(tile(n)%dy)
-      if(allocated(tile(n)%angle_dx)) deallocate(tile(n)%angle_dx)
-      if(allocated(tile(n)%angle_dy)) deallocate(tile(n)%angle_dy)
-      if(allocated(tile(n)%area)) deallocate(tile(n)%area)
-
-      if(allocated(tile(n)%lat)) deallocate(tile(n)%lat)
-      if(allocated(tile(n)%lon)) deallocate(tile(n)%lon)
+     !if(allocated(tile(n)%angle_dx)) deallocate(tile(n)%angle_dx)
+     !if(allocated(tile(n)%angle_dy)) deallocate(tile(n)%angle_dy)
+     !if(allocated(tile(n)%area)) deallocate(tile(n)%area)
 
       do i = 1, tile(n)%nVars
          if(allocated(tile(n)%vars(i)%dimids)) &

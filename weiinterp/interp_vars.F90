@@ -790,14 +790,6 @@ subroutine process_fv_core(spec, tile, gridstruct, latlon)
                else if(2 == uv_count) then
                  !print *, 'Interpolate u/v here.'
                   uv_count = 0
-                 !call u2ua(spec, tile)
-                 !call interp3dvar(tile, latlon, var3d)
-                 !call nc_put3Dvar0(latlon%ncid, 'u', &
-                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
-                 !call v2va(tile)
-                 !call interp3dvar(tile, latlon, var3d)
-                 !call nc_put3Dvar0(latlon%ncid, 'v', &
-                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
 
                   do n = 1, 6
                      call cubed_to_latlon(tile(n)%var3du, tile(n)%var3dv, tile(n)%u, tile(n)%var3d, &
@@ -1375,68 +1367,6 @@ subroutine interp3dvar4sfc(tile, latlon, var3d)
 end subroutine interp3dvar4sfc
 
 !=====================================================================  
-subroutine u2ua(spec, tile)
-
-  use tile_module
-
-  implicit none
-
-  type(tilespec_type), dimension(6), intent(in)    :: spec
-  type(tilegrid), dimension(6),      intent(inout) :: tile
-
-  integer :: i, j, k, n
-  real, dimension(tile(1)%nx, tile(1)%ny) :: cxy, sxy
-  real :: um, vm
-
-  do n = 1, 6
-     do j = 1, tile(n)%ny
-     do i = 1, tile(n)%nx
-       !CALL MOVECT(spec(n)%lat(i,j), spec(n)%lon(i,j), &
-       !            spec(n)%lat(i,j), 0.0, cxy(i,j), sxy(i,j))
-        CALL MOVECT(spec(n)%lat(i,j), spec(n)%lon(i,j), &
-                    0.0, 0.0, cxy(i,j), sxy(i,j))
-     end do
-     end do
-
-     do k = 1, tile(n)%nz
-     do j = 1, tile(n)%ny
-     do i = 1, tile(n)%nx
-        um = 0.5*(tile(n)%var3du(i,j,k) + tile(n)%var3du(i,j+1,k))
-        vm = 0.5*(tile(n)%var3dv(i,j,k) + tile(n)%var3dv(i+1,j,k))
-
-        tile(n)%var3d(i,j,k) = cxy(i,j)*um-sxy(i,j)*vm
-        tile(n)%var3dv(i,j,k) = sxy(i,j)*um+cxy(i,j)*vm
-     end do
-     end do
-     end do
-  end do
-
-end subroutine u2ua
-
-!=====================================================================  
-subroutine v2va(tile)
-
-  use tile_module
-
-  implicit none
-
-  type(tilegrid), dimension(6),      intent(inout) :: tile
-
-  integer :: i, j, k, n
-
-  do n = 1, 6
-  do k = 1, tile(n)%nz
-  do j = 1, tile(n)%ny
-  do i = 1, tile(n)%nx
-     tile(n)%var3d(i,j,k) = tile(n)%var3dv(i,j,k)
-  end do
-  end do
-  end do
-  end do
-
-end subroutine v2va
-
-!=====================================================================  
 subroutine copy_u2var3d(tile)
 
   use tile_module
@@ -1458,83 +1388,4 @@ subroutine copy_u2var3d(tile)
   end do
 
 end subroutine copy_u2var3d
-!===================================================================== 
-
-SUBROUTINE MOVECT(FLAT,FLON,TLAT,TLON,CROT,SROT)
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
-!
-! SUBPROGRAM:  MOVECT     MOVE A VECTOR ALONG A GREAT CIRCLE
-!   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
-!
-! ABSTRACT: THIS SUBPROGRAM PROVIDES THE ROTATION PARAMETERS
-!           TO MOVE A VECTOR ALONG A GREAT CIRCLE FROM ONE
-!           POSITION TO ANOTHER WHILE CONSERVING ITS ORIENTATION
-!           WITH RESPECT TO THE GREAT CIRCLE.  THESE ROTATION
-!           PARAMETERS ARE USEFUL FOR VECTOR INTERPOLATION.
-!
-! PROGRAM HISTORY LOG:
-!   96-04-10  IREDELL
-! 1999-04-08  IREDELL  GENERALIZE PRECISION
-!
-! USAGE:    CALL MOVECT(FLAT,FLON,TLAT,TLON,CROT,SROT)
-!
-!   INPUT ARGUMENT LIST:
-!     FLAT     - REAL LATITUDE IN DEGREES FROM WHICH TO MOVE THE VECTOR
-!     FLON     - REAL LONGITUDE IN DEGREES FROM WHICH TO MOVE THE VECTOR
-!     TLAT     - REAL LATITUDE IN DEGREES TO WHICH TO MOVE THE VECTOR
-!     TLON     - REAL LONGITUDE IN DEGREES TO WHICH TO MOVE THE VECTOR
-!
-!   OUTPUT ARGUMENT LIST:
-!     CROT     - REAL CLOCKWISE VECTOR ROTATION COSINE
-!     SROT     - REAL CLOCKWISE VECTOR ROTATION SINE
-!                (UTO=CROT*UFROM-SROT*VFROM;
-!                 VTO=SROT*UFROM+CROT*VFROM)
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!
-!$$$
- IMPLICIT NONE
-
- REAL,            INTENT(IN   ) :: FLAT, FLON
- REAL,            INTENT(IN   ) :: TLAT, TLON
- REAL,            INTENT(  OUT) :: CROT, SROT
-
- REAL,   PARAMETER     :: CRDLIM=0.9999999
- REAL,   PARAMETER     :: PI=3.14159265358979
- REAL,   PARAMETER     :: RPD=PI/180.0
-
- REAL                  :: CTLAT,STLAT,CFLAT,SFLAT
- REAL                  :: CDLON,SDLON,CRD
- REAL                  :: SRD2RN,STR,CTR,SFR,CFR
-
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  COMPUTE COSINE OF THE RADIAL DISTANCE BETWEEN THE POINTS.
- CTLAT=COS(TLAT*RPD)
- STLAT=SIN(TLAT*RPD)
- CFLAT=COS(FLAT*RPD)
- SFLAT=SIN(FLAT*RPD)
- CDLON=COS((FLON-TLON)*RPD)
- SDLON=SIN((FLON-TLON)*RPD)
- CRD=STLAT*SFLAT+CTLAT*CFLAT*CDLON
-
-! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-!  COMPUTE ROTATIONS AT BOTH POINTS WITH RESPECT TO THE GREAT CIRCLE
-!  AND COMBINE THEM TO GIVE THE TOTAL VECTOR ROTATION PARAMETERS.
- IF(ABS(CRD).LE.CRDLIM) THEN
-   SRD2RN=-1/(1-CRD**2)
-   STR=CFLAT*SDLON
-   CTR=CFLAT*STLAT*CDLON-SFLAT*CTLAT
-   SFR=CTLAT*SDLON
-   CFR=CTLAT*SFLAT*CDLON-STLAT*CFLAT
-   CROT=SRD2RN*(CTR*CFR-STR*SFR)
-   SROT=SRD2RN*(CTR*SFR+STR*CFR)
-!  USE A DIFFERENT APPROXIMATION FOR NEARLY COINCIDENT POINTS.
-!  MOVING VECTORS TO ANTIPODAL POINTS IS AMBIGUOUS ANYWAY.
- ELSE
-   CROT=CDLON
-   SROT=SDLON*STLAT
- ENDIF
-
-END SUBROUTINE MOVECT
 
