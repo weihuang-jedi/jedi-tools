@@ -69,8 +69,10 @@ module fv_grid_utils_mod
   !----------------------------------------------------------------------------------
    do j=1, ny+1
    do i=1, nx+1
-      gridstruct%grid(i,j,1) = gridspec%y(2*i-1, 2*j-1)*deg2arc
-      gridstruct%grid(i,j,2) = gridspec%x(2*i-1, 2*j-1)*deg2arc
+     !gridstruct%grid(i,j,1) = gridspec%y(2*i-1, 2*j-1)*deg2arc
+     !gridstruct%grid(i,j,2) = gridspec%x(2*i-1, 2*j-1)*deg2arc
+      gridstruct%grid(i,j,2) = gridspec%y(2*i-1, 2*j-1)*deg2arc
+      gridstruct%grid(i,j,1) = gridspec%x(2*i-1, 2*j-1)*deg2arc
       call latlon2xyz(gridstruct%grid(i,j,1:2), grid3(1:3,i,j))
    enddo
    enddo
