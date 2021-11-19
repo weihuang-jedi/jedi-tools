@@ -38,6 +38,7 @@ OBJS =	module_namelist.o \
 	read_weights.o \
 	output_tilegrid.o \
 	output_latlongrid.o \
+	fv_grid_mod.o \
 	interp_vars.o
 
 ####################################################
