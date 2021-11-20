@@ -4,8 +4,7 @@ PROGRAM fv3interp2latlon
    use namelist_module
    use tile_module
    use latlon_module
-   use fv_grid_mod
-   use fv_grid_utils_mod
+   use fv_grid_utils_module
 
    IMPLICIT NONE
 

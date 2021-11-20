@@ -1,23 +1,49 @@
-module fv_grid_utils_mod
+module fv_grid_utils_module
 
- use fv_grid_mod
- use tile_module
+  use tile_module
 
- implicit none
+  implicit none
 
- private
+  private
 
- real, parameter::  big_number=1.d8
- real, parameter:: tiny_number=1.d-8
- real, parameter:: pi = 3.1415926536
- real, parameter:: deg2arc = pi/180.0
+  real, parameter::  big_number=1.d8
+  real, parameter:: tiny_number=1.d-8
+  real, parameter:: pi = 3.1415926536
+  real, parameter:: deg2arc = pi/180.0
 
- public grid_utils_init, grid_utils_exit, cubed_to_latlon
-!public latlon2xyz, unit_vect_latlon, v_prod
-!public mid_pt_cart, vect_cross, &
-!       inner_prod, normalize_vect
+  public :: fv_grid_type
+  public grid_utils_init, grid_utils_exit, cubed_to_latlon
+ !public latlon2xyz, unit_vect_latlon, v_prod
+ !public mid_pt_cart, vect_cross, &
+ !       inner_prod, normalize_vect
 
- contains
+  type fv_grid_type
+     real, allocatable, dimension(:,:,:) :: grid, agrid
+
+     real, allocatable, dimension(:,:) :: dx, dy
+
+    !Cubed_2_latlon:
+     real, allocatable :: a11(:,:)
+     real, allocatable :: a12(:,:)
+     real, allocatable :: a21(:,:)
+     real, allocatable :: a22(:,:)
+
+     real, allocatable :: ec1(:,:,:)
+     real, allocatable :: ec2(:,:,:)
+
+    !- 3D Super grid to contain all geometrical factors --
+    ! the 3rd dimension is 9
+     real, allocatable :: sin_sg(:,:,:)
+     real, allocatable :: cos_sg(:,:,:)
+    !--------------------------------------------------
+
+    !Unit vectors for lat-lon grid
+     real, allocatable :: vlon(:,:,:)
+     real, allocatable :: vlat(:,:,:)
+
+  end type fv_grid_type
+
+contains
 
  subroutine grid_utils_init(gridspec, gridstruct, nx, ny)
 
@@ -506,5 +532,5 @@ end subroutine cubed_to_latlon
 
  end function cos_angle
 
-end module fv_grid_utils_mod
+end module fv_grid_utils_module
   

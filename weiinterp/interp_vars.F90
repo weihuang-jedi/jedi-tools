@@ -57,8 +57,7 @@ subroutine interp2latlongrid(gridtype, spec, gridstruct, tile, latlon)
 
    use netcdf
    use tile_module
-   use fv_grid_mod
-   use fv_grid_utils_mod
+   use fv_grid_utils_module
    use latlon_module
 
    implicit none
@@ -654,8 +653,7 @@ subroutine process_fv_core(spec, tile, gridstruct, latlon)
    use netcdf
    use namelist_module
    use tile_module
-   use fv_grid_mod
-   use fv_grid_utils_mod
+   use fv_grid_utils_module
    use latlon_module
 
    implicit none
