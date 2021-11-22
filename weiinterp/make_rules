@@ -32,12 +32,12 @@ FC_OPTIMIZATIONS =	-g # -O3
 ####################################################
 
 FC		=       ifort
-FFLAGS		=       $(FC_US_FLAGS) $(FC_INCLUDES) $(FC_COMPILE_OPTIONS) $(FC_OPTIMIZATIONS)
+FFLAGS		=       $(FC_US_FLAGS) $(FC_INCLUDES) $(FC_COMPILE_OPTIONS) $(FC_OPTIMIZATIONS) -traceback
 
 LDFLAGS		=       
 
 CPP		=       /usr/bin/cpp -C -P 
-CPPFLAGS	=	-I. $(DEBUGFLAGS)
+CPPFLAGS	=	-I. $(DEBUGFLAGS) -DOLD_VECT
 
 LOC_LIBS	=	$(NETCDF_LIB) $(HDF5_LIB) -lm -lc
 

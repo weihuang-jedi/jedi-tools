@@ -33,8 +33,8 @@ module fv_grid_utils_module
 
     !- 3D Super grid to contain all geometrical factors --
     ! the 3rd dimension is 9
-     real, allocatable :: sin_sg(:,:,:)
-     real, allocatable :: cos_sg(:,:,:)
+     real, allocatable :: sin_sg(:,:)
+     real, allocatable :: cos_sg(:,:)
     !--------------------------------------------------
 
     !Unit vectors for lat-lon grid
@@ -68,6 +68,14 @@ contains
 
    integer i, j, k, n, ip
 
+   real :: cmin, cmax, smin, smax
+
+   cmin = 1.0e38
+   smin = 1.0e38
+
+   cmax = -1.0e38
+   smax = -1.0e38
+
   !----------------------------------------------------------------------------------
    allocate(gridstruct%grid(nx+1, ny+1, 2))
    allocate(gridstruct%agrid(nx, ny, 2))
@@ -83,14 +91,14 @@ contains
    allocate(gridstruct%a21(nx, ny))
    allocate(gridstruct%a22(nx, ny))
 
-   allocate(gridstruct%cos_sg(nx, ny, 9))
-   allocate(gridstruct%sin_sg(nx, ny, 9))
+   allocate(gridstruct%cos_sg(nx, ny))
+   allocate(gridstruct%sin_sg(nx, ny))
 
    allocate(gridstruct%vlon(nx, ny, 3))
    allocate(gridstruct%vlat(nx, ny, 3))
 
-   gridstruct%cos_sg(:,:,:) =  big_number
-   gridstruct%sin_sg(:,:,:) = tiny_number
+   gridstruct%cos_sg(:,:) =  big_number
+   gridstruct%sin_sg(:,:) = tiny_number
 
   !----------------------------------------------------------------------------------
    do j=1, ny+1
@@ -112,13 +120,13 @@ contains
 
    do j=1, ny+1
    do i=1, nx
-      gridstruct%dx(i,j) = gridspec%dx(2*i, 2*j-1)*deg2arc
+      gridstruct%dx(i,j) = gridspec%dx(2*i, 2*j-1)
    enddo
    enddo
 
    do j=1, ny
    do i=1, nx+1
-      gridstruct%dy(i,j) = gridspec%dy(2*i-1, 2*j)*deg2arc
+      gridstruct%dy(i,j) = gridspec%dy(2*i-1, 2*j)
    enddo
    enddo
 
@@ -132,46 +140,20 @@ contains
    !--------------------------------------------------------------------------------------------------
     do j=1, ny
     do i=1, nx
-      ! Testing using spherical formular: exact if coordinate lines are along great circles
-      ! SW corner:
-       gridstruct%cos_sg(i,j,6) = cos_angle( grid3(1,i,j), grid3(1,i+1,j), grid3(1,i,j+1) )
+       gridstruct%cos_sg(i,j) = inner_prod( gridstruct%ec1(1:3,i,j), gridstruct%ec2(1:3,i,j) )
+       gridstruct%sin_sg(i,j) = min(1.0, sqrt(max(tiny_number, 1.0-gridstruct%cos_sg(i,j)**2)))
 
-      ! SE corner:
-       gridstruct%cos_sg(i,j,7) = -cos_angle( grid3(1,i+1,j), grid3(1,i,j), grid3(1,i+1,j+1) )
 
-      ! NE corner:
-       gridstruct%cos_sg(i,j,8) = cos_angle( grid3(1,i+1,j+1), grid3(1,i+1,j), grid3(1,i,j+1) )
-
-      ! NW corner:
-       gridstruct%cos_sg(i,j,9) = -cos_angle( grid3(1,i,j+1), grid3(1,i,j), grid3(1,i+1,j+1) )
-
-      ! No averaging -----
-       call latlon2xyz(gridstruct%agrid(i,j,1:2), p3)   ! righ-hand system consistent with grid3
-       call mid_pt3_cart(grid3(1,i,j), grid3(1,i,j+1), p1)
-
-       gridstruct%cos_sg(i,j,1) = cos_angle( p1, p3, grid3(1,i,j+1) )
-       call mid_pt3_cart(grid3(1,i,j), grid3(1,i+1,j), p1)
-
-       gridstruct%cos_sg(i,j,2) = cos_angle( p1, grid3(1,i+1,j), p3 )
-       call mid_pt3_cart(grid3(1,i+1,j), grid3(1,i+1,j+1), p1)
-       gridstruct%cos_sg(i,j,3) = cos_angle( p1, p3, grid3(1,i+1,j) )
-
-       call mid_pt3_cart(grid3(1,i,j+1), grid3(1,i+1,j+1), p1)
-       gridstruct%cos_sg(i,j,4) = cos_angle( p1, grid3(1,i,j+1), p3 )
-
-      ! Center point:
-      ! Using center_vect: [ec1, ec2]
-       gridstruct%cos_sg(i,j,5) = inner_prod( gridstruct%ec1(1:3,i,j), gridstruct%ec2(1:3,i,j) )
+       cmin = min(gridstruct%cos_sg(i,j), cmin)
+       cmax = max(gridstruct%cos_sg(i,j), cmax)
+       smin = min(gridstruct%sin_sg(i,j), smin)
+       smax = max(gridstruct%sin_sg(i,j), smax)
     enddo
     enddo
 
-    do ip=1,9
-    do j=i,ny
-    do i=1,nx
-       gridstruct%sin_sg(i,j,ip) = min(1.0, sqrt(max(0., 1.-gridstruct%cos_sg(i,j,ip)**2)))
-    enddo
-    enddo
-    enddo
+
+    print *, 'cmin = ', cmin, ', cmax = ', cmax
+    print *, 'smin = ', smin, ', smax = ', smax
 
    !Initialize cubed_sphere to lat-lon transformation:
     call init_cubed_to_latlon( gridstruct, nx, ny )
@@ -390,6 +372,25 @@ subroutine init_cubed_to_latlon( gridstruct, nx, ny )
 
  !Local pointers
   real :: z11, z12, z21, z22
+  real :: z11min, z11max, z12min, z12max, &
+          z21min, z21max, z22min, z22max
+  real :: cmin, cmax, smin, smax
+
+  z11min = 1.0e38
+  z12min = 1.0e38
+  z21min = 1.0e38
+  z22min = 1.0e38
+
+  z11max = -1.0e38
+  z12max = -1.0e38
+  z21max = -1.0e38
+  z22max = -1.0e38
+
+  cmin = 1.0e38
+  smin = 1.0e38
+
+  cmax = -1.0e38
+  smax = -1.0e38
 
   do j=1, ny
   do i=1, nx
@@ -405,12 +406,34 @@ subroutine init_cubed_to_latlon( gridstruct, nx, ny )
      z22 = v_prod(gridstruct%ec2(1:3,i,j), gridstruct%vlat(i,j,1:3))
 
     !-------------------------------------------------------------------------
-     gridstruct%a11(i,j) =  0.5d0*z22 / gridstruct%sin_sg(i,j,5)
-     gridstruct%a12(i,j) = -0.5d0*z12 / gridstruct%sin_sg(i,j,5)
-     gridstruct%a21(i,j) = -0.5d0*z21 / gridstruct%sin_sg(i,j,5)
-     gridstruct%a22(i,j) =  0.5d0*z11 / gridstruct%sin_sg(i,j,5)
+     gridstruct%a11(i,j) =  0.5d0*z22 / gridstruct%sin_sg(i,j)
+     gridstruct%a12(i,j) = -0.5d0*z12 / gridstruct%sin_sg(i,j)
+     gridstruct%a21(i,j) = -0.5d0*z21 / gridstruct%sin_sg(i,j)
+     gridstruct%a22(i,j) =  0.5d0*z11 / gridstruct%sin_sg(i,j)
+
+     z11min = min(z11, z11min)
+     z11max = max(z11, z11max)
+     z12min = min(z12, z12min)
+     z12max = max(z12, z12max)
+     z21min = min(z21, z21min)
+     z21max = max(z21, z21max)
+     z22min = min(z22, z22min)
+     z22max = max(z22, z22max)
+
+     cmin = min(gridstruct%cos_sg(i,j), cmin)
+     cmax = max(gridstruct%cos_sg(i,j), cmax)
+     smin = min(gridstruct%sin_sg(i,j), smin)
+     smax = max(gridstruct%sin_sg(i,j), smax)
   enddo
   enddo
+
+  print *, 'z11min = ', z11min, ', z11max = ', z11max
+  print *, 'z12min = ', z12min, ', z12max = ', z12max
+  print *, 'z21min = ', z21min, ', z11max = ', z21max
+  print *, 'z22min = ', z22min, ', a12max = ', z22max
+
+  print *, 'cmin = ', cmin, ', cmax = ', cmax
+  print *, 'smin = ', smin, ', smax = ', smax
 
 end subroutine init_cubed_to_latlon
 
@@ -433,6 +456,19 @@ subroutine cubed_to_latlon(u, v, ua, va, gridstruct, nx, ny, nz)
 
   integer i, j, k
 
+  real :: umin, umax, vmin, vmax, &
+          uamin, uamax, vamin, vamax
+
+  umin = 1.0e38
+  vmin = 1.0e38
+  uamin = 1.0e38
+  vamin = 1.0e38
+
+  umax = -1.0e38
+  vmax = -1.0e38
+  uamax = -1.0e38
+  vamax = -1.0e38
+
 !$OMP parallel do default(none) &
 !$OMP shared(nx,ny,nz,u,dx,v,dy,ua,va,a11,a12,a21,a22) &
 !$OMP private(u1, v1, wu, wv)
@@ -440,12 +476,16 @@ subroutine cubed_to_latlon(u, v, ua, va, gridstruct, nx, ny, nz)
      do j=1, ny+1
      do i=1, nx
         wu(i,j) = u(i,j,k)*gridstruct%dx(i,j)
+        umin = min(u(i,j,k), umin)
+        umax = max(u(i,j,k), umax)
      enddo
      enddo
 
      do j=1, ny
      do i=1, nx+1
         wv(i,j) = v(i,j,k)*gridstruct%dy(i,j)
+        vmin = min(v(i,j,k), vmin)
+        vmax = max(v(i,j,k), vmax)
      enddo
      enddo
 
@@ -458,9 +498,19 @@ subroutine cubed_to_latlon(u, v, ua, va, gridstruct, nx, ny, nz)
        !Cubed (cell center co-variant winds) to lat-lon:
         ua(i,j,k) = gridstruct%a11(i,j)*u1(i) + gridstruct%a12(i,j)*v1(i)
         va(i,j,k) = gridstruct%a21(i,j)*u1(i) + gridstruct%a22(i,j)*v1(i)
+        uamin = min(ua(i,j,k), uamin)
+        uamax = max(ua(i,j,k), uamax)
+        vamin = min(va(i,j,k), vamin)
+        vamax = max(va(i,j,k), vamax)
      enddo
      enddo
   enddo
+
+  print *, 'umin = ', umin, ', vmin = ', vmin
+  print *, 'uamin = ', uamin, ', vamin = ', vamin
+
+  print *, 'umax = ', umax, ', vmax = ', vmax
+  print *, 'uamax = ', uamax, ', vamax = ', vamax
 
 end subroutine cubed_to_latlon
 
