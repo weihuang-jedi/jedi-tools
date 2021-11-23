@@ -4,8 +4,7 @@ include make_rules
 
 ####################################################
 
-OBJS =	module_namelist.o \
-	nc_get1Dint.o \
+OBJS =	nc_get1Dint.o \
 	nc_get1Dvar.o \
 	nc_get2Dint.o \
 	nc_get2Dvar.o \
@@ -33,14 +32,16 @@ OBJS =	module_namelist.o \
 	nc_putGlobalIntAttr.o \
 	nc_putGlobalRealAttr.o \
 	nc_putGlobalCharAttr.o \
+	namelist_module.o \
 	grid_module.o \
+	processfiles.o
 
 ####################################################
 
 deflt :	clean_modulde nc4_lib concatefiles
 
 clean_modulde :
-	$(RM) latlon_module.f90 latlon_module.mod latlon_module.o grid_module.f90 grid_module.mod grid_module.o
+	$(RM) grid_module.f90 grid_module.mod grid_module.o
 
 nc4_lib : $(OBJS)
 	$(RM) libnc4.a

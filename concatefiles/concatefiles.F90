@@ -14,9 +14,7 @@ PROGRAM concatefiles
    call initialize_grid(ocn, trim(ocnname), 'ocn')
    call initialize_grid(ice, trim(icename), 'ice')
 
-   call generate_header(atm, ocn, ice, whole)
-
-   call process(atm, ocn, ice, whole)
+   call process(atm, ocn, ice, whole, trim(output_flnm))
 
    call finalize_grid(atm)
    call finalize_grid(ocn)

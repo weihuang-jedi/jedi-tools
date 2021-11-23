@@ -1,20 +1,14 @@
 !-------------------------------------------------------------
-
 MODULE namelist_module
 
   implicit none
 
   integer, parameter :: nml_unit = 7
-  integer, parameter :: max_types = 5
 
   CHARACTER(LEN=1024) :: program_name
-  character(len=1024) :: dirname
-  character(len=1024) :: output_flnm, wgt_flnm, prefix
-  character(len=1024) :: griddirname
-  character(len=128)  :: grid_type
-  character(len=128), dimension(max_types) :: data_types
-  integer :: nlat, nlon, npnt, num_types
-  logical :: generate_weights, debug_on, has_prefix, use_uv_directly
+  character(len=1024) :: atmname, ocnname, icename
+  character(len=1024) :: output_flnm
+  logical :: debug_on
 
 contains
   subroutine read_namelist(file_path)
@@ -25,36 +19,17 @@ contains
     integer :: rc
 
     ! Namelist definition.
-    namelist /control_param/ program_name, dirname, &
-                             output_flnm, wgt_flnm, &
-                             nlat, nlon, npnt, &
-                             num_types, data_types, &
-                             generate_weights, prefix, &
-                             griddirname, grid_type, &
-                             has_prefix, use_uv_directly
+    namelist /control_param/ program_name, atmname, ocnname, icename, &
+                             output_flnm, debug_on
 
-    program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
+    program_name = 'Combine atm, ocn, and ice into one whole file'
 
-    dirname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
+    atmname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
+    ocnname = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
+    icename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/analysis.getkf.80members.36procs.uvTq/increment/'
 
-    griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/'
-    grid_type = 'C96_grid.tile'
+    output_flnm = 'combined.nc'
 
-    output_flnm = 'latlon_grid.nc'
-    wgt_flnm = 'weights.nc'
-    prefix = 'None'
-
-    has_prefix = .false.
-    use_uv_directly = .false.
-
-    nlon = 360
-    nlat = 180
-    npnt = 4
-    num_types = 1
-
-    data_types(1) = 'fv_core.res.tile'
-
-    generate_weights = .false.
     debug_on = .false.
 
     ! Check whether file exists.

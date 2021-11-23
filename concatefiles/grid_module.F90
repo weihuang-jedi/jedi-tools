@@ -42,9 +42,17 @@ module grid_module
      integer                               :: atm_nlev, atm_nlay, atm_nhor
      integer                               :: ocn_nlay
      integer                               :: ice_ncat
+
+     integer                               :: dimid_lat, dimid_lon, &
+                                              dimid_atm_lev, dimid_atm_lay, &
+                                              dimid_atm_hor, &
+                                              dimid_ocn_lay, &
+                                              dimid_ice_cat
+
      integer, dimension(:),    allocatable :: varids
      integer, dimension(:),    allocatable :: dimids
      integer, dimension(:),    allocatable :: dimlen
+
      character(len=128), dimension(:),    allocatable :: dimnames
 
      real,    dimension(:),    allocatable :: lon, lat
