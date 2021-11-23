@@ -198,7 +198,6 @@ subroutine create_var_attr(grid, whole)
    use netcdf
    use namelist_module
    use grid_module
-   use whole_module
 
    implicit none
 
@@ -235,30 +234,30 @@ subroutine create_var_attr(grid, whole)
 
       nd = grid%vars(i)%ndims
       if(3 == nd) then
-         if('atm' == trim(grid%gridname) then
-            if(whole%atm_nlev == grid%varids(i)%dimlen(3)) then
+         if('atm' == trim(grid%gridname)) then
+            if(whole%atm_nlev == grid%vars(i)%dimlen(3)) then
                coordinates = 'atm_lev lat lon'
-            else if(whole%atm_nlay == grid%varids(i)%dimlen(3)) then
+            else if(whole%atm_nlay == grid%vars(i)%dimlen(3)) then
                coordinates = 'atm_lay lat lon'
-            else if(whole%atm_nhor == grid%varids(i)%dimlen(3)) then
+            else if(whole%atm_nhor == grid%vars(i)%dimlen(3)) then
                coordinates = 'atm_hor lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
-               print *, 'Unknown dimlen: ', grid%varids(i)%dimlen(3)
+               print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
-         else if('ocn' == trim(grid%gridname) then
-            if(whole%ocn_nlay == grid%varids(i)%dimlen(3)) then
+         else if('ocn' == trim(grid%gridname)) then
+            if(whole%ocn_nlay == grid%vars(i)%dimlen(3)) then
                coordinates = 'ocn_lay lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
-               print *, 'Unknown dimlen: ', grid%varids(i)%dimlen(3)
+               print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
-         else if('ice' == trim(grid%gridname) then
-            if(whole%ice_ncat == grid%varids(i)%dimlen(3)) then
+         else if('ice' == trim(grid%gridname)) then
+            if(whole%ice_ncat == grid%vars(i)%dimlen(3)) then
                coordinates = 'ice_cat lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
-               print *, 'Unknown dimlen: ', grid%varids(i)%dimlen(3)
+               print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
          end if
       else if(nd /=2) then
@@ -282,25 +281,24 @@ subroutine process_file(grid, whole)
    use netcdf
    use namelist_module
    use grid_module
-   use fv_grid_utils_module
-   use whole_module
 
    implicit none
 
-   type(gridtupe), intent(inout) :: grid
-   type(gridtupe), intent(inout) :: whole
+   type(gridtype), intent(inout) :: grid
+   type(gridtype), intent(inout) :: whole
 
-   integer :: i, n, rc, uv_count
-
-   real, dimension(:,:,:), allocatable :: var2d
+   real, dimension(:,:), allocatable :: var2d
    real, dimension(:,:,:), allocatable :: var3d
 
-  !print *, 'Enter process_file'
+   character(len=80) :: varname
 
-   allocate(var2d(whole%nlon, whole%nlat, 1))
-   allocate(var3d(whole%nlon, whole%nlat, whole%nlev))
+   integer :: i, rc
 
-   uv_count = 0
+   print *, 'Enter process_file'
+   print *, 'Processing ', trim(grid%gridname)
+
+   allocate(var2d(whole%nlon, whole%nlat))
+
    do i = 1, grid%nVars
      !rc = nf90_inquire_variable(grid%fileid, grid%varids(i), &
      !         ndims=grid%vars(i)%nDims, natts=grid%vars(i)%nAtts)
@@ -315,93 +313,33 @@ subroutine process_file(grid, whole)
       if(grid%vars(i)%nDims < 2) cycle
 
       print *, 'Var No. ', i, ': name: ', trim(grid%vars(i)%varname)
-     !print *, 'Var No. ', i, ': varid: ', grid%varids(i)
+      print *, 'Var No. ', i, ': varid: ', grid%varids(i)
 
-         if((trim(grid(n)%vars(i)%varname) == 'ps') .or. &
-            (trim(grid(n)%vars(i)%varname) == 'phis')) then
-            rc = nf90_get_var(grid(n)%fileid, grid(n)%varids(i), grid(n)%var2d)
-            call check_status(rc)
-         else if((trim(grid(n)%vars(i)%varname) == 'ua') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'va') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'u') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'v') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'W') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'delp') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'DZ') .or. &
-                 (trim(grid(n)%vars(i)%varname) == 'T')) then
-            rc = nf90_get_var(grid(n)%fileid, grid(n)%varids(i), grid(n)%var3d)
-            call check_status(rc)
-         end if
-      end do
+      write(varname, fmt='(3a)') trim(grid%gridname), '_', trim(grid%vars(i)%varname)
 
-      if((trim(grid%vars(i)%varname) == 'ps') .or. &
-         (trim(grid%vars(i)%varname) == 'phis')) then
-         call interp2dvar(grid, whole, var2d)
-        !call nc_put3Dvar(whole%ncid, trim(grid%vars(i)%varname), &
-        !     var2d, 1, 1, whole%nlon, 1, whole%nlat, 1, 1)
-         call nc_put3Dvar0(whole%ncid, trim(grid%vars(i)%varname), &
-              var2d, 1, whole%nlon, 1, whole%nlat, 1, 1)
-      else if((trim(grid%vars(i)%varname) == 'ua') .or. &
-              (trim(grid%vars(i)%varname) == 'va') .or. &
-              (trim(grid%vars(i)%varname) == 'u') .or. &
-              (trim(grid%vars(i)%varname) == 'v') .or. &
-              (trim(grid%vars(i)%varname) == 'W') .or. &
-              (trim(grid%vars(i)%varname) == 'delp') .or. &
-              (trim(grid%vars(i)%varname) == 'DZ') .or. &
-              (trim(grid%vars(i)%varname) == 'T')) then
-         if(use_uv_directly) then
-            if((trim(grid%vars(i)%varname) == 'ua') .or. &
-               (trim(grid%vars(i)%varname) == 'va')) then
-               cycle
-            end if
+      if(2 == grid%vars(i)%nDims) then
+         rc = nf90_get_var(grid%fileid, grid%varids(i), var2d)
+         call check_status(rc)
+         call nc_put2Dvar0(whole%fileid, trim(grid%vars(i)%varname), &
+              var2d, 1, whole%nlon, 1, whole%nlat)
+      else if(3 == grid%vars(i)%nDims) then
+         if(allocated(var3d)) deallocate(var3d)
 
-            if(trim(grid%vars(i)%varname) == 'u') then
-               uv_count = uv_count + 1
-            else if(trim(grid%vars(i)%varname) == 'v') then
-               uv_count = uv_count + 1
-            end if
-         else
-            if((trim(grid%vars(i)%varname) == 'u') .or. &
-               (trim(grid%vars(i)%varname) == 'v')) then
-               cycle
-            end if
-         end if
+         allocate(var3d(whole%nlon, whole%nlat, grid%vars(i)%dimlen(3)))
 
-         if(use_uv_directly) then
-            if((trim(grid%vars(i)%varname) == 'u') .or. &
-               (trim(grid%vars(i)%varname) == 'v')) then
-               if(1 == uv_count) then
-                  cycle
-               else if(2 == uv_count) then
-                 !print *, 'Interpolate u/v here.'
-                  uv_count = 0
-
-                  do n = 1, 6
-                     call cubed_to_whole(grid(n)%var3du, grid(n)%var3dv, grid(n)%u, grid(n)%var3d, &
-                                          gridstruct(n), grid(n)%nx, grid(n)%ny, grid(n)%nz)
-                  end do
-
-                  call interp3dvar(grid, whole, var3d)
-                  call nc_put3Dvar0(whole%ncid, 'v', &
-                       var3d, 1, whole%nlon, 1, whole%nlat, 1, whole%nlev)
-                  call copy_u2var3d(grid)
-                  call interp3dvar(grid, whole, var3d)
-                  call nc_put3Dvar0(whole%ncid, 'u', &
-                       var3d, 1, whole%nlon, 1, whole%nlat, 1, whole%nlev)
-                  cycle
-               end if
-            end if
-         end if
-         call interp3dvar(grid, whole, var3d)
-        !call nc_put3Dvar(whole%ncid, trim(grid%vars(i)%varname), &
-        !     var3d, 1, 1, whole%nlon, 1, whole%nlat, 1, whole%nlev)
-         call nc_put3Dvar0(whole%ncid, trim(grid%vars(i)%varname), &
-              var3d, 1, whole%nlon, 1, whole%nlat, 1, whole%nlev)
+         rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
+         call check_status(rc)
+         call nc_put3Dvar0(whole%fileid, trim(varname), &
+                           var3d, 1, whole%nlon, 1, whole%nlat, &
+                           1, grid%vars(i)%dimlen(3))
+      else
+         print *, 'File: ', __FILE__, ', line: ', __LINE__
+         print *, 'Unprocessed ndims: ', grid%vars(i)%nDims
       end if
    end do
 
    deallocate(var2d)
-   deallocate(var3d)
+   if(allocated(var3d)) deallocate(var3d)
 
   !print *, 'Leave process_file'
 
