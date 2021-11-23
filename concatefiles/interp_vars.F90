@@ -17,19 +17,17 @@ subroutine generate_header(atm, ocn, ice, whole)
   
    call create_fv_core_var_attr(grid, latlon)
 
-   if(last) then
-     !End define mode.
-      rc = nf90_enddef(latlon%ncid)
-      if(rc /= nf90_noerr) then
-         write(unit=0, fmt='(a,i6,a)') "Problem to enddef ncid: <", latlon%ncid, ">."
-         write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
-         write(unit=0, fmt='(3a, i4)') &
-              "Stop in file: <", __FILE__, ">, line: ", __LINE__
-         stop
-      end if
+  !End define mode.
+   rc = nf90_enddef(latlon%ncid)
+   if(rc /= nf90_noerr) then
+      write(unit=0, fmt='(a,i6,a)') "Problem to enddef ncid: <", latlon%ncid, ">."
+      write(unit=0, fmt='(2a)') "Error status: ", trim(nf90_strerror(rc))
+      write(unit=0, fmt='(3a, i4)') &
+           "Stop in file: <", __FILE__, ">, line: ", __LINE__
+      stop
    end if
 
-  !print *, 'Leave generate_header'
+   print *, 'Leave generate_header'
 
 end subroutine generate_header
 

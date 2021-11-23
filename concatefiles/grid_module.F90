@@ -39,7 +39,7 @@ module grid_module
      integer                               :: fileid
      integer                               :: nDims, nVars, nGlobalAtts, unlimDimID
      integer                               :: nlat, nlon
-     integer                               :: atm_nalt, atm_nlay, atm_nhor
+     integer                               :: atm_nlev, atm_nlay, atm_nhor
      integer                               :: ocn_nlay
      integer                               :: ice_ncat
      integer, dimension(:),    allocatable :: varids
@@ -50,11 +50,7 @@ module grid_module
      real,    dimension(:),    allocatable :: lon, lat
      real,    dimension(:),    allocatable :: atm_lev, atm_lay, atm_hor
      real,    dimension(:),    allocatable :: ocn_lay
-     real,    dimension(:),    allocatable :: ice_lay
-
-     real, dimension(:),       allocatable :: var1d
-     real, dimension(:, :),    allocatable :: var2d
-     real, dimension(:, :, :), allocatable :: var3d
+     real,    dimension(:),    allocatable :: ice_cat
 
      type(vartype), dimension(:), allocatable :: vars
   end type gridtype
@@ -144,10 +140,6 @@ contains
    !Allocate memory.
     allocate(grid%varids(grid%nVars))
     allocate(grid%vars(grid%nVars))
-
-    allocate(grid%var1d(grid%nx))
-    allocate(grid%var2d(grid%nx, grid%ny))
-    allocate(grid%var3d(grid%nx, grid%ny, grid%nz))
 
     rc = nf90_inq_varids(grid%fileid, grid%nVars, grid%varids)
     call check_status(rc)
@@ -256,9 +248,6 @@ contains
     end do
 
     if(allocated(grid%vars)) deallocate(grid%vars)
-    if(allocated(grid%var1d)) deallocate(grid%var1d)
-    if(allocated(grid%var2d)) deallocate(grid%var2d)
-    if(allocated(grid%var3d)) deallocate(grid%var3d)
 
     print *, 'close filename: ', trim(grid%filename)
     rc = nf90_close(grid%fileid)
