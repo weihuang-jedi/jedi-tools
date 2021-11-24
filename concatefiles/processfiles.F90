@@ -6,13 +6,14 @@ subroutine process(atm, ocn, ice, whole, flnm)
 
    implicit none
 
-   type(gridtype),   intent(inout) :: atm, ocn, ice
-   type(gridtype),   intent(inout) :: whole
-   character(len=*), intent(inout) :: flnm
+   type(gridtype),   intent(in)  :: atm, ocn, ice
+   type(gridtype),   intent(out) :: whole
+   character(len=*), intent(in)  :: flnm
 
    integer :: rc
 
    print *, 'Enter process'
+   print *, 'flnm: ', trim(flnm)
   
    call create_file(atm, ocn, ice, whole, trim(flnm))
   
@@ -43,8 +44,8 @@ subroutine create_global_attr(ncid, filename, title)
 
    implicit none
 
-   integer, intent(in) :: ncid
-   character(len = *), intent(in) :: filename, title
+   integer,          intent(in) :: ncid
+   character(len=*), intent(in) :: filename, title
 
   !print *, 'Enter create_global_attr'
 
@@ -62,9 +63,9 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
 
    implicit none
 
-   type(gridtype),   intent(inout) :: atm, ocn, ice
-   type(gridtype),   intent(inout) :: whole
-   character(len=*), intent(in)    :: flnm
+   type(gridtype),   intent(in)  :: atm, ocn, ice
+   type(gridtype),   intent(out) :: whole
+   character(len=*), intent(in)  :: flnm
 
    integer :: i, nd, rc, ncid
 
@@ -108,6 +109,25 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'ice_cat', ice%ice_ncat, whole%dimid_ice_cat)
    call check_status(rc)
+
+   whole%nlon = atm%nlon
+   whole%nlat = atm%nlat
+   whole%atm_nlev = atm%atm_nlev
+   whole%atm_nlay = atm%atm_nlay
+   whole%atm_nhor = atm%atm_nhor
+   whole%ocn_nlev = ocn%ocn_nlev
+   whole%ice_ncat = ice%ice_ncat
+
+  !print *, 'ice%ice_ncat = ', ice%ice_ncat
+  !print *, 'ice%ice_cat = ', ice%ice_cat
+
+   print *, 'whole%dimid_lon = ', whole%dimid_lon
+   print *, 'whole%dimid_lat = ', whole%dimid_lat
+   print *, 'whole%dimid_atm_lev = ', whole%dimid_atm_lev
+   print *, 'whole%dimid_atm_lay = ', whole%dimid_atm_lay
+   print *, 'whole%dimid_atm_hor = ', whole%dimid_atm_hor
+   print *, 'whole%dimid_ocn_lev = ', whole%dimid_ocn_lev
+   print *, 'whole%dimid_ice_cat = ', whole%dimid_ice_cat
 
    call create_global_attr(ncid, trim(flnm), 'Atmosphere, Ocean and Ice combined data')
 
@@ -168,6 +188,9 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
                       "ice_catalog", &
                       "Catalog" )
 
+  !print *, 'whole%dimid_lon = ', whole%dimid_lon
+  !print *, 'atm%lon = ', atm%lon
+
   !write lon
    call nc_put1Dvar0(ncid, 'lon', atm%lon, 1, atm%nlon)
 
@@ -183,8 +206,14 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
   !write atm hor
    call nc_put1Dvar0(ncid, 'atm_hor', atm%atm_hor, 1, atm%atm_nhor)
 
-  !write ocn lay
+  !print *, 'ocn%dimid_ocn_lev = ', ocn%dimid_ocn_lev
+  !print *, 'ocn%ocn_lev = ', ocn%ocn_lev
+
+  !write ocn lev
    call nc_put1Dvar0(ncid, 'ocn_lev', ocn%ocn_lev, 1, ocn%ocn_nlev)
+
+  !print *, 'whole%dimid_ice_cat = ', whole%dimid_ice_cat
+  !print *, 'ice%ice_cat = ', ice%ice_cat
 
   !write ice cat
    call nc_put1Dvar0(ncid, 'ice_cat', ice%ice_cat, 1, ice%ice_ncat)
@@ -201,7 +230,7 @@ subroutine create_var_attr(grid, whole)
 
    implicit none
 
-   type(gridtype), intent(inout) :: grid
+   type(gridtype), intent(in)    :: grid
    type(gridtype), intent(inout) :: whole
 
    integer, dimension(6) :: dimids
@@ -210,14 +239,27 @@ subroutine create_var_attr(grid, whole)
    real    :: missing_real
    character(len=80) :: long_name, units, coordinates, varname
 
-  !print *, 'Enter create_var_attr'
+   print *, 'Enter create_var_attr'
+   print *, 'grid%gridname: ', trim(grid%gridname)
+
+
+   print *, 'whole%dimid_lon = ', whole%dimid_lon
+   print *, 'whole%dimid_lat = ', whole%dimid_lat
+   print *, 'whole%dimid_atm_lev = ', whole%dimid_atm_lev
+   print *, 'whole%dimid_atm_lay = ', whole%dimid_atm_lay
+   print *, 'whole%dimid_atm_hor = ', whole%dimid_atm_hor
+   print *, 'whole%dimid_ocn_lev = ', whole%dimid_ocn_lev
+   print *, 'whole%dimid_ice_cat = ', whole%dimid_ice_cat
 
    missing_real = -1.0e38
    missing_int = -999999
-   ncid = whole%fileid
+   ncid = grid%fileid
 
    do i = 1, grid%nVars
       if(grid%vars(i)%nDims < 2) cycle
+
+      print *, 'Var No. ', i, ': varname: ', trim(grid%vars(i)%varname)
+      print *, 'Var No. ', i, ': ndims = ', grid%vars(i)%ndims
 
       dimids(1) = whole%dimid_lon
       dimids(2) = whole%dimid_lat
@@ -229,32 +271,50 @@ subroutine create_var_attr(grid, whole)
       call check_status(rc)
       rc = nf90_get_att(ncid, grid%varids(i), 'units', units)
       call check_status(rc)
-      rc = nf90_get_att(ncid, grid%varids(i), '_CoordinateAxes', coordinates)
-      call check_status(rc)
+
+     !if('ocn' /= trim(grid%gridname)) then
+     !   rc = nf90_get_att(ncid, grid%varids(i), '_CoordinateAxes', coordinates)
+     !   call check_status(rc)
+     !end if
 
       nd = grid%vars(i)%ndims
       if(3 == nd) then
          if('atm' == trim(grid%gridname)) then
-            if(whole%atm_nlev == grid%vars(i)%dimlen(3)) then
+            if(grid%atm_nlev == grid%vars(i)%dimlen(3)) then
+               dimids(3) = whole%dimid_atm_lev
                coordinates = 'atm_lev lat lon'
-            else if(whole%atm_nlay == grid%vars(i)%dimlen(3)) then
+            else if(grid%atm_nlay == grid%vars(i)%dimlen(3)) then
+               dimids(3) = whole%dimid_atm_lay
                coordinates = 'atm_lay lat lon'
-            else if(whole%atm_nhor == grid%vars(i)%dimlen(3)) then
+            else if(grid%atm_nhor == grid%vars(i)%dimlen(3)) then
+               dimids(3) = whole%dimid_atm_hor
                coordinates = 'atm_hor lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
                print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
          else if('ocn' == trim(grid%gridname)) then
-            if(whole%ocn_nlev == grid%vars(i)%dimlen(3)) then
-               coordinates = 'ocn_lev lat lon'
+            if(grid%ocn_ntime == grid%vars(i)%dimlen(3)) then
+               nd = 2
+               coordinates = 'lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
                print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
          else if('ice' == trim(grid%gridname)) then
-            if(whole%ice_ncat == grid%vars(i)%dimlen(3)) then
+            if(grid%ice_ncat == grid%vars(i)%dimlen(3)) then
                coordinates = 'ice_cat lat lon'
+            else
+               print *, 'File: ', __FILE__, ', line: ', __LINE__
+               print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
+            end if
+         end if
+      else if(4 == nd) then
+         if('ocn' == trim(grid%gridname)) then
+            if(grid%ocn_nlev == grid%vars(i)%dimlen(3)) then
+               nd = 3
+               dimids(3) = whole%dimid_ocn_lev
+               coordinates = 'ocn_lev lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
                print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
@@ -266,6 +326,10 @@ subroutine create_var_attr(grid, whole)
       end if
 
       write(varname, fmt='(3a)') trim(grid%gridname), '_', trim(grid%vars(i)%varname)
+
+      print *, 'varname: ', trim(varname)
+      print *, 'dimids = ', dimids(1:nd)
+
       call nc_putAttr(whole%fileid, nd, dimids, NF90_REAL, &
                       trim(varname), trim(long_name), trim(units), &
                       trim(coordinates), missing_real)
@@ -320,13 +384,15 @@ subroutine process_file(grid, whole)
       if(2 == grid%vars(i)%nDims) then
          rc = nf90_get_var(grid%fileid, grid%varids(i), var2d)
          call check_status(rc)
-         call nc_put2Dvar0(whole%fileid, trim(grid%vars(i)%varname), &
+         print *, 'Write var: ', trim(varname)
+         call nc_put2Dvar0(whole%fileid, trim(varname), &
               var2d, 1, whole%nlon, 1, whole%nlat)
       else if(3 == grid%vars(i)%nDims) then
          if('ocn' == trim(grid%gridname)) then
             rc = nf90_get_var(grid%fileid, grid%varids(i), var2d)
             call check_status(rc)
-            call nc_put2Dvar0(whole%fileid, trim(grid%vars(i)%varname), &
+            print *, 'Write var: ', trim(varname)
+            call nc_put2Dvar0(whole%fileid, trim(varname), &
                  var2d, 1, whole%nlon, 1, whole%nlat)
          else
             if(allocated(var3d)) deallocate(var3d)
@@ -335,6 +401,7 @@ subroutine process_file(grid, whole)
 
             rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
             call check_status(rc)
+            print *, 'Write var: ', trim(varname)
             call nc_put3Dvar0(whole%fileid, trim(varname), &
                               var3d, 1, whole%nlon, 1, whole%nlat, &
                               1, grid%vars(i)%dimlen(3))
@@ -347,6 +414,7 @@ subroutine process_file(grid, whole)
 
             rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
             call check_status(rc)
+            print *, 'Write var: ', trim(varname)
             call nc_put3Dvar0(whole%fileid, trim(varname), &
                               var3d, 1, whole%nlon, 1, whole%nlat, &
                               1, grid%vars(i)%dimlen(3))

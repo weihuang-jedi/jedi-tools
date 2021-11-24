@@ -177,37 +177,41 @@ contains
       !print *, 'Var No. ', i, ': ', trim(grid%vars(i)%varname)
 
        if(trim(grid%vars(i)%varname) == 'lat') then
-          if(allocated(grid%lat)) allocate(grid%lat(grid%nlat))
+          if(.not. allocated(grid%lat)) allocate(grid%lat(grid%nlat))
           rc = nf90_get_var(grid%fileid, grid%varids(i), grid%lat)
           call check_status(rc)
        else if(trim(grid%vars(i)%varname) == 'lon') then
-          if(allocated(grid%lon)) allocate(grid%lon(grid%nlon))
+          if(.not. allocated(grid%lon)) allocate(grid%lon(grid%nlon))
           rc = nf90_get_var(grid%fileid, grid%varids(i), grid%lon)
           call check_status(rc)
        else
           if('atm' == trim(gridname)) then
              if(trim(grid%vars(i)%varname) == 'lev') then
-                if(allocated(grid%atm_lev)) allocate(grid%atm_lev(grid%atm_nlev))
+                if(.not. allocated(grid%atm_lev)) allocate(grid%atm_lev(grid%atm_nlev))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%atm_lev)
                 call check_status(rc)
              else if(trim(grid%vars(i)%varname) == 'layer') then
-                if(allocated(grid%atm_lay)) allocate(grid%atm_lay(grid%atm_nlay))
+                if(.not. allocated(grid%atm_lay)) allocate(grid%atm_lay(grid%atm_nlay))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%atm_lay)
                 call check_status(rc)
              else if(trim(grid%vars(i)%varname) == 'hor') then
-                if(allocated(grid%atm_hor)) allocate(grid%atm_hor(grid%atm_nhor))
+                if(.not. allocated(grid%atm_hor)) allocate(grid%atm_hor(grid%atm_nhor))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%atm_hor)
                 call check_status(rc)
              end if
           else if('ocn' == trim(gridname)) then
-             if(trim(grid%vars(i)%varname) == 'lay') then
-                if(allocated(grid%ocn_lev)) allocate(grid%ocn_lev(grid%ocn_nlev))
+             if(trim(grid%vars(i)%varname) == 'lev') then
+                if(.not. allocated(grid%ocn_lev)) allocate(grid%ocn_lev(grid%ocn_nlev))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_lev)
+                call check_status(rc)
+             else if(trim(grid%vars(i)%varname) == 'time') then
+                if(.not. allocated(grid%ocn_time)) allocate(grid%ocn_time(grid%ocn_ntime))
+                rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_time)
                 call check_status(rc)
              end if
           else if('ice' == trim(gridname)) then
              if(trim(grid%vars(i)%varname) == 'ncat') then
-                if(allocated(grid%ice_cat)) allocate(grid%ice_cat(grid%ice_ncat))
+                if(.not. allocated(grid%ice_cat)) allocate(grid%ice_cat(grid%ice_ncat))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ice_cat)
                 call check_status(rc)
              end if
