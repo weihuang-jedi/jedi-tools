@@ -104,7 +104,7 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'atm_hor', atm%atm_nhor, whole%dimid_atm_hor)
    call check_status(rc)
-   rc = nf90_def_dim(ncid, 'ocn_lay', ocn%ocn_nlay, whole%dimid_ocn_lay)
+   rc = nf90_def_dim(ncid, 'ocn_lev', ocn%ocn_nlev, whole%dimid_ocn_lev)
    call check_status(rc)
    rc = nf90_def_dim(ncid, 'ice_cat', ice%ice_ncat, whole%dimid_ice_cat)
    call check_status(rc)
@@ -152,10 +152,10 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
                       "atm_one_lev", &
                       "Horizontal" )
 
-   dimids(1) = whole%dimid_ocn_lay
+   dimids(1) = whole%dimid_ocn_lev
 !--Field atm ocn
    call nc_putAxisAttr(ncid, nd, dimids, NF90_REAL, &
-                      'ocn_lay', &
+                      'ocn_lev', &
                       "Ocean Layer Coordinate", &
                       "ocn_downward", &
                       "Layer" )
@@ -184,7 +184,7 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
    call nc_put1Dvar0(ncid, 'atm_hor', atm%atm_hor, 1, atm%atm_nhor)
 
   !write ocn lay
-   call nc_put1Dvar0(ncid, 'ocn_lay', ocn%ocn_lay, 1, ocn%ocn_nlay)
+   call nc_put1Dvar0(ncid, 'ocn_lev', ocn%ocn_lev, 1, ocn%ocn_nlev)
 
   !write ice cat
    call nc_put1Dvar0(ncid, 'ice_cat', ice%ice_cat, 1, ice%ice_ncat)
@@ -246,8 +246,8 @@ subroutine create_var_attr(grid, whole)
                print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
             end if
          else if('ocn' == trim(grid%gridname)) then
-            if(whole%ocn_nlay == grid%vars(i)%dimlen(3)) then
-               coordinates = 'ocn_lay lat lon'
+            if(whole%ocn_nlev == grid%vars(i)%dimlen(3)) then
+               coordinates = 'ocn_lev lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
                print *, 'Unknown dimlen: ', grid%vars(i)%dimlen(3)
@@ -323,15 +323,37 @@ subroutine process_file(grid, whole)
          call nc_put2Dvar0(whole%fileid, trim(grid%vars(i)%varname), &
               var2d, 1, whole%nlon, 1, whole%nlat)
       else if(3 == grid%vars(i)%nDims) then
-         if(allocated(var3d)) deallocate(var3d)
+         if('ocn' == trim(grid%gridname)) then
+            rc = nf90_get_var(grid%fileid, grid%varids(i), var2d)
+            call check_status(rc)
+            call nc_put2Dvar0(whole%fileid, trim(grid%vars(i)%varname), &
+                 var2d, 1, whole%nlon, 1, whole%nlat)
+         else
+            if(allocated(var3d)) deallocate(var3d)
 
-         allocate(var3d(whole%nlon, whole%nlat, grid%vars(i)%dimlen(3)))
+            allocate(var3d(whole%nlon, whole%nlat, grid%vars(i)%dimlen(3)))
 
-         rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
-         call check_status(rc)
-         call nc_put3Dvar0(whole%fileid, trim(varname), &
-                           var3d, 1, whole%nlon, 1, whole%nlat, &
-                           1, grid%vars(i)%dimlen(3))
+            rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
+            call check_status(rc)
+            call nc_put3Dvar0(whole%fileid, trim(varname), &
+                              var3d, 1, whole%nlon, 1, whole%nlat, &
+                              1, grid%vars(i)%dimlen(3))
+         end if
+      else if(4 == grid%vars(i)%nDims) then
+         if('ocn' == trim(grid%gridname)) then
+            if(allocated(var3d)) deallocate(var3d)
+
+            allocate(var3d(whole%nlon, whole%nlat, grid%vars(i)%dimlen(3)))
+
+            rc = nf90_get_var(grid%fileid, grid%varids(i), var3d)
+            call check_status(rc)
+            call nc_put3Dvar0(whole%fileid, trim(varname), &
+                              var3d, 1, whole%nlon, 1, whole%nlat, &
+                              1, grid%vars(i)%dimlen(3))
+         else
+            print *, 'File: ', __FILE__, ', line: ', __LINE__
+            print *, 'Unprocessed ndims: ', grid%vars(i)%nDims
+         end if
       else
          print *, 'File: ', __FILE__, ', line: ', __LINE__
          print *, 'Unprocessed ndims: ', grid%vars(i)%nDims

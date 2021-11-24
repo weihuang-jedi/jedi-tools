@@ -40,13 +40,13 @@ module grid_module
      integer                               :: nDims, nVars, nGlobalAtts, unlimDimID
      integer                               :: nlat, nlon
      integer                               :: atm_nlev, atm_nlay, atm_nhor
-     integer                               :: ocn_nlay
+     integer                               :: ocn_nlev, ocn_ntime
      integer                               :: ice_ncat
 
      integer                               :: dimid_lat, dimid_lon, &
                                               dimid_atm_lev, dimid_atm_lay, &
                                               dimid_atm_hor, &
-                                              dimid_ocn_lay, &
+                                              dimid_ocn_lev, dimid_ocn_time, &
                                               dimid_ice_cat
 
      integer, dimension(:),    allocatable :: varids
@@ -57,8 +57,10 @@ module grid_module
 
      real,    dimension(:),    allocatable :: lon, lat
      real,    dimension(:),    allocatable :: atm_lev, atm_lay, atm_hor
-     real,    dimension(:),    allocatable :: ocn_lay
+     real,    dimension(:),    allocatable :: ocn_lev
      real,    dimension(:),    allocatable :: ice_cat
+
+     integer(kind=8), dimension(:), allocatable :: ocn_time
 
      type(vartype), dimension(:), allocatable :: vars
   end type gridtype
@@ -89,16 +91,16 @@ contains
     grid%filename = trim(filename)
     grid%gridname = trim(gridname)
 
-    print *, 'open filename: ', trim(grid%filename)
+   !print *, 'open filename: ', trim(grid%filename)
     rc = nf90_open(trim(grid%filename), nf90_nowrite, grid%fileid)
     call check_status(rc)
-    print *, 'fileid: ', grid%fileid
+   !print *, 'fileid: ', grid%fileid
 
     rc = nf90_inquire(grid%fileid, grid%nDims, grid%nVars, &
                       grid%nGlobalAtts, grid%unlimdimid)
     call check_status(rc)
-    print *, 'nVars: ', grid%nVars
-    print *, 'nDims: ', grid%nDims
+   !print *, 'nVars: ', grid%nVars
+   !print *, 'nDims: ', grid%nDims
 
    !Allocate memory.
     allocate(grid%dimids(grid%nDims))
@@ -108,12 +110,12 @@ contains
     rc = nf90_inq_dimids(grid%fileid, grid%nDims, grid%dimids, include_parents)
     call check_status(rc)
 
-    print *, 'dimids: ', grid%dimids
+   !print *, 'dimids: ', grid%dimids
 
     do i = 1, grid%nDims
        rc = nf90_inquire_dimension(grid%fileid, grid%dimids(i), dimname, dimlen)
        call check_status(rc)
-       print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
+      !print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
 
        if(trim(dimname) == 'lat') then
           grid%nlat = dimlen
@@ -129,8 +131,8 @@ contains
                 grid%atm_nhor = dimlen
              end if
           else if('ocn' == trim(gridname)) then
-             if(trim(dimname) == 'lay') then
-                grid%ocn_nlay = dimlen
+             if(trim(dimname) == 'lev') then
+                grid%ocn_nlev = dimlen
              end if
           else if('ice' == trim(gridname)) then
              if(trim(dimname) == 'ncat') then
@@ -143,7 +145,7 @@ contains
        grid%dimnames(i) = trim(dimname)
     end do
 
-    print *, 'grid%nlat = ', grid%nlat, ', grid%nlon = ', grid%nlon
+   !print *, 'grid%nlat = ', grid%nlat, ', grid%nlon = ', grid%nlon
 
    !Allocate memory.
     allocate(grid%varids(grid%nVars))
@@ -158,7 +160,7 @@ contains
        rc = nf90_inquire_variable(grid%fileid, grid%varids(i), &
                                   ndims=grid%vars(i)%nDims, natts=grid%vars(i)%nAtts)
        call check_status(rc)
-       print *, 'Var No. ', i, ': ndims = ', grid%vars(i)%nDims
+      !print *, 'Var No. ', i, ': ndims = ', grid%vars(i)%nDims
 
        allocate(grid%vars(i)%dimids(grid%vars(i)%nDims))
        allocate(grid%vars(i)%dimlen(grid%vars(i)%nDims))
@@ -167,12 +169,12 @@ contains
        rc = nf90_inquire_variable(grid%fileid, grid%varids(i), &
                                   dimids=grid%vars(i)%dimids)
        call check_status(rc)
-       print *, 'Var No. ', i, ': grid%vars(i)%dimids = ', grid%vars(i)%dimids
+      !print *, 'Var No. ', i, ': grid%vars(i)%dimids = ', grid%vars(i)%dimids
 
        rc = nf90_inquire_variable(grid%fileid, grid%varids(i), &
                                   name=grid%vars(i)%varname)
        call check_status(rc)
-       print *, 'Var No. ', i, ': ', trim(grid%vars(i)%varname)
+      !print *, 'Var No. ', i, ': ', trim(grid%vars(i)%varname)
 
        if(trim(grid%vars(i)%varname) == 'lat') then
           if(allocated(grid%lat)) allocate(grid%lat(grid%nlat))
@@ -199,8 +201,8 @@ contains
              end if
           else if('ocn' == trim(gridname)) then
              if(trim(grid%vars(i)%varname) == 'lay') then
-                if(allocated(grid%ocn_lay)) allocate(grid%ocn_lay(grid%ocn_nlay))
-                rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_lay)
+                if(allocated(grid%ocn_lev)) allocate(grid%ocn_lev(grid%ocn_nlev))
+                rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_lev)
                 call check_status(rc)
              end if
           else if('ice' == trim(gridname)) then
@@ -219,7 +221,7 @@ contains
        end do
     end do
 
-    print *, 'Leave initialize_grid'
+   !print *, 'Leave initialize_grid'
 
   end subroutine initialize_grid
 
@@ -243,7 +245,7 @@ contains
     if(allocated(grid%atm_lev)) deallocate(grid%atm_lev)
     if(allocated(grid%atm_lay)) deallocate(grid%atm_lay)
     if(allocated(grid%atm_hor)) deallocate(grid%atm_hor)
-    if(allocated(grid%ocn_lay)) deallocate(grid%ocn_lay)
+    if(allocated(grid%ocn_lev)) deallocate(grid%ocn_lev)
     if(allocated(grid%ice_cat)) deallocate(grid%ice_cat)
 
     do i = 1, grid%nVars
