@@ -176,12 +176,13 @@ if __name__ == '__main__':
   print('uvOnly = ', uvOnly)
   print('addobs = ', addobs)
 
-  bkg = 'jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean'
+  datadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  bkg = '%s/jeff-runs/PSonly/sfg_2021010900_fhr06_ensmean' %(datadir)
   if(uvOnly):
-    anl = 'jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean'
+    anl = '%s/jeff-runs/uvsondeobs/sanl_2021010900_fhr06_ensmean' %(datadir)
   else:
-   #anl = 'jeff-runs/allsondeobs/sanl_2021010900_fhr06_ensmean'
-    anl = 'jeff-runs/PSonly/sanl_2021010900_fhr06_ensmean'
+   #anl = '%s/jeff-runs/allsondeobs/sanl_2021010900_fhr06_ensmean' %(datadir)
+    anl = '%s/jeff-runs/psonly_delp/sanl_2021010900_fhr06_ensmean' %(datadir)
 
 #------------------------------------------------------------------------------
   pg = PlotGaussian(debug=debug, output=output, bkg=bkg, anl=anl)
@@ -202,7 +203,7 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
   if(addobs):
-    filename = 'jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4'
+    filename = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(datadir)
     rgo = ReadGSIobs(debug=debug, filename=filename)
     obslat, obslon = rgo.get_latlon()
 
@@ -221,13 +222,12 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
  #cblevs = np.arange(-0.5, 0.6, 0.1)
-  clevs = np.arange(-1.0, 1.01, 0.01)
-  cblevs = np.arange(-1.0, 1.2, 0.2)
+  clevs = np.arange(-0.2, 0.21, 0.01)
+  cblevs = np.arange(-0.2, 0.3, 0.1)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
- #levs = [61, 62, 63]
-  levs = [60]
+  levs = [0, 1, 30, 40, 50, 60, 63]
 
   for lev in levs:
     pvar = var[lev,:,:]
@@ -240,13 +240,7 @@ if __name__ == '__main__':
     gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
 
 #------------------------------------------------------------------------------
-  clevs = np.arange(-0.5, 0.51, 0.01)
-  cblevs = np.arange(-0.5, 0.6, 0.1)
-  gp.set_clevs(clevs=clevs)
-  gp.set_cblevs(cblevs=cblevs)
-
- #lons = [40, 105, 170, 270, 300]
-  lons = [60]
+  lons = [40, 105, 170, 270, 300]
 
   for lon in lons:
     pvar = var[:,:,lon]
@@ -262,8 +256,7 @@ if __name__ == '__main__':
     gp.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
- #lats = [-30, 0, 45, 70]
-  lats = [50, 55]
+  lats = [-30, 0, 45, 70]
 
   for lat in lats:
     pvar = var[:,90+lat,:]

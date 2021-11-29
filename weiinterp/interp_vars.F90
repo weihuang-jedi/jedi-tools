@@ -666,12 +666,13 @@ subroutine process_fv_core(spec, tile, gridstruct, latlon)
    integer :: i, n, rc, uv_count
 
    real, dimension(:,:,:), allocatable :: var2d
-   real, dimension(:,:,:), allocatable :: var3d
+   real, dimension(:,:,:), allocatable :: var3d, u
 
   !print *, 'Enter process_fv_core'
 
    allocate(var2d(latlon%nlon, latlon%nlat, 1))
    allocate(var3d(latlon%nlon, latlon%nlat, latlon%nlev))
+   allocate(u(latlon%nlon, latlon%nlat, latlon%nlev))
 
    uv_count = 0
    do i = 1, tile(1)%nVars
@@ -789,17 +790,23 @@ subroutine process_fv_core(spec, tile, gridstruct, latlon)
                  !print *, 'Interpolate u/v here.'
                   uv_count = 0
 
-                  do n = 1, 6
-                     call cubed_to_latlon(tile(n)%var3du, tile(n)%var3dv, tile(n)%u, tile(n)%var3d, &
-                                          gridstruct(n), tile(n)%nx, tile(n)%ny, tile(n)%nz)
-                  end do
+                 !do n = 1, 6
+                 !   call cubed_to_latlon(tile(n)%var3du, tile(n)%var3dv, tile(n)%u, tile(n)%var3d, &
+                 !                        gridstruct(n), tile(n)%nx, tile(n)%ny, tile(n)%nz)
+                 !end do
 
-                  call interp3dvar(tile, latlon, var3d)
-                  call nc_put3Dvar0(latlon%ncid, 'v', &
-                       var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
-                  call copy_u2var3d(tile)
-                  call interp3dvar(tile, latlon, var3d)
+                 !call interp3dvar(tile, latlon, var3d)
+                 !call nc_put3Dvar0(latlon%ncid, 'v', &
+                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+                 !call copy_u2var3d(tile)
+                 !call interp3dvar(tile, latlon, var3d)
+                 !call nc_put3Dvar0(latlon%ncid, 'u', &
+                 !     var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+
+                  call interp3dvect(tile, spec, gridstruct, latlon, u, var3d)
                   call nc_put3Dvar0(latlon%ncid, 'u', &
+                       u, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
+                  call nc_put3Dvar0(latlon%ncid, 'v', &
                        var3d, 1, latlon%nlon, 1, latlon%nlat, 1, latlon%nlev)
                   cycle
                end if
@@ -815,6 +822,7 @@ subroutine process_fv_core(spec, tile, gridstruct, latlon)
 
    deallocate(var2d)
    deallocate(var3d)
+   deallocate(u)
 
   !print *, 'Leave process_fv_core'
 
@@ -1386,4 +1394,146 @@ subroutine copy_u2var3d(tile)
   end do
 
 end subroutine copy_u2var3d
+
+!----------------------------------------------------------------------
+subroutine interp3dvect(tile, spec, gridstruct, latlon, var3du, var3dv)
+
+  use tile_module
+  use fv_grid_utils_module
+  use latlon_module
+
+  implicit none
+
+  type(tilegrid), dimension(6), intent(inout) :: tile
+  type(tilespec_type), dimension(6), intent(in)    :: spec
+  type(fv_grid_type), dimension(6), intent(in)     :: gridstruct
+  type(latlongrid), intent(in) :: latlon
+  real, dimension(latlon%nlon, latlon%nlat, latlon%nlev), intent(out) :: var3du
+  real, dimension(latlon%nlon, latlon%nlat, latlon%nlev), intent(out) :: var3dv
+
+  integer :: i, j, k, n, ik, jk, m
+  real :: w
+  real :: um
+  real :: vm
+  real :: cxy
+  real :: sxy
+  real,allocatable :: ue(:,:,:,:)
+  real,allocatable :: ve(:,:,:,:)
+  allocate(ue(6,tile(1)%nx,tile(1)%ny,latlon%nlev))  ! earth realtive winds on the "A" grid
+  allocate(ve(6,tile(1)%nx,tile(1)%ny,latlon%nlev))
+  ! convert u and v from the staggered D-grid to the A-grid points
+  ! need to use code from cubed_to_latlon
+  do n = 1, 6
+     call cubed_to_latlon(tile(n)%var3du, tile(n)%var3dv, ue(n,:,:,:), ve(n,:,:,:), &
+                          gridstruct(n), tile(n)%nx, tile(n)%ny, tile(n)%nz)
+  enddo
+  ! now that winds are earth relative, vector interpolate to new grid
+  do jk = 1, latlon%nlat
+  do ik = 1, latlon%nlon
+     do k = 1, latlon%nlev
+        var3du(ik, jk, k) = 0.0
+        var3dv(ik, jk, k) = 0.0
+     end do
+
+     do m = 1, latlon%npnt
+        n = latlon%tile(ik, jk, m)
+        i = latlon%ilon(ik, jk, m)
+        j = latlon%jlat(ik, jk, m)
+        w = latlon%wgt(ik, jk, m)
+        ! get rotation angle %x and %y are that longitude and latitude of the
+        ! super-grid, so points 2,4,6,.etc refer to the "A" points
+        CALL MOVECT(spec(n)%y(2*i,2*j), spec(n)%x(2*i,2*j), &
+                    latlon%lat(jk), latlon%lon(ik) , cxy, sxy)
+        ! vector interpolate to lat-lon grid
+        do k = 1, latlon%nlev
+           var3du(ik, jk, k) = var3du(ik, jk, k) + w*(cxy * ue(n,i,j,k) - sxy * ve(n,i,j,k))
+           var3dv(ik, jk, k) = var3dv(ik, jk, k) + w*(sxy * ue(n,i,j,k) + cxy * ve(n,i,j,k))
+        end do
+     end do
+  end do
+  end do
+
+  deallocate(ue)
+  deallocate(ve)
+
+end subroutine interp3dvect
+
+!=====================================================================  
+SUBROUTINE MOVECT(FLAT,FLON,TLAT,TLON,CROT,SROT)
+!$$$  SUBPROGRAM DOCUMENTATION BLOCK
+!
+! SUBPROGRAM:  MOVECT     MOVE A VECTOR ALONG A GREAT CIRCLE
+!   PRGMMR: IREDELL       ORG: W/NMC23       DATE: 96-04-10
+!
+! ABSTRACT: THIS SUBPROGRAM PROVIDES THE ROTATION PARAMETERS
+!           TO MOVE A VECTOR ALONG A GREAT CIRCLE FROM ONE
+!           POSITION TO ANOTHER WHILE CONSERVING ITS ORIENTATION
+!           WITH RESPECT TO THE GREAT CIRCLE.  THESE ROTATION
+!           PARAMETERS ARE USEFUL FOR VECTOR INTERPOLATION.
+!
+! PROGRAM HISTORY LOG:
+!   96-04-10  IREDELL
+! 1999-04-08  IREDELL  GENERALIZE PRECISION
+!
+! USAGE:    CALL MOVECT(FLAT,FLON,TLAT,TLON,CROT,SROT)
+!
+!   INPUT ARGUMENT LIST:
+!     FLAT     - REAL LATITUDE IN DEGREES FROM WHICH TO MOVE THE VECTOR
+!     FLON     - REAL LONGITUDE IN DEGREES FROM WHICH TO MOVE THE VECTOR
+!     TLAT     - REAL LATITUDE IN DEGREES TO WHICH TO MOVE THE VECTOR
+!     TLON     - REAL LONGITUDE IN DEGREES TO WHICH TO MOVE THE VECTOR
+!
+!   OUTPUT ARGUMENT LIST:
+!     CROT     - REAL CLOCKWISE VECTOR ROTATION COSINE
+!     SROT     - REAL CLOCKWISE VECTOR ROTATION SINE
+!                (UTO=CROT*UFROM-SROT*VFROM;
+!                 VTO=SROT*UFROM+CROT*VFROM)
+!
+! ATTRIBUTES:
+!   LANGUAGE: FORTRAN 90
+!
+!$$$
+ IMPLICIT NONE
+
+ REAL,            INTENT(IN   ) :: FLAT, FLON
+ REAL,            INTENT(IN   ) :: TLAT, TLON
+ REAL,            INTENT(  OUT) :: CROT, SROT
+
+ REAL,   PARAMETER     :: CRDLIM=0.9999999
+ REAL,   PARAMETER     :: PI=3.14159265358979
+ REAL,   PARAMETER     :: RPD=PI/180.0
+
+ REAL                  :: CTLAT,STLAT,CFLAT,SFLAT
+ REAL                  :: CDLON,SDLON,CRD
+ REAL                  :: SRD2RN,STR,CTR,SFR,CFR
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  COMPUTE COSINE OF THE RADIAL DISTANCE BETWEEN THE POINTS.
+ CTLAT=COS(TLAT*RPD)
+ STLAT=SIN(TLAT*RPD)
+ CFLAT=COS(FLAT*RPD)
+ SFLAT=SIN(FLAT*RPD)
+ CDLON=COS((FLON-TLON)*RPD)
+ SDLON=SIN((FLON-TLON)*RPD)
+ CRD=STLAT*SFLAT+CTLAT*CFLAT*CDLON
+
+! - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+!  COMPUTE ROTATIONS AT BOTH POINTS WITH RESPECT TO THE GREAT CIRCLE
+!  AND COMBINE THEM TO GIVE THE TOTAL VECTOR ROTATION PARAMETERS.
+ IF(ABS(CRD).LE.CRDLIM) THEN
+   SRD2RN=-1/(1-CRD**2)
+   STR=CFLAT*SDLON
+   CTR=CFLAT*STLAT*CDLON-SFLAT*CTLAT
+   SFR=CTLAT*SDLON
+   CFR=CTLAT*SFLAT*CDLON-STLAT*CFLAT
+   CROT=SRD2RN*(CTR*CFR-STR*SFR)
+   SROT=SRD2RN*(CTR*SFR+STR*CFR)
+!  USE A DIFFERENT APPROXIMATION FOR NEARLY COINCIDENT POINTS.
+!  MOVING VECTORS TO ANTIPODAL POINTS IS AMBIGUOUS ANYWAY.
+ ELSE
+   CROT=CDLON
+   SROT=SDLON*STLAT
+ ENDIF
+
+END SUBROUTINE MOVECT
 

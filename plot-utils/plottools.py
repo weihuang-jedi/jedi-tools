@@ -1071,22 +1071,23 @@ class PlotTools():
     self.fig, ax = self.plt.subplots(nrows=1, ncols=2)
     self.fig.suptitle(self.title)
 
-    north_map = Basemap(ax=ax[0], projection='ortho', lon_0=-105, lat_0=90, resolution='c')
-    south_map = Basemap(ax=ax[1], projection='ortho', lon_0=75, lat_0=-90, resolution='c')
+   #north_map = Basemap(ax=ax[0], projection='ortho', lon_0=-105, lat_0=90, resolution='c')
+   #south_map = Basemap(ax=ax[1], projection='ortho', lon_0=75, lat_0=-90, resolution='c')
 
-   #north_map = Basemap(ax=ax[0], projection='npstere', boundinglat=0, round=True,
-   #                    lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
-   #south_map = Basemap(ax=ax[1], projection='spstere', boundinglat=0, round=True,
-   #                    lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
+    north_map = Basemap(ax=ax[0], projection='npstere', boundinglat=30, round=True,
+                        lon_0=-90, lat_0=90, lat_1=60, lat_2=30, resolution='c')
+    south_map = Basemap(ax=ax[1], projection='spstere', boundinglat=-30, round=True,
+                        lon_0=90, lat_0=-90, lat_1=-60, lat_2=-30, resolution='c')
 
-    v1d = np.reshape(pvar, (pvar.size, ))
+   #v1d = np.reshape(pvar, (pvar.size, ))
+    var = np.reshape(pvar, (pvar.size, ))
 
     small_val = 1.0e-6
    #mask = np.ma.masked_where(v1d < small_val, v1d)
    #var = v1d.copy()
    #var[mask < small_val] = np.nan
    #var = v1d
-    var = np.ma.array(v1d, mask = v1d < small_val)
+   #var = np.ma.array(v1d, mask = v1d < small_val)
 
     (nx, ny) = north_map(self.lon1d, self.lat1d)
     f_n = north_map.contourf(nx, ny, var, tri=True,
