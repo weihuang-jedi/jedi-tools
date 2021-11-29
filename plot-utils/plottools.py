@@ -584,7 +584,7 @@ class PlotTools():
                                    alpha=self.alpha)
 
     cb = self.plt.colorbar(orientation=self.orientation, extend='both',
-                           pad=self.pad, ticks=self.cblevs)
+                           pad=self.pad, ticks=self.cblevs, shrink=0.8)
 
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
 

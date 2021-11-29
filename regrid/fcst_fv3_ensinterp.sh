@@ -22,9 +22,15 @@
 
  executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
 
+ yymmdd=20160111
+ analhour=06
+ fcsthout=12
+ PREFIX=${yymmdd}.${fcsthout}0000.
+
 #ensdir=/work/noaa/gsienkf/weihuang/jedi/EnsembleDaVal/Data/ens
  ensdir=/work2/noaa/gsienkf/weihuang/data/UFSRNR_GSI_SOCA_LETKF_COUPLED_012016_FROLOV_IAU/20160111060000/intercom/forecast
- latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
+#latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
+ latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata
 
  number_members=80
 
@@ -55,11 +61,12 @@
      OUTPUTFILE=${grid_fv3}
      WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc
      NUM_TYPES=5
-     DATATYPES="'20160111.120000.fv_core.res.tile', '20160111.120000.sfc_data.tile', '20160111.120000.fv_tracer.res.tile', '20160111.120000.fv_srf_wnd.res.tile', '20160111.120000.phy_data.tile',"
+     DATATYPES="'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',"
 
      sed -e "s?DIRNAME?${DIRNAME}?g" \
          -e "s?OUTPUTFILE?${OUTPUTFILE}?g" \
          -e "s?WEIGHTFILE?${WEIGHTFILE}?g" \
+         -e "s?PREFIX?${PREFIX}?g" \
          -e "s?NUM_TYPES?${NUM_TYPES}?g" \
          -e "s?DATATYPES?${DATATYPES}?g" \
          input.nml.template > input.nml

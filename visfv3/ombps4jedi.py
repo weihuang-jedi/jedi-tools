@@ -11,7 +11,9 @@ import matplotlib.pyplot
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
-from genplot import GeneratePlot as genplot
+#from genplot import GeneratePlot as genplot
+sys.path.append('../plot-utils')
+from plottools import PlotTools
 from scipy_regridder import RegridFV3 as regridder
 from readIODA2Obs import ReadIODA2Obs
 
@@ -46,9 +48,10 @@ if __name__ == '__main__':
   lon = np.arange(0.0, 360.0, dlon)
   lat = np.arange(-90.0, 90.0+dlat, dlat)
 
-  gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
-  clevs = np.arange(-20.0, 20.0, 0.2)
-  cblevs = np.arange(-20.0, 20.0, 5.0)
+ #gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
+  gp = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
+  clevs = np.arange(-10.0, 10.2, 0.2)
+  cblevs = np.arange(-10.0, 15.0, 5.0)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
   gp.set_cmapname('rainbow')
@@ -80,12 +83,12 @@ if __name__ == '__main__':
   print('var min: %f, var max: %f' %(np.min(full_var), np.max(full_var)))
 
 #------------------------------------------------------------------------------
-  gp.set_label('Surface Pressure (hPa)')
+  gp.set_label('Surface Pressure (hPa) -- OMB')
 
-  imgname = 'jedi_sondes_obs_ps_only'
-  title = 'Sondes Surface Pressure OBS (only)'
+  imgname = 'jedi_sondes_obs_ps_only_OMB'
+  title = 'Sondes Surface Pressure OBS (only) -- OMB'
 
   gp.set_imagename(imgname)
   gp.set_title(title)
-  gp.obsonly(full_lat, full_lon, full_var)
+  gp.obsonly2(full_lat, full_lon, full_var, inbound=True)
 

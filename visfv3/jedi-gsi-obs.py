@@ -397,7 +397,7 @@ if __name__ == '__main__':
 
   gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
   if(varname == 'surface_pressure'):
-    jediOutFile = '%s/ioda_v2_data/ps-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4' %(jedidir)
+    jediOutFile = '%s/ioda_v2_data/ps-out-delp/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4' %(jedidir)
     gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
   else:
     jediOutFile = '%s/ioda_v2_data/uvTq-out/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z_0000.nc4' %(jedidir)
