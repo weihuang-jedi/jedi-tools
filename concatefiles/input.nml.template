@@ -1,0 +1,9 @@
+&control_param
+ atmname = 'ATMFILE',
+ ocnname = 'OCNFILE',
+ icename = 'ICEFILE',
+
+ output_flnm = 'COMBINEDFILE',
+ debug_on = .false.,
+/
+

@@ -82,8 +82,8 @@ contains
 
     character(len=1024) :: dimname, varname
 
-    print *, 'Enter initialize_grid'
-    print *, 'filename: <', trim(filename), '>'
+   !print *, 'Enter initialize_grid'
+    print *, 'initialize filename: <', trim(filename), '>'
     print *, 'gridname: <', trim(gridname), '>'
 
     include_parents = 0
@@ -132,6 +132,8 @@ contains
              end if
           else if('ocn' == trim(gridname)) then
              if(trim(dimname) == 'lev') then
+                grid%ocn_nlev = dimlen
+             else if(trim(dimname) == 'lay') then
                 grid%ocn_nlev = dimlen
              end if
           else if('ice' == trim(gridname)) then
@@ -201,6 +203,10 @@ contains
              end if
           else if('ocn' == trim(gridname)) then
              if(trim(grid%vars(i)%varname) == 'lev') then
+                if(.not. allocated(grid%ocn_lev)) allocate(grid%ocn_lev(grid%ocn_nlev))
+                rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_lev)
+                call check_status(rc)
+             else if(trim(grid%vars(i)%varname) == 'lay') then
                 if(.not. allocated(grid%ocn_lev)) allocate(grid%ocn_lev(grid%ocn_nlev))
                 rc = nf90_get_var(grid%fileid, grid%varids(i), grid%ocn_lev)
                 call check_status(rc)

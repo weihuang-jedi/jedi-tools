@@ -12,8 +12,8 @@ subroutine process(atm, ocn, ice, whole, flnm)
 
    integer :: rc
 
-   print *, 'Enter process'
-   print *, 'flnm: ', trim(flnm)
+  !print *, 'Enter process'
+   print *, 'output flnm: ', trim(flnm)
   
    call create_file(atm, ocn, ice, whole, trim(flnm))
   
@@ -35,7 +35,7 @@ subroutine process(atm, ocn, ice, whole, flnm)
    call process_file(ocn, whole)
    call process_file(ice, whole)
 
-   print *, 'Leave process'
+  !print *, 'Leave process'
 
 end subroutine process
 
@@ -73,8 +73,8 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
 
    logical :: fileExists
 
-   print *, 'Enter create_file'
-   print *, 'flnm = ', trim(flnm)
+  !print *, 'Enter create_file'
+  !print *, 'flnm = ', trim(flnm)
 
    whole%filename = trim(flnm)
 
@@ -93,7 +93,7 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
    call check_status(rc)
 
    whole%fileid = ncid
-   print *, 'ncid = ', ncid
+  !print *, 'ncid = ', ncid
 
    rc = nf90_def_dim(ncid, 'lon', atm%nlon, whole%dimid_lon)
    call check_status(rc)
@@ -207,6 +207,7 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
    call nc_put1Dvar0(ncid, 'atm_hor', atm%atm_hor, 1, atm%atm_nhor)
 
   !print *, 'ocn%dimid_ocn_lev = ', ocn%dimid_ocn_lev
+  !print *, 'ocn%ocn_nlev = ', ocn%ocn_nlev
   !print *, 'ocn%ocn_lev = ', ocn%ocn_lev
 
   !write ocn lev
@@ -218,7 +219,7 @@ subroutine create_file(atm, ocn, ice, whole, flnm)
   !write ice cat
    call nc_put1Dvar0(ncid, 'ice_cat', ice%ice_cat, 1, ice%ice_ncat)
 
-   print *, 'Leave create_file'
+  !print *, 'Leave create_file'
 end subroutine create_file
 
 !-------------------------------------------------------------------------------------
@@ -233,14 +234,14 @@ subroutine create_var_attr(grid, whole)
    type(gridtype), intent(in)    :: grid
    type(gridtype), intent(inout) :: whole
 
-   integer, dimension(6) :: dimids
+   integer, dimension(6) :: dimids, chunksizes
    integer :: rc, nd, i, ncid
    integer :: missing_int
    real    :: missing_real
    character(len=80) :: long_name, units, coordinates, varname
 
-   print *, 'Enter create_var_attr'
-   print *, 'grid%gridname: ', trim(grid%gridname)
+  !print *, 'Enter create_var_attr'
+  !print *, 'grid%gridname: ', trim(grid%gridname)
 
   !print *, 'whole%dimid_lon = ', whole%dimid_lon
   !print *, 'whole%dimid_lat = ', whole%dimid_lat
@@ -249,6 +250,9 @@ subroutine create_var_attr(grid, whole)
   !print *, 'whole%dimid_atm_hor = ', whole%dimid_atm_hor
   !print *, 'whole%dimid_ocn_lev = ', whole%dimid_ocn_lev
   !print *, 'whole%dimid_ice_cat = ', whole%dimid_ice_cat
+
+   chunksizes(1) = whole%nlon
+   chunksizes(2) = whole%nlat
 
    missing_real = -1.0e38
    missing_int = -999999
@@ -281,12 +285,15 @@ subroutine create_var_attr(grid, whole)
          if('atm' == trim(grid%gridname)) then
             if(grid%atm_nlev == grid%vars(i)%dimlen(3)) then
                dimids(3) = whole%dimid_atm_lev
+               chunksizes(3) = whole%atm_nlev
                coordinates = 'atm_lev lat lon'
             else if(grid%atm_nlay == grid%vars(i)%dimlen(3)) then
                dimids(3) = whole%dimid_atm_lay
+               chunksizes(3) = whole%atm_nlay
                coordinates = 'atm_lay lat lon'
             else if(grid%atm_nhor == grid%vars(i)%dimlen(3)) then
                dimids(3) = whole%dimid_atm_hor
+               chunksizes(3) = whole%atm_nhor
                coordinates = 'atm_hor lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
@@ -302,6 +309,7 @@ subroutine create_var_attr(grid, whole)
             end if
          else if('ice' == trim(grid%gridname)) then
             if(grid%ice_ncat == grid%vars(i)%dimlen(3)) then
+               chunksizes(3) = whole%ice_ncat
                coordinates = 'ice_cat lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
@@ -310,9 +318,12 @@ subroutine create_var_attr(grid, whole)
          end if
       else if(4 == nd) then
          if('ocn' == trim(grid%gridname)) then
+           !print *, 'grid%ocn_nlev =', grid%ocn_nlev
+           !print *, 'grid%vars(i)%dimlen(3) = ', grid%vars(i)%dimlen(3)
             if(grid%ocn_nlev == grid%vars(i)%dimlen(3)) then
                nd = 3
                dimids(3) = whole%dimid_ocn_lev
+               chunksizes(3) = whole%ocn_nlev
                coordinates = 'ocn_lev lat lon'
             else
                print *, 'File: ', __FILE__, ', line: ', __LINE__
@@ -335,12 +346,15 @@ subroutine create_var_attr(grid, whole)
 !-----  integer,             intent( in) :: ncid_out, varid_out
 !-----  integer                          :: nf90_copy_att
 
-      call nc_putAttr(whole%fileid, nd, dimids, NF90_REAL, &
-                      trim(varname), trim(long_name), trim(units), &
-                      trim(coordinates), missing_real)
+     !call nc_putAttr(whole%fileid, nd, dimids, NF90_REAL, &
+     !                trim(varname), trim(long_name), trim(units), &
+     !                trim(coordinates), missing_real)
+      call nc_putAttrWithChunking(whole%fileid, nd, dimids, chunksizes, NF90_REAL, &
+                                  trim(varname), trim(long_name), trim(units), &
+                                  trim(coordinates), missing_real)
    end do
 
-   print *, 'Leave create_var_attr'
+  !print *, 'Leave create_var_attr'
 
 end subroutine create_var_attr
 
@@ -363,7 +377,7 @@ subroutine process_file(grid, whole)
 
    integer :: i, rc
 
-   print *, 'Enter process_file'
+  !print *, 'Enter process_file'
    print *, 'Processing ', trim(grid%gridname)
 
    allocate(var2d(whole%nlon, whole%nlat))

@@ -1,9 +1,9 @@
 &control_param
- atmname = '/work/noaa/gsienkf/weihuang/tools/weiinterp/grid_latlon.nc',
- ocnname = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/interp/output/MOM.res.2016-01-11-06-00-00_360x180.nc',
- icename = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/interp/output/iced.2016-01-11-21600_360x180.nc',
+ atmname = '/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata/ens1_000001.nc',
+ ocnname = '/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata/ocean_ens1_000001.nc',
+ icename = '/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata/ice_ens1_000001.nc',
 
- output_flnm = 'combined.nc',
+ output_flnm = '/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata/AtmOcnIce_ens1_000001.nc',
  debug_on = .false.,
 /
 
