@@ -3,6 +3,7 @@ import os
 import sys
 import types
 import getopt
+import netCDF4
 
 import numpy as np
 import matplotlib
@@ -61,7 +62,7 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   if(addobs):
-    obsdir = '%s/ioda_v2_data/obs'
+    obsdir = '%s/ioda_v2_data/obs' %(casedir)
     filename = '%s/ioda_v2_diag_amsua_n15_ges.2021010900_ensmean.nc4' %(obsdir)
 
     obsfile = netCDF4.Dataset(filename, 'r')
@@ -69,13 +70,13 @@ if __name__ == '__main__':
     obslon = obsfile.variables['Longitude'][:]
     obsfile.close()
 
-    print('obslat = ', obslat)
-    print('obslon = ', obslon)
+   #print('obslat = ', obslat)
+   #print('obslon = ', obslon)
 
-    print('len(obslat) = ', len(obslat))
-    print('len(obslon) = ', len(obslon))
+   #print('len(obslat) = ', len(obslat))
+   #print('len(obslon) = ', len(obslon))
 
-    sys.exit(-1)
+   #sys.exit(-1)
 
 #------------------------------------------------------------------------------
   rg = regridder(debug=debug, datafiles=datafiles, gridspecfiles=gridspecfiles)
@@ -87,36 +88,26 @@ if __name__ == '__main__':
 
   dlon = 360.0/nlon
   dlat = 180.0/(nlat - 1)
-  lon = np.arange(0.0, 360.0, dlon)
-  lat = np.arange(-90.0, 90.0+dlat, dlat)
+  lon = np.arange(0.0+0.5*dlon, 360.0+0.5*dlon, dlon)
+  lat = np.arange(-90.0+0.5*dlat, 90.0+0.5*dlat, dlat)
 
  #print('var.ndim = ', var.ndim)
  #print('var.shape = ', var.shape)
 
+  if(debug):
+    msg = ('variable min, max: (%s, %s).' % (var.min(), var.max()))
+    print(msg)
+
 #------------------------------------------------------------------------------
   pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
   if(addobs):
-    pt.set_obs_latlon(obslat=lat, obslon=lon)
+    pt.set_obs_latlon(obslat=obslat, obslon=obslon)
 
 #------------------------------------------------------------------------------
   pt.set_label('Temperature (K)')
 
- #image_prefix = 'uvTq_jedi_sondes'
- #title_preix = 'uvTq JEDI Sondes Temperature at'
- #image_prefix = 'PSonly_jedi_sondes'
- #title_preix = 'PSonly JEDI Sondes Temperature at'
- #image_prefix = 'LETKF_PSonly_jedi_sondes'
- #title_preix = 'LETKF PSonly JEDI Sondes Temperature at'
- #image_prefix = 'LETKF_PSonly_exp_1'
- #title_preix = 'LETKF PS only Temperature at'
- #image_prefix = 'GETKF_PSonly_logp_exp_2'
- #title_preix = 'GETKF PS only logp as vert loc. Temperature at'
- #image_prefix = 'LETKF_PSonly_logp_exp_3'
- #title_preix = 'LETKF PS only logp as vert loc. Temperature at'
- #image_prefix = 'manual_Obs_temperature'
- #title_preix = 'Manual Observation Temperature at'
-  image_prefix = 'use_delp_temperature'
-  title_preix = 'use_delp Temperature at'
+  image_prefix = 'amsua_JEDI_temperature'
+  title_preix = 'amsua JEDI Temperature at'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
@@ -125,8 +116,6 @@ if __name__ == '__main__':
  #cblevs = np.arange(-5.0, 6.0, 1.0)
  #clevs = np.arange(-1.0, 1.01, 0.01)
  #cblevs = np.arange(-1.0, 1.2, 0.2)
- #clevs = np.arange(-0.001, 0.001, 0.00001)
- #cblevs = np.arange(-0.001, 0.002, 0.001)
   clevs = np.arange(-0.2, 0.21, 0.01)
   cblevs = np.arange(-0.2, 0.3, 0.1)
   pt.set_clevs(clevs=clevs)
@@ -134,11 +123,12 @@ if __name__ == '__main__':
   pt.set_precision(precision=2)
 
  #------------------------------------------------------------------------------
-  levs = [0, 1, 40, 50, 62, 63]
- #levs = [61, 62, 63]
- #levs = [12, 24, 40, 50]
+  levs = [30, 33, 40, 60, 63]
   for lev in levs:
     pvar = var[lev,:,:]
+    if(debug):
+      msg = ('variable at level %d, min, max: (%s, %s).' % (lev, pvar.min(), pvar.max()))
+      print(msg)
     imgname = '%s_lev_%d.png' %(image_prefix, lev)
     title = '%s level %d' %(title_preix, lev)
     pt.set_imagename(imgname)
@@ -150,14 +140,7 @@ if __name__ == '__main__':
       pt.plot(pvar)
 
  #------------------------------------------------------------------------------
- #clevs = np.arange(-0.5, 0.51, 0.01)
- #cblevs = np.arange(-0.5, 0.6, 0.1)
-  pt.set_clevs(clevs=clevs)
-  pt.set_cblevs(cblevs=cblevs)
-
- #lons = [60, 200]
-  lons = [40, 105, 170, 270, 300]
- #lons = [170]
+  lons = [60, 105, 170, 270, 300]
   for lon in lons:
     pvar = var[:,:,lon]
     title = '%s longitude %d' %(title_preix, lon)
@@ -172,9 +155,7 @@ if __name__ == '__main__':
     pt.plot_meridional_section(pvar)
 
  #------------------------------------------------------------------------------
- #lats = [50, 55]
-  lats = [-30, 0, 45, 70]
- #lats = [-41, -23, 0, 22, 41]
+  lats = [-50, 0, 45, 70]
   for lat in lats:
     pvar = var[:,90+lat,:]
     title = '%s latitude %d' %(title_preix, lat)

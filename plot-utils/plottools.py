@@ -599,7 +599,14 @@ class PlotTools():
 
   def add_obs_marker(self, marker='x', size=3, color='green'):
     if(len(self.obslon) > 0):
+      print('len(self.obslon) = ', len(self.obslon))
+      print('len(self.obslat) = ', len(self.obslat))
+
       x, y = self.basemap(self.obslon, self.obslat)
+
+      print('len(x) = ', len(x))
+      print('len(y) = ', len(y))
+
      #adding dotes:
      #dotes = self.basemap.plot(x, y, 'bo', markersize=12)
      #dotes = self.basemap.plot(x, y, 'bo', markersize=6)

@@ -12,7 +12,10 @@ import matplotlib.pyplot
 from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 
-from genplot import GeneratePlot as genplot
+#from genplot import GeneratePlot as genplot
+sys.path.append('../plot-utils')
+from plottools import PlotTools
+
 from scipy_regridder import RegridFV3 as regridder
 from readGSIobs import ReadGSIobs
 
@@ -172,9 +175,30 @@ if __name__ == '__main__':
   print('output = ', output)
   print('addobs = ', addobs)
 
-  datadir = '/scratch2/BMC/gsienkf/Wei.Huang/jedi/run/case_study/amsua/ioda_v2_data/data'
+ #datadir = '/scratch2/BMC/gsienkf/Wei.Huang/jedi/run/case_study/amsua/ioda_v2_data/data'
+  datadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua/jeff-data'
   bkg = '%s/sfg_2021010900_fhr06_ensmean' %(datadir)
   anl = '%s/sanl_2021010900_fhr06_ensmean' %(datadir)
+
+#------------------------------------------------------------------------------
+  if(addobs):
+    filename = '%s/diag_amsua_n15_ges.2021010900_ensmean.nc4' %(datadir)
+
+    obsfile = netCDF4.Dataset(filename, 'r')
+    obslat = obsfile.variables['Latitude'][:]
+    obslon = obsfile.variables['Longitude'][:]
+    landtm = obsfile.variables['Land_Temperature'][:]
+    obsfile.close()
+
+    print('obslat = ', obslat)
+    print('obslon = ', obslon)
+    print('landtm = ', landtm)
+
+    print('len(obslat) = ', len(obslat))
+    print('len(obslon) = ', len(obslon))
+    print('len(landtm) = ', len(landtm)
+
+    sys.exit(-1)
 
 #------------------------------------------------------------------------------
   pg = PlotGaussian(debug=debug, output=output, bkg=bkg, anl=anl)
@@ -193,19 +217,12 @@ if __name__ == '__main__':
   var = rg.interp2latlon_data(lon1d, lat1d, invar, nlon=nlon, nlat=nlat, method='linear')
 
 #------------------------------------------------------------------------------
-  gp = genplot(debug=debug, output=output, lat=lat, lon=lon)
+  pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
   if(addobs):
-    filename = '%s/diag_amsua_n15_ges.2021010900_ensmean.nc4' %(datadir)
-
-    obsfile = netCDF4.Dataset(filename, 'r')
-    obslat = obsfile.variables['Latitude']
-    obslon = obsfile.variables['Longitude']
-    obsfile.close()
-
-    gp.set_obs_latlon(obslat=obslat, obslon=obslon)
+    pt.set_obs_latlon(obslat=obslat, obslon=obslon)
 
 #------------------------------------------------------------------------------
-  gp.set_label('Temperature (K)')
+  pt.set_label('Temperature (K)')
 
   imageprefix = 'amsua_GSI'
   titleprefix = 'GSI amsua Temperature at'
@@ -215,50 +232,48 @@ if __name__ == '__main__':
  #cblevs = np.arange(-0.5, 0.6, 0.1)
   clevs = np.arange(-0.2, 0.21, 0.01)
   cblevs = np.arange(-0.2, 0.3, 0.1)
-  gp.set_clevs(clevs=clevs)
-  gp.set_cblevs(cblevs=cblevs)
+  pt.set_clevs(clevs=clevs)
+  pt.set_cblevs(cblevs=cblevs)
 
-  levs = [0, 1, 30, 40, 50, 60, 63]
-
+#------------------------------------------------------------------------------
+  levs = [30, 33, 40, 60, 63]
   for lev in levs:
     pvar = var[lev,:,:]
     imgname = '%s_lev_%d.png' %(imageprefix, lev)
     title = '%s level %d' %(titleprefix, lev)
-    gp.set_imagename(imgname)
-    gp.set_title(title)
-   #gp.plot(pvar, addmark=1, marker='x', size=3, color='green')
-   #gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
-    gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+   #pt.plot(pvar, addmark=1, marker='x', size=3, color='green')
+   #pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
+    pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
 
 #------------------------------------------------------------------------------
-  lons = [40, 105, 170, 270, 300]
-
+  lons = [60, 105, 170, 270, 300]
   for lon in lons:
     pvar = var[:,:,lon]
     title = '%s longitude %d' %(titleprefix, lon)
-    gp.set_title(title)
+    pt.set_title(title)
 
     imgname = '%s_lon_%d_logp.png' %(imageprefix, lon)
-    gp.set_imagename(imgname)
-    gp.plot_meridional_section_logp(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_meridional_section_logp(pvar)
 
     imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
-    gp.set_imagename(imgname)
-    gp.plot_meridional_section(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
-  lats = [-30, 0, 45, 70]
-
+  lats = [-50, 0, 45, 70]
   for lat in lats:
     pvar = var[:,90+lat,:]
-    gp.set_title(title)
+    pt.set_title(title)
     title = '%s latitude %d' %(titleprefix, lat)
 
     imgname = '%s_lat_%d_logp.png' %(imageprefix, lat)
-    gp.set_imagename(imgname)
-    gp.plot_zonal_section_logp(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_zonal_section_logp(pvar)
 
     imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
-    gp.set_imagename(imgname)
-    gp.plot_zonal_section(pvar)
+    pt.set_imagename(imgname)
+    pt.plot_zonal_section(pvar)
 

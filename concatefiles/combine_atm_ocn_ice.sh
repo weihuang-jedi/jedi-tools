@@ -16,13 +16,14 @@
  ulimit -s unlimited
  ulimit -c unlimited
 
- executable=/work2/noaa/gsienkf/weihuang/tools/concatefiles/concatefiles.exe
+#executable=/work2/noaa/gsienkf/weihuang/tools/concatefiles/concatefiles.exe
+ executable=/work/noaa/gsienkf/weihuang/tools/concatefiles/concatefiles.exe
 
  sourcedir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
  targetdir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata
 
-#number_members=80
- number_members=1
+ number_members=80
+#number_members=1
 
  n=1
  while [ $n -le $number_members ]
