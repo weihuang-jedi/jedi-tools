@@ -19,6 +19,8 @@
  print("nlat = " + nlat)
  print("nhgt = " + nhgt)
 
+ rho = p/(287.0*t)
+
 ;--------------------------------------------------
 ;pixel = 2048
  pixel = 1024
@@ -37,6 +39,7 @@
  resC@cnLinesOn        = False
  resC@cnLineLabelsOn   = False                     ; no contour line labels
  resC@cnInfoLabelOn    = False                     ; no info label
+ resC@mpCenterLonF     = 180
  resC@gsnDraw          = False                     ; don't draw yet
  resC@gsnFrame         = False                     ; don't advance yet
  resC@cnLevelSelectionMode = "ExplicitLevels" ; use explicit levels
@@ -47,6 +50,7 @@
  resV@gsnFrame         = False                     ; don't advance yet
  resV@mpFillOn         = False
  resV@mpOutlineOn      = True
+ resV@mpCenterLonF     = 180
  resV@vcRefMagnitudeF  = 5.0                       ; add a reference vector
  resV@vcRefLengthF     = 0.045                     ; what the ref length is
  resV@vcGlyphStyle     = "CurlyVector"             ; turn on curley vectors
@@ -61,15 +65,19 @@
 ;draw(plot)
 ;frame(wks)
 
- resC@cnLevels = fspan(200.0, 310.0, 11)
- do n = 0, nhgt, intv
-    resC@tiMainString = "UV and Temperature at " + (50*n) + "m"
+;resC@cnLevels = fspan(200.0, 310.0, 11)
+ levs = (/0, 2, 6, 10, 20, 60, 80/)
+ do i = 0, dimsizes(levs)-1
+    n = levs(i)
+    resC@tiMainString = "UV and Temperature at " + ((500*n)/1000) + "km"
 
     uh = u(n, :, :)
     vh = v(n, :, :)
-    th = t(n, :, :)
+   ;th = t(n, :, :)
+    rhoh = rho(n, :, :)
 
-    plotC = gsn_csm_contour_map(wks, th, resC)
+   ;plotC = gsn_csm_contour_map(wks, th, resC)
+    plotC = gsn_csm_contour_map(wks, rhoh, resC)
     plotV = gsn_csm_vector_map(wks, uh(::intv, ::intv), vh(::intv, ::intv), resV)
 
     overlay(plotC,plotV)

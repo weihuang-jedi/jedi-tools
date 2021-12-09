@@ -20,10 +20,10 @@ module module_trajectory
      character(len=1024)                :: filename
      integer                            :: ncid
      integer                            :: dimidx, dimidy, dimidz, dimidt
-     integer                            :: nx, ny, nz, nt
+     integer                            :: nx, ny, nt
      real(kind=8), dimension(2)         :: time
 
-     integer, dimension(:, :, :), allocatable :: x, y, z
+     integer, dimension(:, :), allocatable :: x, y, z
   end type trajectorytype
 
   !-----------------------------------------------------------------------
@@ -31,33 +31,28 @@ module module_trajectory
 contains
 
  !-----------------------------------------------------------------------
-  subroutine initialize_trajectory(model, trajectory)
+  subroutine initialize_trajectory(model, trajectory, height)
 
     implicit none
 
     type(modelgrid),      intent(in)  :: model
     type(trajectorytype), intent(out) :: trajectory
+    real,                 intent(in)  :: height
 
-    integer :: i, j, k
+    integer :: i, j
 
     trajectory%nx = model%nlon
     trajectory%ny = model%nlat
-    trajectory%nz = model%nlev
 
-    allocate(trajectory%x(trajectory%nx, trajectory%ny, trajectory%nz))
-    allocate(trajectory%y(trajectory%nx, trajectory%ny, trajectory%nz))
-    allocate(trajectory%z(trajectory%nx, trajectory%ny, trajectory%nz))
+    allocate(trajectory%x(trajectory%nx, trajectory%ny))
+    allocate(trajectory%y(trajectory%nx, trajectory%ny))
+    allocate(trajectory%z(trajectory%nx, trajectory%ny))
 
-   !print *, 'model%lon = ', model%lon
-   !print *, 'model%lat = ', model%lat
-
-    do k = 1, trajectory%nz
     do j = 1, trajectory%ny
     do i = 1, trajectory%nx
-       trajectory%x(i,j,k) = model%lon(i)
-       trajectory%y(i,j,k) = model%lat(j)
-       trajectory%z(i,j,k) = 0.5*(model%z(i, j, k) + model%z(i, j, k+1))
-    end do
+       trajectory%x(i,j) = model%lon(i)
+       trajectory%y(i,j) = model%lat(j)
+       trajectory%z(i,j) = height
     end do
     end do
 
@@ -128,38 +123,50 @@ contains
    !real, parameter :: pi = 3.1415926535897932
     real, parameter :: pi = 3.1416
 
-    real :: arc2deg, deg2arc, dlon, dlat, dz, z
+    real :: arc2deg, deg2arc, dlon, dlat, dz, z, rlat
     integer :: i, j, k
     integer :: mi, mj, mk
 
     arc2deg = 180.0/pi
     deg2arc = pi/180.0
 
-    do k = 1, trajectory%nz
+    rlat = er*cos(89.0*deg2arc)
+
     do j = 1, trajectory%ny
     do i = 1, trajectory%nx
-       z = trajectory%z(i,j,k)
-       mi = int(trajectory%x(i,j,k)/model%dlon) + 1
-       mj = int((trajectory%y(i,j,k)+90.0)/model%dlat) + 1
+       z = trajectory%z(i,j)
+       mi = int(trajectory%x(i,j)/model%dlon) + 1
+       mj = int((trajectory%y(i,j)+90.0)/model%dlat) + 1
        mk = get_vertical_index(model, mi, mj, z)
-       if(abs(trajectory%y(i,j,k)) > 89.5) then
-          dlon = 0.0
+       if(abs(trajectory%y(i,j)) > 89.0) then
+          dlon = dt*model%u(mi,mj,mk)/rlat
        else
-          dlon = dt*model%u(mi,mj,mk)/(er*cos(trajectory%y(i,j,k)*deg2arc))
+          dlon = dt*model%u(mi,mj,mk)/(er*cos(trajectory%y(i,j)*deg2arc))
        end if
        dlat = dt*model%v(mi,mj,mk)/er
        dz = dt*model%w(mi,mj,mk)
 
-       trajectory%x(i,j,k) = trajectory%x(i,j,k) + dlon*arc2deg
-       trajectory%y(i,j,k) = trajectory%y(i,j,k) + dlat*arc2deg
-       trajectory%z(i,j,k) = trajectory%z(i,j,k) + dz
+       trajectory%x(i,j) = trajectory%x(i,j) + dlon*arc2deg
+       trajectory%y(i,j) = trajectory%y(i,j) + dlat*arc2deg
+       trajectory%z(i,j) = trajectory%z(i,j) + dz
 
-       if(trajectory%z(i,j,k) > model%z(mi, mj, 1)) then
-          trajectory%z(i,j,k) = model%z(mi, mj, 1)
-       else if(trajectory%z(i,j,k) < model%z(mi, mj, model%nlev+1)) then
-          trajectory%z(i,j,k) = model%z(mi, mj, model%nlev+1)
+       if(trajectory%x(i,j) < 0.0 ) then
+          trajectory%x(i,j) = trajectory%x(i,j) + 360.0
+       else if(trajectory%x(i,j) >= model%lon(model%nlon)) then
+          trajectory%x(i,j) = trajectory%x(i,j) - 360.0
        end if
-    end do
+
+       if(trajectory%y(i,j) < -90.0 ) then
+          trajectory%y(i,j) = -180.0 - trajectory%y(i,j)
+       else if(trajectory%y(i,j) > 90.0) then
+          trajectory%y(i,j) =  180.0 - trajectory%y(i,j)
+       end if
+
+       if(trajectory%z(i,j) > model%z(mi, mj, 1)) then
+          trajectory%z(i,j) = model%z(mi, mj, 1)
+       else if(trajectory%z(i,j) < model%z(mi, mj, model%nlev+1)) then
+          trajectory%z(i,j) = model%z(mi, mj, model%nlev+1)
+       end if
     end do
     end do
 

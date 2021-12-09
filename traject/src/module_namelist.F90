@@ -10,7 +10,7 @@ MODULE module_namelist
   character(len=1024) :: filename
   character(len=1024) :: output_flnm
   integer :: numbstep
-  real    :: dt
+  real    :: dt, height
   logical :: debug_on
 
 contains
@@ -24,7 +24,7 @@ contains
 
     ! Namelist definition.
     namelist /control_param/ program_name, filename, &
-                             numbstep, dt, &
+                             numbstep, dt, height, &
                              output_flnm, debug_on
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
@@ -36,6 +36,7 @@ contains
     numbstep = 1
 
     dt = 60.0
+    height = 5000.0
 
     debug_on = .false.
 
