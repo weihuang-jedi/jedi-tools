@@ -49,7 +49,8 @@ if __name__ == '__main__':
   griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48'
 
   casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua'
-  datadir = '%s/analysis.getkf.5members.36procs/increment/' %(casedir)
+ #datadir = '%s/huge_incr_analysis/increment/' %(casedir)
+  datadir = '%s/analysis/increment/' %(casedir)
 
   datafiles = []
   gridspecfiles = []
@@ -62,19 +63,18 @@ if __name__ == '__main__':
 
 #------------------------------------------------------------------------------
   if(addobs):
-    obsdir = '%s/ioda_v2_data/obs' %(casedir)
-    filename = '%s/ioda_v2_diag_amsua_n15_ges.2021010900_ensmean.nc4' %(obsdir)
+    filename = '%s/ioda_v2_data/obs/amsua_n15_obs_2021010900.nc4' %(casedir)
 
-    obsfile = netCDF4.Dataset(filename, 'r')
-    obslat = obsfile.variables['Latitude'][:]
-    obslon = obsfile.variables['Longitude'][:]
-    obsfile.close()
+    print('obs filename: ', filename)
+
+    rio = ReadIODA2Obs(debug=debug, filename=filename)
+    obslat, obslon = rio.get_latlon()
 
    #print('obslat = ', obslat)
    #print('obslon = ', obslon)
 
-   #print('len(obslat) = ', len(obslat))
-   #print('len(obslon) = ', len(obslon))
+    print('len(obslat) = ', len(obslat))
+    print('len(obslon) = ', len(obslon))
 
    #sys.exit(-1)
 
@@ -83,7 +83,7 @@ if __name__ == '__main__':
 
   nlon = 360
   nlat = nlon/2 + 1
-  varname = 'T'
+  varname = 't'
   var = rg.get_latlon_data(varname, nlon=nlon, nlat=nlat, method='linear')
 
   dlon = 360.0/nlon
@@ -118,9 +118,12 @@ if __name__ == '__main__':
  #cblevs = np.arange(-1.0, 1.2, 0.2)
   clevs = np.arange(-0.2, 0.21, 0.01)
   cblevs = np.arange(-0.2, 0.3, 0.1)
+  clevs = 500.0*clevs
+  cblevs = 500.0*cblevs
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
-  pt.set_precision(precision=2)
+ #pt.set_precision(precision=2)
+  pt.set_precision(precision=0)
 
  #------------------------------------------------------------------------------
   levs = [30, 33, 40, 60, 63]
