@@ -1,5 +1,5 @@
 &control_param
- filename = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/grid_latlon.nc',
+ filename = 'verticalheight.nc',
  output_flnm = 'trajectory.nc',
  numbstep = 200,
  dt = 300.0,

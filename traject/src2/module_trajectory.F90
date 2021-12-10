@@ -56,8 +56,6 @@ contains
     end do
     end do
 
-   !print *, 'trajectory%y(1,j,1) = ', trajectory%y(1,:,1)
-
   end subroutine initialize_trajectory
 
  !----------------------------------------------------------------------
@@ -82,24 +80,23 @@ contains
   end subroutine finalize_trajectory
 
  !-----------------------------------------------------------------------
-  integer function get_vertical_index(model, mi, mj, z)
+  integer function get_vertical_index(model, z)
 
     implicit none
 
     type(modelgrid), intent(in) :: model
-    integer,         intent(in) :: mi, mj
     real,            intent(in) :: z
     integer                     :: mk
 
     integer :: k
 
-    if(z >= model%z(mi, mj, 1)) then
+    if(z <= model%alt(1)) then
        mk = 1
-    else if(z <= model%z(mi, mj, model%nlev+1)) then
-       mk = model%nlev
+    else if(z >= model%alt(model%nalt)) then
+       mk = model%nalt-1
     else
-       do k = 1, model%nlev
-          if(z <= model%z(mi, mj, k) .and. z > model%z(mi, mj, k+1)) then
+       do k = 1, model%nalt
+          if(z >= model%alt(k) .and. z < model%alt(k+1)) then
              mk = k
              exit
           end if
@@ -137,7 +134,7 @@ contains
        z = trajectory%z(i,j)
        mi = int(trajectory%x(i,j)/model%dlon) + 1
        mj = int((trajectory%y(i,j)+90.0)/model%dlat) + 1
-       mk = get_vertical_index(model, mi, mj, z)
+       mk = get_vertical_index(model, z)
        if(abs(trajectory%y(i,j)) > 89.0) then
           dlon = dt*model%u(mi,mj,mk)/rlat
        else
@@ -162,10 +159,10 @@ contains
           trajectory%y(i,j) =  180.0 - trajectory%y(i,j)
        end if
 
-       if(trajectory%z(i,j) > model%z(mi, mj, 1)) then
-          trajectory%z(i,j) = model%z(mi, mj, 1)
-       else if(trajectory%z(i,j) < model%z(mi, mj, model%nlev+1)) then
-          trajectory%z(i,j) = model%z(mi, mj, model%nlev+1)
+       if(trajectory%z(i,j) <= model%alt(1)) then
+          trajectory%z(i,j) = model%alt(1)
+       else if(trajectory%z(i,j) >= model%alt( model%nalt)) then
+          trajectory%z(i,j) = model%alt(model%nalt)
        end if
     end do
     end do
