@@ -16,6 +16,8 @@ module module_model
   public :: modelgrid
   public :: initialize_modelgrid
   public :: finalize_modelgrid
+  public :: copy_modelgrid
+  public :: set_modelgrid
   public :: check_status
 
   !-----------------------------------------------------------------------
@@ -171,15 +173,15 @@ contains
           rc = nf90_get_var(model%fileid, model%varids(n), model%t)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'P') then
-          allocate(model%t(model%nlon, model%nlat, model%nalt))
+          allocate(model%p(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%p)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'Q') then
-          allocate(model%t(model%nlon, model%nlat, model%nalt))
+          allocate(model%q(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%q)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'RH') then
-          allocate(model%t(model%nlon, model%nlat, model%nalt))
+          allocate(model%rh(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%rh)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'PW') then
@@ -258,6 +260,47 @@ contains
     call check_status(rc)
 
   end subroutine finalize_modelgrid
+
+  !----------------------------------------------------------------------
+  subroutine set_modelgrid(model0, model1, model, fac)
+  
+    implicit none
+
+    type(modelgrid), intent(in)  :: model0, model1
+    type(modelgrid), intent(out) :: model
+    real,            intent(in)  :: fac
+
+    integer :: i, rc
+
+    model%u = (1.0-fac)*model0%u + fac*model1%u
+    model%v = (1.0-fac)*model0%v + fac*model1%v
+    model%w = (1.0-fac)*model0%w + fac*model1%w
+
+  end subroutine set_modelgrid
+
+  !----------------------------------------------------------------------
+  subroutine copy_modelgrid(model1, model0)
+
+    implicit none
+
+    type(modelgrid), intent(in)  :: model1
+    type(modelgrid), intent(out) :: model0
+
+    integer :: i, rc
+
+    model0%u = model1%u
+    model0%v = model1%v
+    model0%w = model1%w
+   !model0%t = model1%t
+   !model0%p = model1%p
+   !model0%q = model1%q
+   !model0%rh = model1%rh
+   !model0%pw = model1%pw
+   !model0%ter = model1%ter
+   !model0%slp = model1%slp
+   !model0%tsk = model1%tsk
+
+  end subroutine copy_modelgrid
 
   !----------------------------------------------------------------------
   subroutine check_status(rc)
