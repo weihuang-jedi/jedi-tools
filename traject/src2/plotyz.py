@@ -12,7 +12,9 @@ if __name__ == '__main__':
   debug = 1
   output = 0
 
-  filename = 'trajectory.nc'
+ #filename = 'trajectory.nc'
+  filename = 'trajectory_3000m.nc'
+
   ncfile = netCDF4.Dataset(filename, 'r')
   lon = ncfile.variables['x'][:,:,:]
   lat = ncfile.variables['y'][:,:,:]
