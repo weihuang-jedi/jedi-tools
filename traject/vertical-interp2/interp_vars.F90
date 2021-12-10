@@ -198,10 +198,10 @@ subroutine create_var_attr(grid)
          call nc_putAttrWithChunking(grid%ncid, nd, dimids, chunksize, NF90_REAL, &
                          'TSK', trim(long_name), trim(units), &
                          trim(coordinates), missing_real)
-      else if('TMP_P0_L102_GLL0' == trim(grid%vars(i)%varname)) then
+      else if('TMP_P0_L104_GLL0' == trim(grid%vars(i)%varname)) then
          coordinates = 'lat lon'
          nd = 2
-         long_name = 'Sea Level Air Temperature'
+         long_name = 'Lowest Sigma Level Temperature'
          units = 'K'
          call nc_putAttrWithChunking(grid%ncid, nd, dimids, chunksize, NF90_REAL, &
                          'TSL', trim(long_name), trim(units), &
@@ -296,148 +296,6 @@ subroutine create_var_attr(grid)
 
 end subroutine create_var_attr
 
-!-------------------------------------------------------------------------------------
-subroutine create_var_attr_nochunking(grid)
-
-   use netcdf
-   use module_grid
-
-   implicit none
-
-   type(gfsgrid), intent(inout) :: grid
-
-   integer, dimension(6) :: dimids
-   integer :: rc, nd, i
-   integer :: missing_int
-   real    :: missing_real
-   character(len=80) :: long_name, units, coordinates
-
-   print *, 'Enter create_var_attr'
-
-   missing_real = -1.0e38
-   missing_int = -999999
-
-   print *, 'grid%nVars = ', grid%nVars
-
-   do i = 1, grid%nVars
-      if(grid%vars(i)%nDims < 2) then
-         cycle
-      end if
-
-      long_name = trim(grid%vars(i)%varname)
-      units = 'unknown'
-      coordinates = 'alt lat lon'
-      dimids(1) = grid%dimidlon
-      dimids(2) = grid%dimidlat
-      dimids(3) = grid%dimidalt
-      nd = 3
-
-      if('TMP_P0_L1_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Ground or water surface temperature'
-         units = 'K'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'TSK', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('TMP_P0_L102_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Sea Level Air Temperature'
-         units = 'K'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'TSL', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('PWAT_P0_L200_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Precipitable water'
-         units = 'kg m-2'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'PW', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('PRATE_P0_L1_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Precipitation rate'
-         units = 'kg m-2 s-1'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'PRATE', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('PRMSL_P0_L101_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Mean sea level'
-         units = 'Pa'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'SLP', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('HGT_P0_L1_GLL0' == trim(grid%vars(i)%varname)) then
-         coordinates = 'lat lon'
-         nd = 2
-         long_name = 'Terrain Height'
-         units = 'gpm'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'TER', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('TMP_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'Temperature'
-         units = 'K'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'T', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-         rc = nf90_get_var(grid%fileid, grid%varids(i), grid%temp)
-         call check_status(rc)
-         call t2rho(grid)
-      else if('HGT_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'Pressure'
-         units = 'Pa'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'P', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-         rc = nf90_get_var(grid%fileid, grid%varids(i), grid%hgt)
-         call check_status(rc)
-      else if('SPFH_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'Specific humidity'
-         units = 'kg kg-1'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'Q', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('RH_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'Relative humidity'
-         units = '%'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'RH', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('UGRD_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'U-component of wind'
-         units = 'm s-1'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'U', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('VGRD_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'V-component of wind'
-         units = 'm s-1'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'V', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else if('VVEL_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
-         long_name = 'W-component of wind'
-         units = 'm s-1'
-         call nc_putAttr(grid%ncid, nd, dimids, NF90_REAL, &
-                         'W', trim(long_name), trim(units), &
-                         trim(coordinates), missing_real)
-      else
-         cycle
-      end if
-
-      print *, 'Var No. ', i, ': name: ', trim(grid%vars(i)%varname)
-   end do
-
-   print *, 'Leave create_var_attr'
-
-end subroutine create_var_attr_nochunking
-
 !----------------------------------------------------------------------------------------
 subroutine process(grid)
 
@@ -461,6 +319,8 @@ subroutine process(grid)
    do i = 1, grid%nVars
       if(grid%vars(i)%nDims < 2) cycle
 
+      print *, 'Var No. ', i, ': name: ', trim(grid%vars(i)%varname)
+
       rc = nf90_inquire_variable(grid%fileid, grid%varids(i), &
                name=grid%vars(i)%varname)
       call check_status(rc)
@@ -471,7 +331,7 @@ subroutine process(grid)
          call flip(grid, var2d)
          call nc_put2Dvar0(grid%ncid, 'TSK', &
                            var2d, 1, grid%nlon, 1, grid%nlat)
-      else if('TMP_P0_L102_GLL0' == trim(grid%vars(i)%varname)) then
+      else if('TMP_P0_L104_GLL0' == trim(grid%vars(i)%varname)) then
          rc = nf90_get_var(grid%fileid, grid%varids(i), var2d)
          call check_status(rc)
          call flip(grid, var2d)
@@ -518,8 +378,10 @@ subroutine process(grid)
          call nc_put3Dvar0(grid%ncid, 'Q', &
                            var3d, 1, grid%nlon, 1, grid%nlat, 1, grid%nalt)
       else if('RH_P0_L100_GLL0' == trim(grid%vars(i)%varname)) then
+        !rc = nf90_get_var(grid%fileid, grid%varids(i), grid%rh)
          rc = nf90_get_var(grid%fileid, grid%varids(i), grid%var3d)
          call check_status(rc)
+        !call fillrh(grid)
          call v2z(grid, var3d)
          call nc_put3Dvar0(grid%ncid, 'RH', &
                            var3d, 1, grid%nlon, 1, grid%nlat, 1, grid%nalt)
@@ -541,12 +403,10 @@ subroutine process(grid)
          call omega2w(grid)
          call v2z(grid, var3d)
          call nc_put3Dvar0(grid%ncid, 'W', &
-                           var3d, 1, grid%nlon, 1, grid%nlat, 1, grid%npre)
+                           var3d, 1, grid%nlon, 1, grid%nlat, 1, grid%nalt)
       else
          cycle
       end if
-
-      print *, 'Var No. ', i, ': name: ', trim(grid%vars(i)%varname)
 
    end do
 
@@ -619,6 +479,39 @@ subroutine omega2w(grid)
   end do
 
 end subroutine omega2w
+
+!----------------------------------------------------------------------
+subroutine fillrh(grid)
+
+  use module_grid
+
+  implicit none
+
+  type(gfsgrid), intent(inout) :: grid
+
+  integer :: i, j, k, krh
+
+ !Note, grid%temp hold density now.
+  krh = 1
+  do k = 1, grid%npre
+     print *, 'grid%pre(', k, ') = ', grid%pre(k), ', grid%prh(', krh, ') = ', grid%prh(krh)
+     if(grid%pre(k) == grid%prh(krh)) then
+       do j = 1, grid%nlat
+       do i = 1, grid%nlon
+          grid%var3d(i,j,k) = grid%rh(i,j,krh)
+       end do
+       end do
+       krh = krh + 1
+    else
+       do j = 1, grid%nlat
+       do i = 1, grid%nlon
+          grid%var3d(i,j,k) = 10.0
+       end do
+       end do
+    end if
+  end do
+
+end subroutine fillrh
 
 !----------------------------------------------------------------------
 subroutine z2p(grid, var3d)

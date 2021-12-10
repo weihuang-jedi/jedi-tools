@@ -1,5 +1,5 @@
 &control_param
- input_flnm = '../data/gfs_4_20210131_0000_000.nc',
+ input_flnm = '../data/gfs_4_20210401_0000_000.nc',
 
  output_flnm = 'verticalheight.nc',
 
@@ -8,5 +8,4 @@
 
  debug_on = .false.
 /
-;input_flnm = '../data/gfs_4_20210101_0000_000.nc'
 

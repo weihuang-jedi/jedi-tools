@@ -40,10 +40,10 @@ module module_grid
      character(len=128), dimension(:), allocatable :: dimnames
 
      integer                               :: dimidlon, dimidlat, dimidalt
-     integer                               :: nlon, nlat, nalt, npre
-     real, dimension(:),       allocatable :: lon, lat, alt, pre
+     integer                               :: nlon, nlat, nalt, npre, nprh
+     real, dimension(:),       allocatable :: lon, lat, alt, pre, prh
 
-     real, dimension(:, :, :), allocatable :: var3d, hgt, temp
+     real, dimension(:, :, :), allocatable :: var3d, hgt, temp, rh
 
      type(vartype), dimension(:), allocatable :: vars
   end type gfsgrid
@@ -89,6 +89,7 @@ contains
 
    !print *, 'dimids: ', grid%dimids
     grid%npre = 1
+    grid%nprh = 1
 
     do i = 1, grid%nDims
        rc = nf90_inquire_dimension(grid%fileid, grid%dimids(i), dimname, dimlen)
@@ -101,6 +102,8 @@ contains
           grid%nlat = dimlen
        else if(trim(dimname) == 'lv_ISBL0') then
           grid%npre = dimlen
+       else if(trim(dimname) == 'lv_ISBL5') then
+          grid%nprh = dimlen
        end if
 
        grid%dimlen(i) = dimlen
@@ -108,7 +111,7 @@ contains
     end do
 
     print *, 'grid%nlon = ', grid%nlon, ', grid%nlat = ', grid%nlat, &
-           ', grid%npre = ', grid%npre
+           ', grid%npre = ', grid%npre, ', grid%nprh = ', grid%nprh
 
    !Allocate memory.
     allocate(grid%varids(grid%nVars))
@@ -117,6 +120,7 @@ contains
     allocate(grid%var3d(grid%nlon, grid%nlat, grid%npre))
     allocate(grid%hgt(grid%nlon, grid%nlat, grid%npre))
     allocate(grid%temp(grid%nlon, grid%nlat, grid%npre))
+    allocate(grid%rh(grid%nlon, grid%nlat, grid%nprh))
 
     rc = nf90_inq_varids(grid%fileid, grid%nVars, grid%varids)
     call check_status(rc)
@@ -155,6 +159,10 @@ contains
           allocate(grid%pre(grid%npre))
           rc = nf90_get_var(grid%fileid, grid%varids(i), grid%pre)
           call check_status(rc)
+       else if(trim(grid%vars(i)%varname) == 'lv_ISBL5') then
+          allocate(grid%prh(grid%nprh))
+          rc = nf90_get_var(grid%fileid, grid%varids(i), grid%prh)
+          call check_status(rc)
        end if
 
        do k = 1, grid%vars(i)%ndims
@@ -188,6 +196,7 @@ contains
     if(allocated(grid%lon)) deallocate(grid%lon)
     if(allocated(grid%lat)) deallocate(grid%lat)
     if(allocated(grid%pre)) deallocate(grid%pre)
+    if(allocated(grid%prh)) deallocate(grid%prh)
 
     do i = 1, grid%nVars
        if(allocated(grid%vars(i)%dimids)) &
