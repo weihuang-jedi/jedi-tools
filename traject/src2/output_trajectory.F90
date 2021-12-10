@@ -1,5 +1,5 @@
 !----------------------------------------------------------------------------------------
-subroutine create_header(trajectory, flnm, numbstep, dt)
+subroutine create_header(trajectory, flnm)
 
    use netcdf
    use module_trajectory
@@ -9,12 +9,10 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
 
    type(trajectorytype), intent(inout) :: trajectory
    character(len=*), intent(in) :: flnm
-   integer, intent(in) :: numbstep
-   real, intent(in) :: dt
 
    real, dimension(1:trajectory%nx) :: lon
    real, dimension(1:trajectory%ny) :: lat
-   real, dimension(numbstep+1)      :: time
+   real, dimension(1)               :: time
 
    integer :: i, j, k, rc
    logical :: fileExists
@@ -30,9 +28,7 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
   !print *, 'lon = ', lon
   !print *, 'lat = ', lat
 
-   do i = 0, numbstep
-      time(i) = i * dt
-   end do
+   time(i) = 0.0
 
    rc = nf90_noerr
 
@@ -81,7 +77,7 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
    call nc_put1Dvar0(trajectory%ncid, 'lat', lat, 1, trajectory%ny)
 
   !write time
-   call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, numbstep+1)
+   call nc_put1Dvar(trajectory%ncid, 'time', time, 1, 1, 1)
 
   !print *, 'Finished create file: ', trim(flnm)
 
@@ -179,7 +175,7 @@ subroutine write_global_attr(ncid, filename, title, gridtype)
 end subroutine write_global_attr
 
 !-------------------------------------------------------------------------------------
-subroutine output_trajectory(trajectory, n, dt)
+subroutine output_trajectory(trajectory, n, ct)
 
    use netcdf
    use module_trajectory
@@ -188,7 +184,7 @@ subroutine output_trajectory(trajectory, n, dt)
 
    type(trajectorytype), intent(in) :: trajectory
    integer, intent(in) :: n
-   real, intent(in) :: dt
+   real, intent(in) :: ct
 
    integer :: rc, nd
    real, dimension(1:1) :: time
@@ -196,15 +192,15 @@ subroutine output_trajectory(trajectory, n, dt)
    real, dimension(trajectory%nx, trajectory%ny) :: var
 
   !print *, 'Enter output_trajectory'
-   print *, 'n = ', n, ', dt = ', dt, ', time = ', n*dt
+   print *, 'n = ', n
   !print *, 'trajectory%ncid = ', trajectory%ncid
   !print *, 'trajectory%nx = ', trajectory%nx
   !print *, 'trajectory%ny = ', trajectory%ny
 
-   time(1) = n * dt
-  !print *, 'time = ', time
+   time(1) = ct
+   print *, 'output for time = ', time
 
-  !call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
+   call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
 
    var = trajectory%x
    call nc_put2Dvar(trajectory%ncid, 'x', var, n+1, &

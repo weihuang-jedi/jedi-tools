@@ -17,11 +17,11 @@ PROGRAM trajectory
 
    call initialize_modelgrid(model0, trim(filelist(1)))
 
-  !call initialize_trajectory(model0, traject, height)
+   call initialize_trajectory(model0, traject, height)
 
-  !call create_header(traject, output_flnm, numbstep, dt)
+   call create_header(traject, output_flnm)
 
-  !call output_trajectory(traject, 0, dt)
+   call output_trajectory(traject, 0, 0)
 
    numbsteps = 60.0*frequency/dt
 
@@ -33,14 +33,14 @@ PROGRAM trajectory
          call initialize_modelgrid(model1, trim(filelist(i)))
       end if
 
-      fac = ct / (60.0*frequency)
-
-     !do n = 1, numbstep
-     !   call set_modelgrid(model0, model1, model, fac)
-     !   call advance_trajectory(model, traject, dt)
-     !   call output_trajectory(traject, n, dt)
+      do n = 1, numbsteps
+         fac = ct / (60.0*frequency)
+         call set_modelgrid(model0, model1, model, fac)
+         call advance_trajectory(model, traject, dt)
+         fac = ct+(i-2)*60*frequency
+         call output_trajectory(traject, n, fac)
          ct = ct + dt
-     !end do
+      end do
 
       if(i < numbfiles) then
          call copy_modelgrid(model1, model0)
@@ -49,7 +49,7 @@ PROGRAM trajectory
       ct = 0.0
    end do
 
-  !call finalize_trajectory(traject)
+   call finalize_trajectory(traject)
 
    call finalize_modelgrid(model0)
    if(1 < numbfiles) then

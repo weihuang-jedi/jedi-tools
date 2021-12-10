@@ -78,7 +78,7 @@ contains
        end do
     end if
 
-    write(unit=6, nml=control_param)
+   !write(unit=6, nml=control_param)
 
   end subroutine read_namelist
 

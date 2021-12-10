@@ -92,10 +92,10 @@ contains
 
     if(z <= model%alt(1)) then
        mk = 1
-    else if(z >= model%alt(model%nalt)) then
+    else if(z >= model%alt(model%nalt-1)) then
        mk = model%nalt-1
     else
-       do k = 1, model%nalt
+       do k = 1, model%nalt - 1
           if(z >= model%alt(k) .and. z < model%alt(k+1)) then
              mk = k
              exit
@@ -135,6 +135,10 @@ contains
        mi = int(trajectory%x(i,j)/model%dlon) + 1
        mj = int((trajectory%y(i,j)+90.0)/model%dlat) + 1
        mk = get_vertical_index(model, z)
+
+      !print *, 'i,j,mi,mj,mk=', i,j,mi,mj,mk
+      !print *, 'x, y, z = ', trajectory%x(i,j), trajectory%y(i,j), trajectory%z(i,j)
+
        if(abs(trajectory%y(i,j)) > 89.0) then
           dlon = dt*model%u(mi,mj,mk)/rlat
        else

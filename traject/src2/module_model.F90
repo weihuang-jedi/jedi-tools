@@ -272,6 +272,17 @@ contains
 
     integer :: i, rc
 
+    model%nlon = model0%nlon
+    model%nlat = model0%nlat
+    model%nalt = model0%nalt
+
+    model%lon = model0%lon
+    model%lat = model0%lat
+    model%alt = model0%alt
+
+    model%dlon = model0%lon(2) - model0%lon(1)
+    model%dlat = model0%lat(2) - model0%lat(1)
+
     model%u = (1.0-fac)*model0%u + fac*model1%u
     model%v = (1.0-fac)*model0%v + fac*model1%v
     model%w = (1.0-fac)*model0%w + fac*model1%w
