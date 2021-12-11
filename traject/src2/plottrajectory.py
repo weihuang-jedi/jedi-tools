@@ -186,16 +186,81 @@ class PlotTrajectory():
     self.image_name = 'trajectory_lathgt.png'
     self.display(output=self.output, image_name=self.image_name)
 
+  def plotLonHgt(self, jlat=1):
+    self.plt = plt
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    j = jlat
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    for filename in self.filelist:
+      print('Working on file: ', filename)
+      ncfile = netCDF4.Dataset(filename, 'r')
+      lon = ncfile.variables['x'][:,:,:]
+      lat = ncfile.variables['y'][:,:,:]
+      hgt = ncfile.variables['z'][:,:,:]
+      ncfile.close()
+
+      nt, nlat, nlon = lon.shape
+
+      print('nt = ', nt)
+      print('nlon = ', nlon)
+      print('nlat = ', nlat)
+
+      for i in range(nlon):
+        x = lon[:, j, i]
+        y = hgt[:, j, i]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+
+    wlat = int(jlat/2 - 90)
+
+    if(wlat < 0):
+      self.title = 'Trajectory_lat_%dS' %(-wlat)
+    elif(wlat > 0):
+      self.title = 'Trajectory_lat_%dN' %(wlat)
+    else:
+      self.title = 'Trajectory_lat_%d' %(wlat)
+
+    self.ax.set_title(self.title)
+
+    major_ticks_top=np.linspace(0,360,13)
+    self.ax.set_xticks(major_ticks_top)
+
+   #major_ticks_top=np.linspace(0,55000,12)
+    major_ticks_top=np.linspace(0,10000,11)
+    self.ax.set_yticks(major_ticks_top)
+
+    minor_ticks_top=np.linspace(0,360,37)
+    self.ax.set_xticks(minor_ticks_top,minor=True)
+
+   #minor_ticks_top=np.linspace(0,51000,51)
+    minor_ticks_top=np.linspace(0,10000,21)
+    self.ax.set_yticks(minor_ticks_top,minor=True)
+
+    self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
+    self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
+
+   #self.plt.legend()
+    self.image_name = 'trajectory_lathgt.png'
+    self.display(output=self.output, image_name=self.image_name)
+
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
   output = 0
 
-  filelist = ['trajectory_2000m.nc']
- #filelist = ['trajectory_500m.nc', 'trajectory_2000m.nc']
- #            'trajectory_3000m.nc', 'trajectory_4000m.nc',
- #            'trajectory_5000m.nc',
- #            'trajectory_6000m.nc', 'trajectory_7000m.nc']
+ #filelist = ['trajectory_2000m.nc']
+  filelist = ['trajectory_500m.nc',  'trajectory_1000m.nc',
+              'trajectory_2000m.nc', 'trajectory_3000m.nc',
+              'trajectory_4000m.nc', 'trajectory_5000m.nc',
+              'trajectory_6000m.nc', 'trajectory_7000m.nc',
+              'trajectory_8000m.nc', 'trajectory_9000m.nc']
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filelist='])
 
@@ -216,7 +281,12 @@ if __name__ == '__main__':
   pt = PlotTrajectory(debug=0, output=0, filelist=filelist)
 
  #pt.plotOnMap()
-  for i in [0, 90, 180, 270]:
-    ilon = 2*i
-    pt.plotLatHgt(ilon=ilon)
+
+ #for i in [0, 90, 180, 270]:
+ #  ilon = 2*i
+ #  pt.plotLatHgt(ilon=ilon)
+
+  for j in [-60, -30, 0, 30, 60]:
+    jlat = 2*(j+90)
+    pt.plotLonHgt(jlat=jlat)
 
