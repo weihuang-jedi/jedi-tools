@@ -129,13 +129,15 @@ class PlotTrajectory():
     self.image_name = 'trajectory_latlon.png'
     self.display(output=self.output, image_name=self.image_name)
 
-  def plotLatHgt(self):
+  def plotLatHgt(self, ilon=1):
     self.plt = plt
     try:
       self.plt.close('all')
       self.plt.clf()
     except Exception:
       pass
+
+    i = ilon
 
     self.fig = self.plt.figure()
     self.ax = self.plt.subplot()
@@ -155,27 +157,26 @@ class PlotTrajectory():
       print('nlat = ', nlat)
 
       for j in range(nlat):
-        for i in range(nlon):
-          x = lat[:, j, i]
-          y = hgt[:, j, i]
-          self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+        x = lat[:, j, i]
+        y = hgt[:, j, i]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
 
-    self.title = 'Trajectory'
+    self.title = 'Trajectory_lon_%d' %(int(ilon/2))
 
     self.ax.set_title(self.title)
 
     major_ticks_top=np.linspace(-90,90,7)
     self.ax.set_xticks(major_ticks_top)
 
-   #major_ticks_top=np.linspace(0,55000,11)
-    major_ticks_top=np.linspace(0,11000,11)
+   #major_ticks_top=np.linspace(0,55000,12)
+    major_ticks_top=np.linspace(0,10000,11)
     self.ax.set_yticks(major_ticks_top)
 
     minor_ticks_top=np.linspace(-90,90,19)
     self.ax.set_xticks(minor_ticks_top,minor=True)
 
    #minor_ticks_top=np.linspace(0,51000,51)
-    minor_ticks_top=np.linspace(0,10200,51)
+    minor_ticks_top=np.linspace(0,10000,21)
     self.ax.set_yticks(minor_ticks_top,minor=True)
 
     self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
@@ -190,7 +191,11 @@ if __name__ == '__main__':
   debug = 1
   output = 0
 
-  filelist = ['trajectory_3000m.nc', 'trajectory_5000m.nc']
+  filelist = ['trajectory_2000m.nc']
+ #filelist = ['trajectory_500m.nc', 'trajectory_2000m.nc']
+ #            'trajectory_3000m.nc', 'trajectory_4000m.nc',
+ #            'trajectory_5000m.nc',
+ #            'trajectory_6000m.nc', 'trajectory_7000m.nc']
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filelist='])
 
@@ -211,5 +216,7 @@ if __name__ == '__main__':
   pt = PlotTrajectory(debug=0, output=0, filelist=filelist)
 
  #pt.plotOnMap()
-  pt.plotLatHgt()
+  for i in [0, 90, 180, 270]:
+    ilon = 2*i
+    pt.plotLatHgt(ilon=ilon)
 

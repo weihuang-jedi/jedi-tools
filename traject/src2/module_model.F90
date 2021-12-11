@@ -91,9 +91,9 @@ contains
     print *, 'nDims: ', model%nDims
 
    !Allocate memory.
-    allocate(model%dimids(model%nDims))
-    allocate(model%dimlen(model%nDims))
-    allocate(model%dimnames(model%nDims))
+    if(.not. allocated(model%dimids)) allocate(model%dimids(model%nDims))
+    if(.not. allocated(model%dimlen)) allocate(model%dimlen(model%nDims))
+    if(.not. allocated(model%dimnames)) allocate(model%dimnames(model%nDims))
 
     rc = nf90_inq_dimids(model%fileid, model%nDims, model%dimids, include_parents)
     call check_status(rc)
@@ -118,8 +118,8 @@ contains
     end do
 
    !Allocate memory.
-    allocate(model%varids(model%nVars))
-    allocate(model%vars(model%nVars))
+    if(.not. allocated(model%varids)) allocate(model%varids(model%nVars))
+    if(.not. allocated(model%vars)) allocate(model%vars(model%nVars))
 
     rc = nf90_inq_varids(model%fileid, model%nVars, model%varids)
     call check_status(rc)
@@ -132,9 +132,9 @@ contains
        call check_status(rc)
       !print *, 'Var No. ', n, ': ndims = ', model%vars(n)%nDims
 
-       allocate(model%vars(n)%dimids(model%vars(n)%nDims))
-       allocate(model%vars(n)%dimlen(model%vars(n)%nDims))
-       allocate(model%vars(n)%dimnames(model%vars(n)%nDims))
+       if(.not. allocated(model%vars(n)%dimids)) allocate(model%vars(n)%dimids(model%vars(n)%nDims))
+       if(.not. allocated(model%vars(n)%dimlen)) allocate(model%vars(n)%dimlen(model%vars(n)%nDims))
+       if(.not. allocated(model%vars(n)%dimnames)) allocate(model%vars(n)%dimnames(model%vars(n)%nDims))
 
        rc = nf90_inquire_variable(model%fileid, model%varids(n), &
                                   dimids=model%vars(n)%dimids)
@@ -147,57 +147,57 @@ contains
       !print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
 
        if(trim(model%vars(n)%varname) == 'lon') then
-          allocate(model%lon(model%nlon))
+          if(.not. allocated(model%lon)) allocate(model%lon(model%nlon))
           rc = nf90_get_var(model%fileid, model%varids(n), model%lon)
        else if(trim(model%vars(n)%varname) == 'lat') then
-          allocate(model%lat(model%nlat))
+          if(.not. allocated(model%lat)) allocate(model%lat(model%nlat))
           rc = nf90_get_var(model%fileid, model%varids(n), model%lat)
        else if(trim(model%vars(n)%varname) == 'alt') then
-          allocate(model%alt(model%nalt))
+          if(.not. allocated(model%alt)) allocate(model%alt(model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%alt)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'U') then
-          allocate(model%u(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%u)) allocate(model%u(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%u)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'V') then
-          allocate(model%v(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%v)) allocate(model%v(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%v)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'W') then
-          allocate(model%w(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%w)) allocate(model%w(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%w)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'T') then
-          allocate(model%t(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%t)) allocate(model%t(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%t)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'P') then
-          allocate(model%p(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%p)) allocate(model%p(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%p)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'Q') then
-          allocate(model%q(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%q)) allocate(model%q(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%q)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'RH') then
-          allocate(model%rh(model%nlon, model%nlat, model%nalt))
+          if(.not. allocated(model%rh)) allocate(model%rh(model%nlon, model%nlat, model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%rh)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'PW') then
-          allocate(model%pw(model%nlon, model%nlat))
+          if(.not. allocated(model%pw)) allocate(model%pw(model%nlon, model%nlat))
           rc = nf90_get_var(model%fileid, model%varids(n), model%pw)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'TER') then
-          allocate(model%ter(model%nlon, model%nlat))
+          if(.not. allocated(model%ter)) allocate(model%ter(model%nlon, model%nlat))
           rc = nf90_get_var(model%fileid, model%varids(n), model%ter)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'SLP') then
-          allocate(model%slp(model%nlon, model%nlat))
+          if(.not. allocated(model%slp)) allocate(model%slp(model%nlon, model%nlat))
           rc = nf90_get_var(model%fileid, model%varids(n), model%slp)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'TSK') then
-          allocate(model%tsk(model%nlon, model%nlat))
+          if(.not. allocated(model%tsk)) allocate(model%tsk(model%nlon, model%nlat))
           rc = nf90_get_var(model%fileid, model%varids(n), model%tsk)
           call check_status(rc)
        end if

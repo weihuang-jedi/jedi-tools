@@ -11,9 +11,14 @@ PROGRAM trajectory
    type(trajectorytype) :: traject
 
    integer :: i, n, numbsteps
-   real :: ct, fac
+   real :: pt, ct, fac
 
    call read_namelist('input.nml')
+
+   if(numbfiles < 2) then
+      print *, 'We need two or more data files. Stop'
+      stop 999
+   end if
 
    call initialize_modelgrid(model0, trim(filelist(1)))
 
@@ -28,16 +33,15 @@ PROGRAM trajectory
    print *, 'frequency, dt, numbsteps = ', frequency, dt, numbsteps
 
    ct = 0.0
+   pt = 0.0
    do i = 2, numbfiles
-      if(2 == i) then
-         call initialize_modelgrid(model1, trim(filelist(i)))
-      end if
+      call initialize_modelgrid(model1, trim(filelist(i)))
 
       do n = 1, numbsteps
          fac = ct / (60.0*frequency)
          call set_modelgrid(model0, model1, model, fac)
          call advance_trajectory(model, traject, dt)
-         fac = ct+(i-2)*60*frequency
+         fac = ct+pt
          call output_trajectory(traject, n, fac)
          ct = ct + dt
       end do
@@ -47,14 +51,13 @@ PROGRAM trajectory
       end if
   
       ct = 0.0
+      pt = pt+60*frequency
    end do
 
    call finalize_trajectory(traject)
 
    call finalize_modelgrid(model0)
-   if(1 < numbfiles) then
-      call finalize_modelgrid(model1)
-   end if
+   call finalize_modelgrid(model1)
 
 END PROGRAM trajectory
 
