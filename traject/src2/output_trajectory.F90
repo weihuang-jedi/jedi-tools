@@ -93,13 +93,17 @@ subroutine write_var_attr(trajectory)
 
    type(trajectorytype), intent(in) :: trajectory
 
-   integer, dimension(6) :: dimids
+   integer, dimension(6) :: dimids, chunksize
    integer :: rc, nd
    integer :: missing_int
    real    :: missing_real
 
    missing_real = -1.0e38
    missing_int = -999999
+
+   chunksize(1) = trajectory%nx
+   chunksize(2) = trajectory%ny
+   chunksize(3) = 1
 
    dimids(1) = trajectory%dimidx
    nd = 1
@@ -110,7 +114,6 @@ subroutine write_var_attr(trajectory)
                       "degree_east", &
                       "Longitude" )
 
-   dimids(1) = trajectory%dimidy
    nd = 1
 !--Field lat
    call nc_putAxisAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
@@ -134,7 +137,8 @@ subroutine write_var_attr(trajectory)
    nd = 3
 
 !--Field x
-   call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+!  call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+   call nc_putAttrWithChunking(trajectory%ncid, nd, dimids, chunksize, NF90_REAL, &
                    "x", &
                    "Longitude of Trajectory", &
                    "degree_east", &
@@ -142,7 +146,8 @@ subroutine write_var_attr(trajectory)
                    missing_real)
 
 !--Field y
-   call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+!  call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+   call nc_putAttrWithChunking(trajectory%ncid, nd, dimids, chunksize, NF90_REAL, &
                    "y", &
                    "Latitude of Trajectory", &
                    "degree_north", &
@@ -150,7 +155,8 @@ subroutine write_var_attr(trajectory)
                    missing_real)
 
 !--Field z
-   call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+!  call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
+   call nc_putAttrWithChunking(trajectory%ncid, nd, dimids, chunksize, NF90_REAL, &
                    "z", &
                    "Altitude of Trajectory", &
                    "meter", &

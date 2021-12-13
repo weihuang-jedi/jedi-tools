@@ -32,6 +32,7 @@ PROGRAM trajectory
 
    print *, 'numbfiles = ', numbfiles
    print *, 'frequency, dt, numbsteps = ', frequency, dt, numbsteps
+   print *, 'height = ', height
 
    ct = 0.0
    pt = 0.0
