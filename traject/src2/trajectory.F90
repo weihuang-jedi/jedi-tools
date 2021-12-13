@@ -30,11 +30,15 @@ PROGRAM trajectory
 
    numbsteps = 60.0*frequency/dt
 
+   print *, 'numbfiles = ', numbfiles
    print *, 'frequency, dt, numbsteps = ', frequency, dt, numbsteps
 
    ct = 0.0
    pt = 0.0
    do i = 2, numbfiles
+      if(i > 2) then
+         call initialize_modelgrid(model0, trim(filelist(i-1)))
+      end if
       call initialize_modelgrid(model1, trim(filelist(i)))
 
       do n = 1, numbsteps
@@ -46,9 +50,11 @@ PROGRAM trajectory
          ct = ct + dt
       end do
 
-      if(i < numbfiles) then
-         call copy_modelgrid(model1, model0)
-      end if
+     !if(i < numbfiles) then
+        !call copy_modelgrid(model1, model0)
+         call finalize_modelgrid(model0)
+         call finalize_modelgrid(model1)
+     !end if
   
       ct = 0.0
       pt = pt+60*frequency
@@ -56,8 +62,8 @@ PROGRAM trajectory
 
    call finalize_trajectory(traject)
 
-   call finalize_modelgrid(model0)
-   call finalize_modelgrid(model1)
+  !call finalize_modelgrid(model0)
+  !call finalize_modelgrid(model1)
 
 END PROGRAM trajectory
 

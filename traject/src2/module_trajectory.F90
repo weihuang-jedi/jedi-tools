@@ -23,7 +23,7 @@ module module_trajectory
      integer                            :: nx, ny, nt
      real(kind=8), dimension(2)         :: time
 
-     integer, dimension(:, :), allocatable :: x, y, z
+     real, dimension(:, :), allocatable :: x, y, z
   end type trajectorytype
 
   !-----------------------------------------------------------------------
@@ -129,6 +129,10 @@ contains
 
     rlat = er*cos(89.0*deg2arc)
 
+   !print *, 'model%dlon, model%dlat=', model%dlon, model%dlat
+
+   !i = 3*trajectory%nx/4
+   !j = 3*trajectory%ny/4
     do j = 1, trajectory%ny
     do i = 1, trajectory%nx
        z = trajectory%z(i,j)
@@ -138,6 +142,7 @@ contains
 
       !print *, 'i,j,mi,mj,mk=', i,j,mi,mj,mk
       !print *, 'x, y, z = ', trajectory%x(i,j), trajectory%y(i,j), trajectory%z(i,j)
+      !print *, 'u, v, w = ', model%u(mi,mj,mk), model%v(mi,mj,mk), model%w(mi,mj,mk)
 
        if(abs(trajectory%y(i,j)) > 89.0) then
           dlon = dt*model%u(mi,mj,mk)/rlat

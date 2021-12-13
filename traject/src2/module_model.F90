@@ -280,8 +280,11 @@ contains
     model%lat = model0%lat
     model%alt = model0%alt
 
-    model%dlon = model0%lon(2) - model0%lon(1)
-    model%dlat = model0%lat(2) - model0%lat(1)
+    model%dlon = model%lon(2) - model%lon(1)
+    model%dlat = model%lat(2) - model%lat(1)
+
+   !model%dlon = model0%dlon
+   !model%dlat = model0%dlat
 
     model%u = (1.0-fac)*model0%u + fac*model1%u
     model%v = (1.0-fac)*model0%v + fac*model1%v
@@ -298,6 +301,10 @@ contains
     type(modelgrid), intent(out) :: model0
 
     integer :: i, rc
+
+    model0%lon = model1%lon
+    model0%lat = model1%lat
+    model0%alt = model1%alt
 
     model0%u = model1%u
     model0%v = model1%v

@@ -112,8 +112,8 @@ class PlotTrajectory():
       print('nlon = ', nlon)
       print('nlat = ', nlat)
 
-      for j in range(nlat):
-        for i in range(nlon):
+      for j in range(0, nlat, 10):
+        for i in range(0, nlon, 10):
           x = lon[:, j, i]
           y = lat[:, j, i]
           self.basemap.plot(x, y)
@@ -165,14 +165,14 @@ class PlotTrajectory():
 
     self.ax.set_title(self.title)
 
-    major_ticks_top=np.linspace(-90,90,7)
+    major_ticks_top=np.linspace(-90,90,13)
     self.ax.set_xticks(major_ticks_top)
 
    #major_ticks_top=np.linspace(0,55000,12)
     major_ticks_top=np.linspace(0,10000,11)
     self.ax.set_yticks(major_ticks_top)
 
-    minor_ticks_top=np.linspace(-90,90,19)
+    minor_ticks_top=np.linspace(-90,90,37)
     self.ax.set_xticks(minor_ticks_top,minor=True)
 
    #minor_ticks_top=np.linspace(0,51000,51)
@@ -255,7 +255,7 @@ if __name__ == '__main__':
   debug = 1
   output = 0
 
- #filelist = ['trajectory_2000m.nc']
+ #filelist = ['trajectory_3000m.nc']
   filelist = ['trajectory_500m.nc',  'trajectory_1000m.nc',
               'trajectory_2000m.nc', 'trajectory_3000m.nc',
               'trajectory_4000m.nc', 'trajectory_5000m.nc',
@@ -278,15 +278,15 @@ if __name__ == '__main__':
   print('output = ', output)
   print('filelist = ', filelist)
 
-  pt = PlotTrajectory(debug=0, output=0, filelist=filelist)
+  pt = PlotTrajectory(debug=0, output=0, filelist=filelist[0:3])
 
  #pt.plotOnMap()
 
- #for i in [0, 90, 180, 270]:
- #  ilon = 2*i
- #  pt.plotLatHgt(ilon=ilon)
+  for i in [0, 90, 180, 270]:
+    ilon = 2*i
+    pt.plotLatHgt(ilon=ilon)
 
-  for j in [-60, -30, 0, 30, 60]:
-    jlat = 2*(j+90)
-    pt.plotLonHgt(jlat=jlat)
+ #for j in [-60, -30, 0, 30, 60]:
+ #  jlat = 2*(j+90)
+ #  pt.plotLonHgt(jlat=jlat)
 
