@@ -218,18 +218,148 @@ class PlotTrajectory():
     self.ax.set_title(self.title)
 
     self.plt.xlim((-90.0, 90.0))
-    self.plt.ylim((0.0, 15000.0))
+    self.plt.ylim((0.0, 16000.0))
 
     major_ticks_top=np.linspace(-90,90,13)
     self.ax.set_xticks(major_ticks_top)
 
-    major_ticks_top=np.linspace(0,15000,16)
+    major_ticks_top=np.linspace(0,16000,17)
     self.ax.set_yticks(major_ticks_top)
 
     minor_ticks_top=np.linspace(-90,90,37)
     self.ax.set_xticks(minor_ticks_top,minor=True)
 
-    minor_ticks_top=np.linspace(0,15000,31)
+    minor_ticks_top=np.linspace(0,16000,33)
+    self.ax.set_yticks(minor_ticks_top,minor=True)
+
+    self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
+    self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
+
+   #self.plt.legend()
+    self.image_name = 'trajectory_lathgt.png'
+    self.display(output=self.output, image_name=self.image_name)
+
+  def plotLatHgtCrossingPole(self, ilon=1):
+    self.plt = plt
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    i = ilon
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    for filename in self.filelist:
+      print('Working on file: ', filename)
+      ncfile = netCDF4.Dataset(filename, 'r')
+      lon = ncfile.variables['x'][:,:,:]
+      lat = ncfile.variables['y'][:,:,:]
+      hgt = ncfile.variables['z'][:,:,:]
+      ncfile.close()
+
+      nt, nlat, nlon = lon.shape
+
+      i2 = ilon + int(nlon/2)
+      if(i2 > nlon):
+        i2 -= nlon
+
+      print('nt = ', nt)
+      print('nlon = ', nlon)
+      print('nlat = ', nlat)
+
+      for j in range(int(nlat/2), nlat):
+        x = lat[:, j, i]
+        y = hgt[:, j, i]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+
+      for j in range(int(nlat/2), nlat):
+        x = 180.0-lat[:, j, i2]
+        y = hgt[:, j, i2]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+
+    self.title = 'Trajectory_lon_%d' %(int(ilon/2))
+
+    self.ax.set_title(self.title)
+
+    self.plt.xlim((0.0, 180.0))
+    self.plt.ylim((0.0, 16000.0))
+
+    major_ticks_top=np.linspace(0,180,13)
+    self.ax.set_xticks(major_ticks_top)
+
+    major_ticks_top=np.linspace(0,16000,17)
+    self.ax.set_yticks(major_ticks_top)
+
+    minor_ticks_top=np.linspace(0,180,37)
+    self.ax.set_xticks(minor_ticks_top,minor=True)
+
+    minor_ticks_top=np.linspace(0,16000,33)
+    self.ax.set_yticks(minor_ticks_top,minor=True)
+
+    self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
+    self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
+
+   #self.plt.legend()
+    self.image_name = 'trajectory_lathgt.png'
+    self.display(output=self.output, image_name=self.image_name)
+
+  def plotLatHgtAverageBetween(self, startlon=0, endlon=360):
+    self.plt = plt
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    ib = int(2*startlon)
+    ie = int(2*endlon)
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    for filename in self.filelist:
+      print('Working on file: ', filename)
+      ncfile = netCDF4.Dataset(filename, 'r')
+      lon = ncfile.variables['x'][:,:,:]
+      lat = ncfile.variables['y'][:,:,:]
+      hgt = ncfile.variables['z'][:,:,:]
+      ncfile.close()
+
+      nt, nlat, nlon = lon.shape
+
+      print('nt = ', nt)
+      print('nlon = ', nlon)
+      print('nlat = ', nlat)
+
+      avglat = np.mean(lat[:,:,ib:ie], axis=2)
+      avghgt = np.mean(hgt[:,:,ib:ie], axis=2)
+      print('avglat.shape = ', avglat.shape)
+
+      for j in range(nlat):
+        x = avglat[:, j]
+        y = avghgt[:, j]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+
+    self.title = 'Trajectory_between_Lon_%d, %d' %(startlon, endlon)
+
+    self.ax.set_title(self.title)
+
+    self.plt.xlim((-90.0, 90.0))
+    self.plt.ylim((0.0, 16000.0))
+
+    major_ticks_top=np.linspace(-90,90,13)
+    self.ax.set_xticks(major_ticks_top)
+
+    major_ticks_top=np.linspace(0,16000,17)
+    self.ax.set_yticks(major_ticks_top)
+
+    minor_ticks_top=np.linspace(-90,90,37)
+    self.ax.set_xticks(minor_ticks_top,minor=True)
+
+    minor_ticks_top=np.linspace(0,16000,33)
     self.ax.set_yticks(minor_ticks_top,minor=True)
 
     self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
@@ -285,14 +415,12 @@ class PlotTrajectory():
     major_ticks_top=np.linspace(0,360,13)
     self.ax.set_xticks(major_ticks_top)
 
-   #major_ticks_top=np.linspace(0,55000,12)
     major_ticks_top=np.linspace(0,10000,11)
     self.ax.set_yticks(major_ticks_top)
 
     minor_ticks_top=np.linspace(0,360,37)
     self.ax.set_xticks(minor_ticks_top,minor=True)
 
-   #minor_ticks_top=np.linspace(0,51000,51)
     minor_ticks_top=np.linspace(0,10000,21)
     self.ax.set_yticks(minor_ticks_top,minor=True)
 
@@ -308,13 +436,22 @@ if __name__ == '__main__':
   debug = 1
   output = 0
 
-  filelist = ['trajectory_500m.nc',  'trajectory_1000m.nc',
-              'trajectory_2000m.nc', 'trajectory_3000m.nc',
-              'trajectory_4000m.nc', 'trajectory_5000m.nc',
-              'trajectory_6000m.nc', 'trajectory_7000m.nc',
-              'trajectory_8000m.nc', 'trajectory_9000m.nc',
-              'trajectory_10000m.nc', 'trajectory_11000m.nc',
-              'trajectory_12000m.nc', 'trajectory_13000m.nc']
+ #filelist = ['trajectory_500m.nc',  'trajectory_1000m.nc',
+ #            'trajectory_2000m.nc', 'trajectory_3000m.nc',
+ #            'trajectory_4000m.nc', 'trajectory_5000m.nc',
+ #            'trajectory_6000m.nc', 'trajectory_7000m.nc',
+ #            'trajectory_8000m.nc', 'trajectory_9000m.nc',
+ #            'trajectory_10000m.nc', 'trajectory_11000m.nc',
+ #            'trajectory_12000m.nc', 'trajectory_13000m.nc',
+ #            'trajectory_14000m.nc', 'trajectory_15000m.nc']
+
+  filelist = ['trajectory_1000m.nc', 'trajectory_3000m.nc',
+              'trajectory_5000m.nc', 'trajectory_7000m.nc',
+              'trajectory_9000m.nc', 'trajectory_11000m.nc',
+              'trajectory_13000m.nc', 'trajectory_15000m.nc']
+
+ #            'trajectory_18000m.nc', 'trajectory_22000m.nc',
+ #            'trajectory_25000m.nc']
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filelist='])
 
@@ -333,15 +470,26 @@ if __name__ == '__main__':
   print('filelist = ', filelist)
 
  #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[0:11])
-  pt = PlotTrajectory(debug=0, output=0, filelist=filelist[1::2])
+ #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[1::2])
  #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[3:4:2])
+  pt = PlotTrajectory(debug=0, output=0, filelist=filelist)
 
  #pt.plotOnMap()
  #pt.plotOnMapAtLat(latlist=[-30, -15, 0, 15, 30])
 
-  for i in [0, 90, 180, 270]:
+  for i in [0, 90, 160, 180, 200, 225, 270]:
     ilon = 2*i
     pt.plotLatHgt(ilon=ilon)
+
+ #pt.plotLatHgtAverageBetween(startlon=0, endlon=360)
+ #pt.plotLatHgtAverageBetween(startlon=0, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=90, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=120, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=150, endlon=210)
+
+ #for i in [0, 45, 90, 120, 135]:
+ #  ilon = 2*i
+ #  pt.plotLatHgtCrossingPole(ilon=ilon)
 
  #for j in [-60, -30, 0, 30, 60]:
  #  jlat = 2*(j+90)

@@ -190,15 +190,13 @@ if __name__ == '__main__':
     landtm = obsfile.variables['Land_Temperature'][:]
     obsfile.close()
 
-    print('obslat = ', obslat)
-    print('obslon = ', obslon)
-    print('landtm = ', landtm)
+   #print('obslat = ', obslat)
+   #print('obslon = ', obslon)
+   #print('landtm = ', landtm)
 
-    print('len(obslat) = ', len(obslat))
-    print('len(obslon) = ', len(obslon))
-    print('len(landtm) = ', len(landtm)
-
-    sys.exit(-1)
+   #print('len(obslat) = ', len(obslat))
+   #print('len(obslon) = ', len(obslon))
+   #print('len(landtm) = ', len(landtm)
 
 #------------------------------------------------------------------------------
   pg = PlotGaussian(debug=debug, output=output, bkg=bkg, anl=anl)
@@ -232,8 +230,14 @@ if __name__ == '__main__':
  #cblevs = np.arange(-0.5, 0.6, 0.1)
   clevs = np.arange(-0.2, 0.21, 0.01)
   cblevs = np.arange(-0.2, 0.3, 0.1)
+  clevs = 5.0*clevs
+  cblevs = 5.0*cblevs
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
+
+ #pt.set_precision(precision=2)
+  pt.set_precision(precision=1)
+ #pt.set_precision(precision=0)
 
 #------------------------------------------------------------------------------
   levs = [30, 33, 40, 60, 63]

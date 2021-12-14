@@ -49,8 +49,9 @@ if __name__ == '__main__':
   griddir = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C48'
 
   casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua'
- #datadir = '%s/huge_incr_analysis/increment/' %(casedir)
-  datadir = '%s/analysis/increment/' %(casedir)
+ #datadir = '%s/huge_incr_analysis/increment' %(casedir)
+  datadir = '%s/analysis.reasonable/increment' %(casedir)
+ #datadir = '%s/analysis/increment' %(casedir)
 
   datafiles = []
   gridspecfiles = []
@@ -118,12 +119,13 @@ if __name__ == '__main__':
  #cblevs = np.arange(-1.0, 1.2, 0.2)
   clevs = np.arange(-0.2, 0.21, 0.01)
   cblevs = np.arange(-0.2, 0.3, 0.1)
-  clevs = 500.0*clevs
-  cblevs = 500.0*cblevs
+  clevs = 5.0*clevs
+  cblevs = 5.0*cblevs
   pt.set_clevs(clevs=clevs)
   pt.set_cblevs(cblevs=cblevs)
  #pt.set_precision(precision=2)
-  pt.set_precision(precision=0)
+  pt.set_precision(precision=1)
+ #pt.set_precision(precision=0)
 
  #------------------------------------------------------------------------------
   levs = [30, 33, 40, 60, 63]
