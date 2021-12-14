@@ -50,8 +50,8 @@ if __name__ == '__main__':
 
   casedir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua'
  #datadir = '%s/huge_incr_analysis/increment' %(casedir)
-  datadir = '%s/analysis.reasonable/increment' %(casedir)
- #datadir = '%s/analysis/increment' %(casedir)
+ #datadir = '%s/analysis.reasonable/increment' %(casedir)
+  datadir = '%s/analysis/increment' %(casedir)
 
   datafiles = []
   gridspecfiles = []
@@ -107,8 +107,8 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
   pt.set_label('Temperature (K)')
 
-  image_prefix = 'amsua_JEDI_temperature'
-  title_preix = 'amsua JEDI Temperature at'
+  image_prefix = 'amsua_JEDI_temperature_boxN29-31E149-151'
+  title_preix = 'amsua JEDI Temperature at box N29-31, E149-151'
 
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
