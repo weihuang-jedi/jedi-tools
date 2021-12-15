@@ -240,31 +240,33 @@ if __name__ == '__main__':
  #pt.set_precision(precision=0)
 
 #------------------------------------------------------------------------------
-  levs = [30, 33, 40, 60, 63]
-  for lev in levs:
-    pvar = var[lev,:,:]
-    imgname = '%s_lev_%d.png' %(imageprefix, lev)
-    title = '%s level %d' %(titleprefix, lev)
-    pt.set_imagename(imgname)
-    pt.set_title(title)
-   #pt.plot(pvar, addmark=1, marker='x', size=3, color='green')
-   #pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
-    pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
+ #levs = [30, 33, 40, 60, 63]
+ #for lev in levs:
+ #  pvar = var[lev,:,:]
+ #  imgname = '%s_lev_%d.png' %(imageprefix, lev)
+ #  title = '%s level %d' %(titleprefix, lev)
+ #  pt.set_imagename(imgname)
+ #  pt.set_title(title)
+ # #pt.plot(pvar, addmark=1, marker='x', size=3, color='green')
+ # #pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
+ #  pt.plot(pvar, addmark=1, marker='x', size=1, color='green')
 
 #------------------------------------------------------------------------------
-  lons = [60, 105, 170, 270, 300]
-  for lon in lons:
-    pvar = var[:,:,lon]
-    title = '%s longitude %d' %(titleprefix, lon)
-    pt.set_title(title)
+ #lons = [60, 105, 170, 270, 300]
+ #for lon in lons:
+ #  pvar = var[:,:,lon]
+ #  title = '%s longitude %d' %(titleprefix, lon)
+ #  pt.set_title(title)
 
-    imgname = '%s_lon_%d_logp.png' %(imageprefix, lon)
-    pt.set_imagename(imgname)
-    pt.plot_meridional_section_logp(pvar)
+ #  imgname = '%s_lon_%d_logp.png' %(imageprefix, lon)
+ #  pt.set_imagename(imgname)
+ #  pt.set_title(title)
+ #  pt.plot_meridional_section_logp(pvar)
 
-    imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
-    pt.set_imagename(imgname)
-    pt.plot_meridional_section(pvar)
+ #  imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
+ #  pt.set_imagename(imgname)
+ #  pt.set_title(title)
+ #  pt.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
   lats = [-50, 0, 45, 70]
@@ -273,11 +275,23 @@ if __name__ == '__main__':
     pt.set_title(title)
     title = '%s latitude %d' %(titleprefix, lat)
 
-    imgname = '%s_lat_%d_logp.png' %(imageprefix, lat)
+    if(lat < 0):
+      imgname = '%s_lat_S%d_logp.png' %(imageprefix, abs(lat))
+    elif(lat == 0):
+      imgname = '%s_lat_%d_logp.png' %(imageprefix, abs(lat))
+    else:
+      imgname = '%s_lat_N%d_logp.png' %(imageprefix, lat)
     pt.set_imagename(imgname)
+    pt.set_title(title)
     pt.plot_zonal_section_logp(pvar)
 
-    imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
+    if(lat < 0):
+      imgname = '%s_lat_S%d_level.png' %(imageprefix, abs(lat))
+    elif(lat == 0):
+      imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
+    else:
+      imgname = '%s_lat_N%d_level.png' %(imageprefix, lat)
     pt.set_imagename(imgname)
+    pt.set_title(title)
     pt.plot_zonal_section(pvar)
 

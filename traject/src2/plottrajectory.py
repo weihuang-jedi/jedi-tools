@@ -477,15 +477,34 @@ if __name__ == '__main__':
  #pt.plotOnMap()
  #pt.plotOnMapAtLat(latlist=[-30, -15, 0, 15, 30])
 
-  for i in [0, 90, 160, 180, 200, 225, 270]:
-    ilon = 2*i
-    pt.plotLatHgt(ilon=ilon)
+ #for i in [0, 90, 160, 180, 200, 225, 270]:
+ #  ilon = 2*i
+ #  pt.plotLatHgt(ilon=ilon)
 
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=360)
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=90, endlon=180)
- #pt.plotLatHgtAverageBetween(startlon=120, endlon=180)
- #pt.plotLatHgtAverageBetween(startlon=150, endlon=210)
+  pt.plotLatHgtAverageBetween(startlon=120, endlon=180)
+
+  pt.plotLatHgtAverageBetween(startlon=150, endlon=210)
+  pt.plotLatHgtAverageBetween(startlon=150, endlon=180)
+  pt.plotLatHgtAverageBetween(startlon=180, endlon=210)
+
+  pt.plotLatHgtAverageBetween(startlon=160, endlon=200)
+  pt.plotLatHgtAverageBetween(startlon=160, endlon=180)
+  pt.plotLatHgtAverageBetween(startlon=180, endlon=200)
+
+  pt.plotLatHgtAverageBetween(startlon=170, endlon=190)
+  pt.plotLatHgtAverageBetween(startlon=170, endlon=180)
+  pt.plotLatHgtAverageBetween(startlon=180, endlon=190)
+
+  pt.plotLatHgtAverageBetween(startlon=175, endlon=185)
+  pt.plotLatHgtAverageBetween(startlon=175, endlon=180)
+  pt.plotLatHgtAverageBetween(startlon=180, endlon=185)
+
+  pt.plotLatHgtAverageBetween(startlon=178, endlon=182)
+  pt.plotLatHgtAverageBetween(startlon=178, endlon=180)
+  pt.plotLatHgtAverageBetween(startlon=180, endlon=182)
 
  #for i in [0, 45, 90, 120, 135]:
  #  ilon = 2*i
