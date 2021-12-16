@@ -29,7 +29,6 @@ class CheckObsInfo():
     self.jediinfo = self.get_jediinfo()
 
     nobs = len(self.jedilat)
-    self.jediEffectiveError0 = np.zeros((nobs), dtype=float)
     self.jedihofx_y_mean_xb0 = np.zeros((nobs), dtype=float)
     self.jediombg = np.zeros((nobs), dtype=float)
 
@@ -78,6 +77,8 @@ class CheckObsInfo():
 
 #----------------------------------------------------------------
   def get_jediinfo(self):
+    print('self.varname: ', self.varname)
+
     jediinfo = {}
     ncfile = netCDF4.Dataset(self.jedifile, 'r')
 
@@ -171,7 +172,26 @@ class CheckObsInfo():
           return 1, n
     return 0, 0
 
+  def get_data_1d(self, ncfile, groupname, varname):
+   #print('groupname: %s, varname: %s' %(groupname, varname))
+    ncgroup = ncfile.groups[groupname]
+    var = ncgroup.variables[varname][:]
+   #print('length %d' %(len(var)))
+   #print('var = ', var)
+    return var
+
+  def get_data_2d(self, ncfile, groupname, varname):
+   #print('groupname: %s, varname: %s' %(groupname, varname))
+    ncgroup = ncfile.groups[groupname]
+    var = ncgroup.variables[varname][:][:]
+    var = var[:,0]
+   #print('length %d' %(len(var)))
+   #print('var = ', var)
+    return var
+
   def readJEDIobsout(self):
+    print('self.varname: ', self.varname)
+
     nprocs = 36
     self.oldlat = []
     self.oldlon = []
@@ -181,50 +201,31 @@ class CheckObsInfo():
       flnm = self.jediOutFile.replace('0000', flstr)
 
       print('Reading JEDI out obs for proc: %d' %(n))
+      print('Reading JEDI out obs from file: %s' %(flnm))
 
       ncfile = netCDF4.Dataset(flnm, 'r')
 
-      ncgroup = ncfile['/ObsValue/']
-      var = ncgroup.variables[self.varname][:]
+      var = self.get_data_2d(ncfile, 'ObsValue', self.varname)
       self.set_mask(var)
       obs = self.get_unmasked_value(var)
  
-      ncgroup = ncfile['/EffectiveError0/']
-      var = ncgroup.variables[self.varname][:]
-      self.set_mask(var)
-      EffectiveError0 = self.get_unmasked_value(var)
-
-      ncgroup = ncfile['/MetaData/']
-      var = ncgroup.variables['latitude'][:]
+      var = self.get_data_1d(ncfile, 'MetaData', 'latitude')
       lat = self.get_unmasked_value(var)
-      var = ncgroup.variables['longitude'][:]
+
+      var = self.get_data_1d(ncfile, 'MetaData', 'longitude')
       lon = self.get_unmasked_value(var)
 
-      ncgroup = ncfile['/hofx_y_mean_xb0/']
-      var = ncgroup.variables[self.varname][:]
+      var = self.get_data_2d(ncfile, 'hofx_y_mean_xb0', self.varname)
       hofx_y_mean_xb0 = self.get_unmasked_value(var)
 
-      ncgroup = ncfile['/ombg/']
-      var = ncgroup.variables[self.varname][:]
+      var = self.get_data_2d(ncfile, 'ombg', self.varname)
       ombg = self.get_unmasked_value(var)
 
       ncfile.close()
 
-      if('surface_pressure' == self.varname):
-        ombg = 0.01*ombg
-        hofx_y_mean_xb0 = 0.01*hofx_y_mean_xb0
-        EffectiveError0 = 0.01*EffectiveError0
-      elif('specific_humidity' == self.varname):
-        ombg = 1000.0*ombg
-        hofx_y_mean_xb0 = 1000.0*hofx_y_mean_xb0
-        EffectiveError0 = 1000.0*EffectiveError0
+      self.insert2JEDI(lat, lon, obs, hofx_y_mean_xb0, ombg)
 
-     #print('Find %d ombg for proc %d' %(len(ombg), n))
-     #print('ombg = ', ombg)
-
-      self.insert2JEDI(lat, lon, obs, EffectiveError0, hofx_y_mean_xb0, ombg)
-
-  def insert2JEDI(self, lat, lon, obs, EffectiveError0, hofx_y_mean_xb0, ombg):
+  def insert2JEDI(self, lat, lon, obs, hofx_y_mean_xb0, ombg):
     if(len(self.oldlat) < 1):
       newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
     else:
@@ -245,7 +246,6 @@ class CheckObsInfo():
         if(abs(self.jedilat[n] - lat[i]) < self.delt):
           if(abs(self.jedilon[n] - lon[i]) < self.delt):
             if(abs(self.jediobs[n] - obs[i]) < self.delt):
-              self.jediEffectiveError0[n] = EffectiveError0[i]
               self.jedihofx_y_mean_xb0[n] = hofx_y_mean_xb0[i]
               self.jediombg[n] = ombg[i]
 
@@ -256,9 +256,9 @@ class CheckObsInfo():
    #---------------------------------------------------------------------------------------------
     flnm = 'stats_gsiNjedi_%s_common.txt' %(self.varname)
     OUTF = open(flnm, 'w')
-    infostr = 'latitude, longitude, pressure, ObsValue, GSI HofX, JEDI HofX, '
+    infostr = 'latitude, longitude, ObsValue, GSI HofX, JEDI HofX, '
     infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
-    infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
+    infostr = infostr + 'JEDI hofx_y_mean_xb0'
     OUTF.write('%s\n' %(infostr))
     nobs = len(self.gsiidx)
     for k in range(nobs):
@@ -294,7 +294,7 @@ class CheckObsInfo():
         jedierr = 999999.0
      #infostr = '%s %f, %f,' %(infostr, self.gsiinfo['err'][n], self.jediinfo['err'][i])
       infostr = '%s %f, %f,' %(infostr, gsierr, jedierr)
-      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[i], self.jediEffectiveError0[i])
+      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
@@ -327,7 +327,7 @@ class CheckObsInfo():
     OUTF = open(flnm, 'w')
     infostr = 'latitude, longitude, ObsValue, JEDI HofX, '
     infostr = infostr + 'JEDI omb, JEDI ob error, '
-    infostr = infostr + 'JEDI hofx_y_mean_xb0, EffectiveError0'
+    infostr = infostr + 'JEDI hofx_y_mean_xb0'
     OUTF.write('%s\n' %(infostr))
     nobs = len(self.jedionly)
     for k in range(nobs):
@@ -341,7 +341,7 @@ class CheckObsInfo():
       if(jedierr > 999999.0):
         jedierr = 999999.0
       infostr = '%s %f,' %(infostr, jedierr)
-      infostr = '%s %f, %f' %(infostr, self.jedihofx_y_mean_xb0[i], self.jediEffectiveError0[i])
+      infostr = '%s %f' %(infostr, self.jedihofx_y_mean_xb0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
