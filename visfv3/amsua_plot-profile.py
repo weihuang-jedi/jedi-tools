@@ -57,7 +57,8 @@ with open('amsua_profile_data.txt', 'r') as filehandle:
            color='red',  
            linewidth=2.0)
 
-  plt.xlim((0, 0.10))  
+ #plt.xlim((0, 0.10))  
+  plt.xlim((0, 0.25))  
  #plt.xlim((0, 0.30))  
  #plt.xlim((0, 0.40))  
  #plt.xlim((0, 0.50))  
@@ -86,7 +87,8 @@ with open('amsua_profile_data.txt', 'r') as filehandle:
            linewidth=2.0)
 
  #plt.xlim((0, 120.0))
-  plt.xlim((0, 200.0))
+ #plt.xlim((0, 200.0))
+  plt.xlim((0, 600.0))
   plt.ylim((0, nz-1))  
 
   ax = plt.gca()

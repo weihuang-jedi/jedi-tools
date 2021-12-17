@@ -12,6 +12,9 @@ from matplotlib import cm
 from mpl_toolkits.basemap import Basemap
 from matplotlib.ticker import MultipleLocator
 
+from matplotlib import colors
+from matplotlib.ticker import PercentFormatter
+
 from modelVerticalpressure import ModelVerticalPressure
 
 #=========================================================================
@@ -1260,6 +1263,97 @@ class PlotTools():
    #cb.ax.tick_params(labelsize=self.labelsize)
 
     self.ax.set_title(self.title)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot_histograph(self, dist1):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+   #self.fig = self.plt.figure()
+   #self.ax = self.plt.subplot()
+
+    msg = 'dist1 min: %s, max: %s' % (np.min(dist1), np.max(dist1))
+    print(msg)
+
+    self.fig, self.axs = self.plt.subplots(1, 2, tight_layout=True)
+
+    n_bins = 21
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches = self.axs[0].hist(dist1, bins=n_bins)
+
+   #We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+   #we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+   #We can also normalize our inputs by the total number of counts
+    self.axs[1].hist(dist1, bins=n_bins, density=True)
+
+   #Now we format the y-axis to display percentage
+    self.axs[1].yaxis.set_major_formatter(PercentFormatter(xmax=1))
+
+    ltitle = self.title + ' counts'
+    self.axs[0].set_title(ltitle)
+    rtitle = self.title + ' percent'
+    self.axs[1].set_title(rtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot2histogram(self, dist1, dist2, name1=' ', name2=' '):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'dist1 min: %s, max: %s' % (np.min(dist1), np.max(dist1))
+    print(msg)
+    msg = 'dist2 min: %s, max: %s' % (np.min(dist2), np.max(dist2))
+    print(msg)
+
+    self.fig, self.axs = self.plt.subplots(1, 2, tight_layout=True)
+
+    n_bins = 21
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches0 = self.axs[0].hist(dist1, bins=n_bins)
+    N, bins, patches1 = self.axs[1].hist(dist2, bins=n_bins)
+
+   #We can set the number of bins with the *bins* keyword argument.
+   #self.axs[0].hist(dist1, bins=n_bins)
+   #self.axs[1].hist(dist2, bins=n_bins)
+
+   #We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+   #we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches0):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches1):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+    ltitle = self.title + ' ' + name1
+    self.axs[0].set_title(ltitle)
+    rtitle = self.title + ' ' + name2
+    self.axs[1].set_title(rtitle)
 
     self.display(output=self.output, image_name=self.image_name)
 

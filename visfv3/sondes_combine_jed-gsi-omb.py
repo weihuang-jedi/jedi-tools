@@ -45,83 +45,108 @@ class CheckObsInfo():
     ncfile = netCDF4.Dataset(self.gsifile, 'r')
     lat = ncfile.variables['Latitude'][:]
     lon = ncfile.variables['Longitude'][:]
-    obs = ncfile.variables['Observation'][:]
+    prs = ncfile.variables['Pressure'][:]
 
     gsiinfo['lat'] = lat
     gsiinfo['lon'] = lon
-    gsiinfo['obs'] = obs
+    gsiinfo['prs'] = prs
 
     self.gsilat = lat
     self.gsilon = lon
-    self.gsiobs = obs
+    self.gsiprs = prs
 
-    obs = ncfile.variables['Observation'][:]
-    omb = ncfile.variables['Obs_Minus_Forecast_adjusted'][:]
+    if('surface_pressure' == self.varname or
+       'specific_humidity' == self.varname or
+       'air_temperature' == self.varname):
+      obs = ncfile.variables['Observation'][:]
+      omb = ncfile.variables['Obs_Minus_Forecast_adjusted'][:]
+     #omb = ncfile.variables['Obs_Minus_Forecast_unadjusted'][:]
+    elif('eastward_wind' == self.varname):
+      obs = ncfile.variables['u_Observation'][:]
+      omb = ncfile.variables['u_Obs_Minus_Forecast_adjusted'][:]
+    elif('northward_wind' == self.varname):
+      obs = ncfile.variables['v_Observation'][:]
+      omb = ncfile.variables['v_Obs_Minus_Forecast_adjusted'][:]
 
-   #err = ncfile.variables['Errinv_Final'][:]
-    err = ncfile.variables['Inverse_Observation_Error'][:]
+    err = ncfile.variables['Errinv_Final'][:]
     oberr = 1.0/err
 
-    gsiinfo['obs'] = obs
-    gsiinfo['omb'] = omb
-    gsiinfo['err'] = oberr
+    if('surface_pressure' == self.varname):
+      gsiinfo['obs'] = obs
+      gsiinfo['omb'] = omb
+      gsiinfo['err'] = oberr
+    elif('specific_humidity' == self.varname):
+      gsiinfo['obs'] = 1000.0*obs
+      gsiinfo['omb'] = 1000.0*omb
+      gsiinfo['err'] = 1000.0*oberr
+    else:
+      gsiinfo['obs'] = obs
+      gsiinfo['omb'] = omb
+      gsiinfo['err'] = oberr
 
-   #sid = ncfile.variables['Station_ID'][:]
-   #gsiinfo['sid'] = sid
+    sid = ncfile.variables['Station_ID'][:]
+    gsiinfo['sid'] = sid
 
     ncfile.close()
 
-   #print("len(gsiinfo['sid']) = ", len(gsiinfo['sid']))
+    print("len(gsiinfo['sid']) = ", len(gsiinfo['sid']))
 
     return gsiinfo
 
 #----------------------------------------------------------------
   def get_jediinfo(self):
-    print('self.varname: ', self.varname)
-
     jediinfo = {}
     ncfile = netCDF4.Dataset(self.jedifile, 'r')
 
-    ncgroup = ncfile['/ObsValue/']
-    var = ncgroup.variables[self.varname][:]
+    var = self.get_data_1d(ncfile, 'ObsValue', self.varname)
     self.set_mask(var)
     obs = self.get_unmasked_value(var)
 
-   #ncgroup = ncfile['/GsiFinalObsError/']
-    ncgroup = ncfile['/ObsError/']
-    var = ncgroup.variables[self.varname][:]
+    var = self.get_data_1d(ncfile, 'ObsError', self.varname)
+    self.set_mask(var)
     oberr = self.get_unmasked_value(var)
 
-    ncgroup = ncfile['/GsiHofX/']
-    var = ncgroup.variables[self.varname][:]
+    var = self.get_data_1d(ncfile, 'GsiHofX', self.varname)
+    self.set_mask(var)
     hofx = self.get_unmasked_value(var)
 
-    ncgroup = ncfile['/MetaData/']
-    var = ncgroup.variables['latitude'][:]
+    var = self.get_data_1d(ncfile, 'MetaData', 'latitude')
     lat = self.get_unmasked_value(var)
-    var = ncgroup.variables['longitude'][:]
+
+    var = self.get_data_1d(ncfile, 'MetaData', 'longitude')
     lon = self.get_unmasked_value(var)
+
+    var = self.get_data_1d(ncfile, 'MetaData', 'air_pressure')
+    prs = 0.01*self.get_unmasked_value(var)
+
+    var = self.get_data_1d(ncfile, 'MetaData', 'station_id')
+    sid =self.get_unmasked_value(var)
+    jediinfo['sid'] = sid
 
     jediinfo['lat'] = lat
     jediinfo['lon'] = lon
-    jediinfo['obs'] = obs
+    jediinfo['prs'] = prs
 
     self.jedilat = lat
     self.jedilon = lon
-    self.jediobs = obs
+    self.jediprs = prs
 
-    jediinfo['obs'] = obs
-    jediinfo['err'] = oberr
-    jediinfo['hofx'] = hofx
-
-
-   #var = ncgroup.variables['station_id'][:]
-   #sid =self.get_unmasked_value(var)
-   #jediinfo['sid'] = sid
+    if('surface_pressure' == self.varname):
+      jediinfo['obs'] = 0.01*obs
+      jediinfo['err'] = 0.01*oberr
+      jediinfo['hofx'] = 0.01*hofx
+    elif('specific_humidity' == self.varname):
+      jediinfo['obs'] = 1000.0*obs
+      jediinfo['err'] = 1000.0*oberr
+      jediinfo['hofx'] = 1000.0*hofx
+    else:
+      jediinfo['obs'] = obs
+      jediinfo['err'] = oberr
+      jediinfo['hofx'] = hofx
 
     ncfile.close()
 
-   #print("len(jediinfo['sid']) = ", len(jediinfo['sid']))
+    print("len(jediinfo['sid']) = ", len(jediinfo['sid']))
 
     return jediinfo
 
@@ -148,15 +173,15 @@ class CheckObsInfo():
       if(found):
         self.gsiidx.append(i)
         self.jediidx.append(idx)
-       #infostr = 'found gsi lat: %f, lon %f, ' %(self.gsilat[i], self.gsilon[i])
-       #infostr = '%s matches jedi lat: %f, lon %f' %(infostr, self.jedilat[idx], self.jedilon[idx])
+       #infostr = 'found gsi lat: %8.3f, lon %8.3f, ' %(self.gsilat[i], self.gsilon[i])
+       #infostr = '%s matches jedi lat: %8.3f, lon %8.3f' %(infostr, self.jedilat[idx], self.jedilon[idx])
        #print(infostr)
       else:
-        infostr = 'did not find matched gsi lat: %f, lon %f, ' %(self.gsilat[i], self.gsilon[i])
+        infostr = 'did not find matched gsi lat: %8.3f, lon %8.3f, ' %(self.gsilat[i], self.gsilon[i])
         print(infostr)
       
      #xe = time.time()
-     #print('Loop on No. %d and %d use time: %f' %(i, idx, xe - xb))
+     #print('Loop on No. %d and %d use time: %8.3f' %(i, idx, xe - xb))
      #xb = xe
 
     self.gsiall = np.linspace(0, len(self.gsilat), len(self.gsilat), endpoint=False, dtype=int)
@@ -190,42 +215,52 @@ class CheckObsInfo():
     return var
 
   def readJEDIobsout(self):
-    print('self.varname: ', self.varname)
-
     nprocs = 36
     self.oldlat = []
     self.oldlon = []
-    self.oldobs = []
+    self.oldprs = []
     for n in range(nprocs):
       flstr = '%04d' %(n)
       flnm = self.jediOutFile.replace('0000', flstr)
 
       print('Reading JEDI out obs for proc: %d' %(n))
-      print('Reading JEDI out obs from file: %s' %(flnm))
 
       ncfile = netCDF4.Dataset(flnm, 'r')
-
-      var = self.get_data_2d(ncfile, 'ObsValue', self.varname)
+ 
+      var = self.get_data_1d(ncfile, 'ObsValue', self.varname)
       self.set_mask(var)
       obs = self.get_unmasked_value(var)
- 
+
       var = self.get_data_1d(ncfile, 'MetaData', 'latitude')
       lat = self.get_unmasked_value(var)
 
       var = self.get_data_1d(ncfile, 'MetaData', 'longitude')
       lon = self.get_unmasked_value(var)
 
-      var = self.get_data_2d(ncfile, 'hofx_y_mean_xb0', self.varname)
+      var = self.get_data_1d(ncfile, 'MetaData', 'air_pressure')
+      prs = 0.01*self.get_unmasked_value(var)
+
+      var = self.get_data_1d(ncfile, 'hofx_y_mean_xb0', self.varname)
       hofx_y_mean_xb0 = self.get_unmasked_value(var)
 
-      var = self.get_data_2d(ncfile, 'ombg', self.varname)
+      var = self.get_data_1d(ncfile, 'ombg', self.varname)
       ombg = self.get_unmasked_value(var)
 
       ncfile.close()
 
-      self.insert2JEDI(lat, lon, obs, hofx_y_mean_xb0, ombg)
+      if('surface_pressure' == self.varname):
+        ombg = 0.01*ombg
+        hofx_y_mean_xb0 = 0.01*hofx_y_mean_xb0
+      elif('specific_humidity' == self.varname):
+        ombg = 1000.0*ombg
+        hofx_y_mean_xb0 = 1000.0*hofx_y_mean_xb0
 
-  def insert2JEDI(self, lat, lon, obs, hofx_y_mean_xb0, ombg):
+     #print('Find %d ombg for proc %d' %(len(ombg), n))
+     #print('ombg = ', ombg)
+
+      self.insert2JEDI(lat, lon, prs, hofx_y_mean_xb0, ombg)
+
+  def insert2JEDI(self, lat, lon, prs, hofx_y_mean_xb0, ombg):
     if(len(self.oldlat) < 1):
       newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
     else:
@@ -234,7 +269,7 @@ class CheckObsInfo():
         for n in range(len(self.oldlat)):
           if(abs(self.oldlat[n] - lat[i]) < self.delt and
              abs(self.oldlon[n] - lon[i]) < self.delt and
-             abs(self.oldobs[n] - obs[i]) < self.delt):
+             abs(self.oldprs[n] - prs[i]) < self.delt):
              usedidx.append(i)
              break
       newidx = np.linspace(0, len(lat), len(lat), endpoint=False, dtype=int)
@@ -245,7 +280,7 @@ class CheckObsInfo():
       for i in newidx:
         if(abs(self.jedilat[n] - lat[i]) < self.delt):
           if(abs(self.jedilon[n] - lon[i]) < self.delt):
-            if(abs(self.jediobs[n] - obs[i]) < self.delt):
+            if(abs(self.jediprs[n] - prs[i]) < self.delt):
               self.jedihofx_y_mean_xb0[n] = hofx_y_mean_xb0[i]
               self.jediombg[n] = ombg[i]
 
@@ -256,27 +291,34 @@ class CheckObsInfo():
    #---------------------------------------------------------------------------------------------
     flnm = 'stats_gsiNjedi_%s_common.txt' %(self.varname)
     OUTF = open(flnm, 'w')
-    infostr = 'latitude, longitude, ObsValue, GSI HofX, JEDI HofX, '
+    infostr = 'latitude, longitude, pressure, ObsValue, GSI HofX, JEDI HofX, '
     infostr = infostr + 'GSI omb, JEDI omb, GSI ob error, JEDI ob error, '
     infostr = infostr + 'JEDI hofx_y_mean_xb0'
     OUTF.write('%s\n' %(infostr))
     nobs = len(self.gsiidx)
-    for k in range(nobs):
+    print('len(self.gsiidx) = ', len(self.gsiidx))
+    print('len(self.jediidx) = ', len(self.jediidx))
+    print("len(self.gsiinfo['err']) = ", len(self.gsiinfo['err']))
+    print("len(self.jediinfo['err']) = ", len(self.jediinfo['err']))
+
+    for k in range(nobs-1):
       n = self.gsiidx[k]
       i = self.jediidx[k]
+      if(n >= nobs-1 or i >= nobs-1):
+        continue
+
       if((abs(self.gsilat[n] - self.jedilat[i]) > self.delt) or
          (abs(self.gsilon[n] - self.jedilon[i]) > self.delt)):
-         infostr = 'gsi lat: %f, lon %f did not match ' %(self.gsilat[n], self.gsilon[n])
-         infostr = '%s jedi lat: %f, lon %f. Exit.' %(infostr, self.jedilat[i], self.jedilon[i])
+         infostr = 'gsi lat: %8.3f, lon %8.3f did not match ' %(self.gsilat[n], self.gsilon[n])
+         infostr = '%s jedi lat: %8.3f, lon %8.3f. Exit.' %(infostr, self.jedilat[i], self.jedilon[i])
          print(infostr)
          sys.exit(-1)
 
-      infostr = '%7.3f, %8.3f,' %(self.gsilat[n], self.gsilon[n])
-     #infostr = '%s %7.2f, %7.2f,' %(infostr, self.gsiinfo['obs'][n], self.jediinfo['obs'][i])
-      infostr = '%s %7.2f,' %(infostr, self.gsiinfo['obs'][n])
+      infostr = '%8.3f, %8.3f,' %(self.gsilat[n], self.gsilon[n])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, self.gsiinfo['prs'][n], self.jediinfo['obs'][i])
       gsihofx = self.gsiinfo['obs'][n] - self.gsiinfo['omb'][n]
-      infostr = '%s %7.2f, %7.2f,' %(infostr, gsihofx, self.jediinfo['hofx'][i])
-      infostr = '%s %7.2f, %7.2f,' %(infostr, self.gsiinfo['omb'][n], self.jediombg[i])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, gsihofx, self.jediinfo['hofx'][i])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, self.gsiinfo['omb'][n], self.jediombg[i])
 
       if(math.isnan(self.gsiinfo['err'][n])):
         gsierr = 999999.0
@@ -287,8 +329,8 @@ class CheckObsInfo():
         gsierr = 999999.0
       if(jedierr > 999999.0):
         jedierr = 999999.0
-      infostr = '%s %7.2f, %7.2f,' %(infostr, gsierr, jedierr)
-      infostr = '%s %7.2f' %(infostr, self.jedihofx_y_mean_xb0[i])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, gsierr, jedierr)
+      infostr = '%s %8.3f' %(infostr, self.jedihofx_y_mean_xb0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
@@ -302,9 +344,9 @@ class CheckObsInfo():
     for k in range(nobs):
       n = self.gsionly[k]
 
-      infostr = '%7.3f, %8.3f, %7.2f,' %(self.gsilat[n], self.gsilon[n], self.gsiinfo['obs'][n])
+      infostr = '%8.3f, %8.3f, %8.3f,' %(self.gsilat[n], self.gsilon[n], self.gsiinfo['prs'][n])
       gsihofx = self.gsiinfo['obs'][n] - self.gsiinfo['omb'][n]
-      infostr = '%s %7.2f, %7.2f,' %(infostr, gsihofx, self.gsiinfo['omb'][n])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, gsihofx, self.gsiinfo['omb'][n])
 
       if(math.isnan(self.gsiinfo['err'][n])):
         gsierr = 999999.0
@@ -312,14 +354,14 @@ class CheckObsInfo():
         gsierr = self.gsiinfo['err'][n]
       if(gsierr > 999999.0):
         gsierr = 999999.0
-      infostr = '%s %f' %(infostr, gsierr)
+      infostr = '%s %8.3f' %(infostr, gsierr)
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
    #---------------------------------------------------------------------------------------------
     flnm = 'stats_gsiNjedi_%s_jedionly.txt' %(self.varname)
     OUTF = open(flnm, 'w')
-    infostr = 'latitude, longitude, ObsValue, JEDI HofX, '
+    infostr = 'latitude, longitude, pressure, ObsValue, JEDI HofX, '
     infostr = infostr + 'JEDI omb, JEDI ob error, '
     infostr = infostr + 'JEDI hofx_y_mean_xb0'
     OUTF.write('%s\n' %(infostr))
@@ -327,23 +369,23 @@ class CheckObsInfo():
     for k in range(nobs):
       i = self.jedionly[k]
 
-      infostr = '%7.3f, %8.3f,' %(self.jedilat[i], self.jedilon[i])
-      infostr = '%s %7.2f,' %(infostr, self.jediinfo['obs'][i])
-      infostr = '%s %7.2f, %7.2f,' %(infostr, self.jediinfo['hofx'][i], self.jediombg[i])
+      infostr = '%8.3f, %8.3f,' %(self.jedilat[i], self.jedilon[i])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, self.jediinfo['prs'][i], self.jediinfo['obs'][i])
+      infostr = '%s %8.3f, %8.3f,' %(infostr, self.jediinfo['hofx'][i], self.jediombg[i])
 
       jedierr = self.jediinfo['err'][i]
       if(jedierr > 999999.0):
         jedierr = 999999.0
-      infostr = '%s %7.2f,' %(infostr, jedierr)
-      infostr = '%s %7.2f' %(infostr, self.jedihofx_y_mean_xb0[i])
+      infostr = '%s %8.3f,' %(infostr, jedierr)
+      infostr = '%s %8.3f' %(infostr, self.jedihofx_y_mean_xb0[i])
       OUTF.write('%s\n' %(infostr))
     OUTF.close()
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
- #varname = 'Obs_Minus_Forecast_adjusted'
-  varname = 'brightness_temperature'
+ #varname = 'surface_pressure'
+  varname = 'eastward_wind'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'varname='])
 
@@ -359,12 +401,21 @@ if __name__ == '__main__':
   print('varname = ', varname)
 
 #=======================================================================================================================
-  jedidir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua/ioda_v2_data'
-  jediobsfile = '%s/obs/amsua_n15_obs_2021010900.nc4' %(jedidir)
-  jediOutFile = '%s/out_80m/amsua_n15_obs_2021010900_0000.nc4' %(jedidir)
+  jedidir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/rerun/ioda_v2_data'
+  jediobsfile = '%s/obs/ioda_v2_sondes_all_obs_2021010900.nc4' %(jedidir)
 
-  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/amsua/jeff-data'
-  gsiobsfile = '%s/diag_amsua_n15_ges.2021010900_ensmean.nc4' %(gsidatadir)
+  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  if(varname == 'surface_pressure'):
+    jediOutFile = '%s/ps-out/ps_obs_2021010900_0000.nc4' %(jedidir)
+    gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
+  else:
+    jediOutFile = '%s/uvtq+tv-out/uvtq_obs_2021010900_0000.nc4' %(jedidir)
+    if(varname.find('temperature') > 0):
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_t_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    elif(varname == 'specific_humidity'):
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_q_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    else:
+      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_uv_ges.2021010900_ensmean.nc4' %(gsidatadir)
 
   coi = CheckObsInfo(debug=debug, jedifile=jediobsfile, gsifile=gsiobsfile, jediOutFile=jediOutFile)
 
