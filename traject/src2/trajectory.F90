@@ -45,7 +45,7 @@ PROGRAM trajectory
      if(1 == it) then
         call initialize_modelgrid(model1, trim(filename))
      else
-        if(1 == mod(it, 2)) then
+        if(0 == mod(it, 2)) then
            call setup_modelgrid(model0, trim(filename))
         else
            call setup_modelgrid(model1, trim(filename))

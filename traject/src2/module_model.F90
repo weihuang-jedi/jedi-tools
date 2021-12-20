@@ -226,18 +226,15 @@ contains
 
     implicit none
 
-    type(modelgrid),  intent(out) :: model
+    type(modelgrid),  intent(inout) :: model
     character(len=*), intent(in)  :: filename
 
-    integer :: i, j, k, n, nk, rc
-    integer :: include_parents, dimlen
+    integer :: n, rc
 
     character(len=1024) :: dimname, varname
 
-    print *, 'Enter setup_modelgrid'
-    print *, 'filename: <', trim(filename), '>'
-
-    include_parents = 0
+   !print *, 'Enter setup_modelgrid'
+   !print *, 'filename: <', trim(filename), '>'
 
     model%filename = trim(filename)
 
@@ -249,11 +246,15 @@ contains
     rc = nf90_inquire(model%fileid, model%nDims, model%nVars, &
                       model%nGlobalAtts, model%unlimdimid)
     call check_status(rc)
-    print *, 'nVars: ', model%nVars
-    print *, 'nDims: ', model%nDims
+   !print *, 'nVars: ', model%nVars
+   !print *, 'nDims: ', model%nDims
 
     do n = 1, model%nVars
-      !print *, 'Var No. ', n, ': ndims = ', model%vars(n)%nDims
+       rc = nf90_inquire_variable(model%fileid, model%varids(n), &
+                name=model%vars(n)%varname)
+       call check_status(rc)
+
+      !print *, 'Var No. ', n, ': name = ', trim(model%vars(n)%varname)
 
        if(trim(model%vars(n)%varname) == 'U') then
           rc = nf90_get_var(model%fileid, model%varids(n), model%u)
@@ -283,7 +284,10 @@ contains
        call check_status(rc)
     end do
 
-    print *, 'Leave setup_modelgrid'
+    rc = nf90_close(model%fileid)
+    call check_status(rc)
+
+   !print *, 'Leave setup_modelgrid'
 
   end subroutine setup_modelgrid
 
@@ -326,9 +330,6 @@ contains
     if(allocated(model%ter)) deallocate(model%ter)
     if(allocated(model%slp)) deallocate(model%slp)
     if(allocated(model%tsk)) deallocate(model%tsk)
-
-    rc = nf90_close(model%fileid)
-    call check_status(rc)
 
   end subroutine finalize_modelgrid
 
