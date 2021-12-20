@@ -1357,6 +1357,34 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
+ #----------------------------------------------------------------------------------------------
+  def plot_cdf(self, omb, omin=-1.0, omax=1.0):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'omb min: %s, max: %s' % (np.min(omb), np.max(omb))
+    print(msg)
+
+    self.fig, self.ax = self.plt.subplots(1, 1, tight_layout=True)
+
+    dx = 1.0/len(omb)
+    X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+   # Compute the CDF
+    CY = np.cumsum(Y * dx)
+
+   # Plot both
+    self.plt.plot(X, Y)
+    self.plt.plot(X, CY, 'r--')
+
+    self.ax.set_title(self.title)
+
+    self.display(output=self.output, image_name=self.image_name)
+
 # ----
 if __name__ == '__main__':
   debug = 1

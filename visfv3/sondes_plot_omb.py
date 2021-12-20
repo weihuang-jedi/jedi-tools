@@ -62,11 +62,29 @@ class StatsHandler():
       self.JEDI_hofx_y_mean_xb0.append(float(item[10]))
 
 #------------------------------------------------------------------------------
-  def get_omb(self):
-    return self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb
+  def get_omb(self, pressure=None):
+    if(pressure is None):
+      return self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb
+
+    obslat = []
+    obslon = []
+    GSI_omb = []
+    JEDI_omb = []
+
+    nobs = len(self.latitude)
+    delt = 0.1
+
+    for n in range(nobs):
+      if(abs(self.pressure[n] - pressure) < delt):
+        obslat.append(self.latitude[n])
+        obslon.append(self.longitude[n])
+        GSI_omb.append(self.GSI_omb[n])
+        JEDI_omb.append(self.JEDI_omb[n])
+
+    return obslat, obslon, GSI_omb, JEDI_omb
 
 #------------------------------------------------------------------------------
-  def plotit(self, clevs, cblevs, cmapname, units='hPa', precision=1):
+  def plotit(self, clevs, cblevs, cmapname, units='hPa', precision=1, pressure=None):
     nlon = 360
     nlat = nlon/2 + 1
     dlon = 360.0/nlon
@@ -76,23 +94,63 @@ class StatsHandler():
 
     pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
 
-   #------------------------------------------------------------------------------
-    obslat, obslon, GSI_omb, JEDI_omb = self.get_omb()
+    obslat, obslon, GSI_omb, JEDI_omb = self.get_omb(pressure=pressure)
 
+    print('len(obslat) = ', len(obslat))
+
+    if(len(obslat) < 2):
+      print('pressure = ', pressure)
+      print('Too few obs to plot.')
+      return
+     #sys.exit(-1)
+
+   #------------------------------------------------------------------------------
     pt.set_clevs(clevs=clevs)
     pt.set_cblevs(cblevs=cblevs)
     pt.set_cmapname(cmapname)
     pt.set_precision(precision=precision)
 
-    label = '%s GSI omb - JEDI omb, units: %s' %(self.varname, units)
-    pt.set_label(label)
+   #------------------------------------------------------------------------------
+  
+    if(pressure is None):
+      img_label = '%s' %(self.varname)
+      ttl_label = '%s' %(self.varname)
+    else:
+      img_label = '%s_%dhPa' %(self.varname, int(pressure+0.5))
+      ttl_label = '%s %dhPa' %(self.varname, int(pressure+0.5))
 
-    imgname = '%s_GSIomb-JEDIomb' %(self.varname)
-    title = '%s GSIomb-JEDIomb' %(self.varname)
+    label = '%s GSI omb - JEDI omb, units: %s' %(ttl_label, units)
+    pt.set_label(label)
 
     obsvar = np.array(GSI_omb) - np.array(JEDI_omb)
 
    #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb_cdf' %(img_label)
+    title = '%s GSIomb CDF' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(GSI_omb)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_JEDIomb_cdf' %(img_label)
+    title = '%s JEDIomb CDF' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(JEDI_omb)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb_cdf' %(img_label)
+    title = '%s GSIomb-JEDIomb CDF' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(obsvar)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb' %(img_label)
+    title = '%s GSIomb-JEDIomb' %(ttl_label)
     meangsiomb = np.mean(np.abs(GSI_omb))
     title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
     pt.set_imagename(imgname)
@@ -101,12 +159,33 @@ class StatsHandler():
     pt.obsonly(obslat, obslon, obsvar, inbound=True)
 
    #------------------------------------------------------------------------------
-    imgname = '%s_GSIomb-JEDIomb_scatter' %(varname)
-    title = '%s GSIomb-JEDIomb Scatter' %(varname)
+    imgname = '%s_GSIomb-JEDIomb_scatter' %(img_label)
+    title = '%s GSIomb-JEDIomb Scatter' %(ttl_label)
     pt.set_imagename(imgname)
     pt.set_title(title)
 
-    pt.scatter_plot(JEDI_omb, GSI_omb, obsvar, self.varname, inbound=True)
+    pt.scatter_plot(JEDI_omb, GSI_omb, obsvar, img_label, inbound=True)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb_JEDIomb_Histogram' %(img_label)
+    title = '%s Histogram' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+    pt.plot2histogram(GSI_omb, JEDI_omb, name1='GSI omb', name2='JEDI omb')
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_JEDIomb_Histogram' %(img_label)
+    title = '%s JEDIomb Histogram' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+    pt.plot_histograph(JEDI_omb)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb_Histogram' %(img_label)
+    title = '%s GSIomb Histogram' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+    pt.plot_histograph(GSI_omb)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -144,7 +223,8 @@ if __name__ == '__main__':
     units = 'hPa'
     clevs = np.arange(-1.0, 1.1, 0.1)
     cblevs = np.arange(-1.0, 1.5, 0.5)
-  elif(varname == 'air_temperature'):
+  elif((varname == 'air_temperature')
+    or (varname == 'virtual_temperature')) :
     units = 'K'
     clevs = np.arange(-5.0, 5.1, 0.2)
     cblevs = np.arange(-5.0, 5.5, 1.0)
@@ -159,6 +239,9 @@ if __name__ == '__main__':
 
   print('clevs = ', clevs)
   print('cblevs = ', cblevs)
+
+  for prs in [100.0, 200.0, 500.0, 700.0, 850.0, 1000.0]:
+    sh.plotit(clevs, cblevs, cmapname, units=units, pressure=prs)
 
   sh.plotit(clevs, cblevs, cmapname, units=units)
 

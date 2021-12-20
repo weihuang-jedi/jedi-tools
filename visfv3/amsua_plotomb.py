@@ -135,6 +135,30 @@ class StatsHandler():
     pt.obsonly(obslat, obslon, obsvar, inbound=True)
 
    #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb_cdf' %(varname)
+    title = '%s GSIomb CDF' %(varname)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(GSI_omb)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_JEDIomb_cdf' %(varname)
+    title = '%s JEDIomb CDF' %(varname)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(JEDI_omb)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb_cdf' %(varname)
+    title = '%s GSIomb-JEDIomb CDF' %(varname)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.plot_cdf(obsvar)
+
+   #------------------------------------------------------------------------------
     imgname = '%s_GSIomb-JEDIomb_scatter' %(varname)
     title = '%s GSIomb-JEDIomb Scatter' %(varname)
     pt.set_imagename(imgname)

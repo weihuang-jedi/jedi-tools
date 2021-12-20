@@ -43,9 +43,9 @@ class CheckObsInfo():
     gsiinfo = {}
 
     ncfile = netCDF4.Dataset(self.gsifile, 'r')
-    lat = ncfile.variables['Latitude'][:]
-    lon = ncfile.variables['Longitude'][:]
-    prs = ncfile.variables['Pressure'][:]
+    lat = ncfile.variables['latitude@MetaData'][:]
+    lon = ncfile.variables['longitude@MetaData'][:]
+    prs = ncfile.variables['air_pressure@MetaData'][:]
 
     gsiinfo['lat'] = lat
     gsiinfo['lon'] = lon
@@ -55,27 +55,16 @@ class CheckObsInfo():
     self.gsilon = lon
     self.gsiprs = prs
 
-    if('surface_pressure' == self.varname or
-       'specific_humidity' == self.varname or
-       'air_temperature' == self.varname):
-      obs = ncfile.variables['Observation'][:]
-      omb = ncfile.variables['Obs_Minus_Forecast_adjusted'][:]
-     #omb = ncfile.variables['Obs_Minus_Forecast_unadjusted'][:]
-    elif('eastward_wind' == self.varname):
-      obs = ncfile.variables['u_Observation'][:]
-      omb = ncfile.variables['u_Obs_Minus_Forecast_adjusted'][:]
-    elif('northward_wind' == self.varname):
-      obs = ncfile.variables['v_Observation'][:]
-      omb = ncfile.variables['v_Obs_Minus_Forecast_adjusted'][:]
+    obsname = '%s@ObsValue' %(self.varname)
+    ombname = '%s@GsiAdjustObsError' %(self.varname)
+    errname = '%s@GsiFinalObsError' %(self.varname)
 
-    err = ncfile.variables['Errinv_Final'][:]
+    obs = ncfile.variables[obsname][:]
+    omb = ncfile.variables[ombname][:]
+    err = ncfile.variables[errname][:]
     oberr = 1.0/err
 
-    if('surface_pressure' == self.varname):
-      gsiinfo['obs'] = obs
-      gsiinfo['omb'] = omb
-      gsiinfo['err'] = oberr
-    elif('specific_humidity' == self.varname):
+    if('specific_humidity' == self.varname):
       gsiinfo['obs'] = 1000.0*obs
       gsiinfo['omb'] = 1000.0*omb
       gsiinfo['err'] = 1000.0*oberr
@@ -84,12 +73,7 @@ class CheckObsInfo():
       gsiinfo['omb'] = omb
       gsiinfo['err'] = oberr
 
-    sid = ncfile.variables['Station_ID'][:]
-    gsiinfo['sid'] = sid
-
     ncfile.close()
-
-    print("len(gsiinfo['sid']) = ", len(gsiinfo['sid']))
 
     return gsiinfo
 
@@ -119,10 +103,6 @@ class CheckObsInfo():
     var = self.get_data_1d(ncfile, 'MetaData', 'air_pressure')
     prs = 0.01*self.get_unmasked_value(var)
 
-    var = self.get_data_1d(ncfile, 'MetaData', 'station_id')
-    sid =self.get_unmasked_value(var)
-    jediinfo['sid'] = sid
-
     jediinfo['lat'] = lat
     jediinfo['lon'] = lon
     jediinfo['prs'] = prs
@@ -145,8 +125,6 @@ class CheckObsInfo():
       jediinfo['hofx'] = hofx
 
     ncfile.close()
-
-    print("len(jediinfo['sid']) = ", len(jediinfo['sid']))
 
     return jediinfo
 
@@ -404,18 +382,20 @@ if __name__ == '__main__':
   jedidir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/rerun/ioda_v2_data'
   jediobsfile = '%s/obs/ioda_v2_sondes_all_obs_2021010900.nc4' %(jedidir)
 
-  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/visfv3'
+  gsidatadir = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/diag2iodav2'
   if(varname == 'surface_pressure'):
     jediOutFile = '%s/ps-out/ps_obs_2021010900_0000.nc4' %(jedidir)
-    gsiobsfile = '%s/jeff-runs/PSonly/diag_conv_ps_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    gsiobsfile = '%s/sondes_ps_obs_2021010900.nc4' %(gsidatadir)
   else:
     jediOutFile = '%s/uvtq+tv-out/uvtq_obs_2021010900_0000.nc4' %(jedidir)
-    if(varname.find('temperature') > 0):
-      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_t_ges.2021010900_ensmean.nc4' %(gsidatadir)
+    if(varname == 'virtual_temperature'):
+      gsiobsfile = '%s/sondes_tv_obs_2021010900.nc4' %(gsidatadir)
+    elif(varname == 'air_temperature'):
+      gsiobsfile = '%s/sondes_tsen_obs_2021010900.nc4' %(gsidatadir)
     elif(varname == 'specific_humidity'):
-      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_q_ges.2021010900_ensmean.nc4' %(gsidatadir)
+      gsiobsfile = '%s/sondes_q_obs_2021010900.nc4' %(gsidatadir)
     else:
-      gsiobsfile = '%s/jeff-runs/allsondeobs/diag_conv_uv_ges.2021010900_ensmean.nc4' %(gsidatadir)
+      gsiobsfile = '%s/sondes_uv_obs_2021010900.nc4' %(gsidatadir)
 
   coi = CheckObsInfo(debug=debug, jedifile=jediobsfile, gsifile=gsiobsfile, jediOutFile=jediOutFile)
 
