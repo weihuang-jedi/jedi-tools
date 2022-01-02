@@ -49,6 +49,14 @@ class StatsHandler():
     nlines = len(lines)
     for i in range(1, nlines):
       item = lines[i].split(', ')
+      if('specific_humidity' == self.varname):
+        omb = abs(float(item[6]))
+        if(omb > 100.0):
+          continue
+        omb = abs(float(item[7]))
+        if(omb > 100.0):
+          continue
+     #print('GSI_omb: %f, JEDI_omb: %f' %(float(item[6]), float(item[7])))
       self.latitude.append(float(item[0]))
       self.longitude.append(float(item[1]))
       self.pressure.append(float(item[2]))
@@ -116,6 +124,8 @@ class StatsHandler():
       img_label = '%s' %(self.varname)
       ttl_label = '%s' %(self.varname)
     else:
+     #img_label = '%s_%dhPa' %(self.varname, int((pressure+0.5)/100.0))
+     #ttl_label = '%s %dhPa' %(self.varname, int((pressure+0.5)/100.0))
       img_label = '%s_%dhPa' %(self.varname, int(pressure+0.5))
       ttl_label = '%s %dhPa' %(self.varname, int(pressure+0.5))
 
@@ -191,7 +201,8 @@ class StatsHandler():
 if __name__ == '__main__':
   debug = 1
   output = 0
-  varname = 'surface_pressure'
+ #varname = 'surface_pressure'
+  varname = 'specific_humidity'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'varname='])
 
@@ -226,8 +237,8 @@ if __name__ == '__main__':
   elif((varname == 'air_temperature')
     or (varname == 'virtual_temperature')) :
     units = 'K'
-    clevs = np.arange(-5.0, 5.1, 0.2)
-    cblevs = np.arange(-5.0, 5.5, 1.0)
+    clevs = np.arange(-5.0, 5.2, 0.2)
+    cblevs = np.arange(-5.0, 6.0, 1.0)
   elif(varname == 'eastward_wind' or varname == 'northward_wind'):
     clevs = np.arange(-5.0, 5.2, 0.2)
     cblevs = np.arange(-5.0, 6.0, 1.0)
@@ -241,7 +252,9 @@ if __name__ == '__main__':
   print('cblevs = ', cblevs)
 
   for prs in [100.0, 200.0, 500.0, 700.0, 850.0, 1000.0]:
-    sh.plotit(clevs, cblevs, cmapname, units=units, pressure=prs)
+   #prs_pa = 100.0*prs
+    prs_pa = prs
+    sh.plotit(clevs, cblevs, cmapname, units=units, pressure=prs_pa)
 
   sh.plotit(clevs, cblevs, cmapname, units=units)
 

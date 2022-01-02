@@ -1,7 +1,7 @@
 &control_param
- input_flnm = '../data/gfs_4_20210401_0000_000.nc',
+ input_flnm = '../data/gfs_4_20210731_1200_000.nc',
 
- output_flnm = 'verticalheight.nc',
+ output_flnm = 'vh_2021_0731_12.nc',
 
  nalt = 101
  dz = 500.0

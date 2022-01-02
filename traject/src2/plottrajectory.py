@@ -236,7 +236,7 @@ class PlotTrajectory():
     self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
 
    #self.plt.legend()
-    self.image_name = 'trajectory_lathgt.png'
+    self.image_name = 'trajectory_lathgt_at_%d.png' %(int(ilon/2))
     self.display(output=self.output, image_name=self.image_name)
 
   def plotLatHgtCrossingPole(self, ilon=1):
@@ -303,7 +303,7 @@ class PlotTrajectory():
     self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
 
    #self.plt.legend()
-    self.image_name = 'trajectory_lathgt.png'
+    self.image_name = 'trajectory_lathgt_crosspole_%d.png' %(int(ilon/2))
     self.display(output=self.output, image_name=self.image_name)
 
   def plotLatHgtAverageBetween(self, startlon=0, endlon=360):
@@ -366,7 +366,7 @@ class PlotTrajectory():
     self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
 
    #self.plt.legend()
-    self.image_name = 'trajectory_lathgt.png'
+    self.image_name = 'trajectory_lathgt_avg_%d-%d.png' %(startlon, endlon)
     self.display(output=self.output, image_name=self.image_name)
 
   def plotLonHgt(self, jlat=1):
@@ -469,46 +469,48 @@ if __name__ == '__main__':
   print('output = ', output)
   print('filelist = ', filelist)
 
- #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[0:11])
- #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[1::2])
- #pt = PlotTrajectory(debug=0, output=0, filelist=filelist[3:4:2])
-  pt = PlotTrajectory(debug=0, output=0, filelist=filelist)
+  pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[0:11:2])
+ #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[1::2])
+ #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[3:4:2])
+ #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[1:3])
 
  #pt.plotOnMap()
  #pt.plotOnMapAtLat(latlist=[-30, -15, 0, 15, 30])
 
  #for i in [0, 90, 160, 180, 200, 225, 270]:
- #  ilon = 2*i
- #  pt.plotLatHgt(ilon=ilon)
+  for i in [0, 180]:
+    ilon = 2*i
+    pt.plotLatHgt(ilon=ilon)
 
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=360)
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=90, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=120, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=120, endlon=180)
 
-  pt.plotLatHgtAverageBetween(startlon=150, endlon=210)
-  pt.plotLatHgtAverageBetween(startlon=150, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=180, endlon=210)
+ #pt.plotLatHgtAverageBetween(startlon=150, endlon=210)
+ #pt.plotLatHgtAverageBetween(startlon=150, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=180, endlon=210)
 
-  pt.plotLatHgtAverageBetween(startlon=160, endlon=200)
-  pt.plotLatHgtAverageBetween(startlon=160, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=180, endlon=200)
+ #pt.plotLatHgtAverageBetween(startlon=160, endlon=200)
+ #pt.plotLatHgtAverageBetween(startlon=160, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=180, endlon=200)
 
   pt.plotLatHgtAverageBetween(startlon=170, endlon=190)
-  pt.plotLatHgtAverageBetween(startlon=170, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=180, endlon=190)
+ #pt.plotLatHgtAverageBetween(startlon=170, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=180, endlon=190)
 
   pt.plotLatHgtAverageBetween(startlon=175, endlon=185)
-  pt.plotLatHgtAverageBetween(startlon=175, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=180, endlon=185)
+ #pt.plotLatHgtAverageBetween(startlon=175, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=180, endlon=185)
 
   pt.plotLatHgtAverageBetween(startlon=178, endlon=182)
-  pt.plotLatHgtAverageBetween(startlon=178, endlon=180)
-  pt.plotLatHgtAverageBetween(startlon=180, endlon=182)
+ #pt.plotLatHgtAverageBetween(startlon=178, endlon=180)
+ #pt.plotLatHgtAverageBetween(startlon=180, endlon=182)
 
  #for i in [0, 45, 90, 120, 135]:
- #  ilon = 2*i
- #  pt.plotLatHgtCrossingPole(ilon=ilon)
+  for i in [0]:
+    ilon = 2*i
+    pt.plotLatHgtCrossingPole(ilon=ilon)
 
  #for j in [-60, -30, 0, 30, 60]:
  #  jlat = 2*(j+90)

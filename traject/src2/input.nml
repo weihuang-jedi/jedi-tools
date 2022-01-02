@@ -1,19 +1,21 @@
 &control_param
- output_flnm = 'trajectory_50000m.nc',
- dt = 120.0,
- height = 50000.0,
+ datadir = '../vertical-interp2',
+ output_flnm = 'trajectory_15000m.nc',
+ dt = 600.0,
+ height = 15000.0,
  debug_on = .true.,
 
  start_year = 2021,
- start_month = 4,
- start_day = 1,
- start_hour = 0,
+ start_month = 10,
+ start_day = 4,
+ start_hour = 00,
 
  end_year = 2021,
- end_month = 4,
- end_day = 3,
- end_hour = 0,
+ end_month = 10,
+ end_day = 7,
+ end_hour = 00,
 
  interval_hour = 12,
 /
+
 

@@ -17,29 +17,53 @@
  ulimit -s unlimited
  ulimit -c unlimited
 
+ cd /work2/noaa/gsienkf/weihuang/tools/traject/src2
+
  generate_weights=0
 
  executable=/work2/noaa/gsienkf/weihuang/tools/traject/src2/trajectory.exe
 
- year=2021
- month=04
- day=01
- hour=00
+ intvhour=12
+ dt=600
 
-#for HEIGHT in 500 1000
-#for HEIGHT in 2000 3000 4000 5000 6000 7000 8000 9000 10000
-#for HEIGHT in 500 1000 2000 3000 4000 5000 6000 7000 8000 9000 10000
-#for HEIGHT in 11000 12000 13000 14000 15000
- for HEIGHT in 18000 22000 25000 30000 35000 40000 45000 50000
+ syear=2021
+ smonth=10
+ sday=4
+ shour=00
+
+ eyear=2021
+ emonth=10
+ eday=7
+ ehour=00
+
+ datadir=../vertical-interp2
+
+ for HEIGHT in 1000 3000 5000 7000 9000 11000 12000 13000 15000
  do
    sed -e "s?HEIGHT?${HEIGHT}?g" \
+       -e "s?DATADIR?${datadir}?g" \
+       -e "s?DT?${dt}?g" \
+       -e "s?SYEAR?${syear}?g" \
+       -e "s?SMONTH?${smonth}?g" \
+       -e "s?SDAY?${sday}?g" \
+       -e "s?SHOUR?${shour}?g" \
+       -e "s?EYEAR?${eyear}?g" \
+       -e "s?EMONTH?${emonth}?g" \
+       -e "s?EDAY?${eday}?g" \
+       -e "s?EHOUR?${ehour}?g" \
+       -e "s?INTVHOUR?${intvhour}?g" \
        input.nml.template > input.nml
 
    if [ ! -f 'trajectory_${HEIGHT}m.nc' ]
    then
-     ${executable}
+     ${executable} &
+     sleep 5
    fi
 
    n=$(( $n + 1 ))
  done
+
+ wait
+
+ exit 0
 

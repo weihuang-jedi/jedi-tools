@@ -22,13 +22,12 @@
  executable=/work2/noaa/gsienkf/weihuang/tools/traject/vertical-interp2/verticalinterp.exe
 
  year=2021
- month=04
- day=01
+ month=07
+ day=31
  hour=00
 
- end_day=30
+ end_day=31
 
- day=4
  while [ $day -le $end_day ]
  do
    for hour in 00 12

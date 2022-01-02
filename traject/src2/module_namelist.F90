@@ -6,7 +6,7 @@ MODULE module_namelist
 
   integer, parameter :: nml_unit = 7
 
-  CHARACTER(LEN=1024) :: program_name
+  CHARACTER(LEN=1024) :: datadir
   character(len=1024) :: output_flnm
 
   real    :: dt, height, frequency
@@ -29,15 +29,14 @@ contains
     integer :: n, rc
 
     ! Namelist definition.
-    namelist /control_param/ program_name, &
-                             dt, height, interval_hour, &
+    namelist /control_param/ datadir, dt, height, interval_hour, &
                              output_flnm, debug_on, &
                              start_year, start_month, start_day, start_hour, &
                              end_year, end_month, end_day, end_hour
 
     days_in_month = (/31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31/)
 
-    program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
+    datadir = './data'
 
     output_flnm = 'trajectory.nc'
 
@@ -83,9 +82,9 @@ contains
      implicit none
      character(len=1024), intent(out) :: filename
      
-     write(filename, fmt='(a, i4, a, 2(i0.2), a, i0.2, a)') &
-       'vh_', current_year, '_', current_month, current_day, &
-       '_', current_hour, '.nc'
+     write(filename, fmt='(2a, i4, a, 2(i0.2), a, i0.2, a)') &
+       trim(datadir), '/vh_', current_year, '_', &
+       current_month, current_day, '_', current_hour, '.nc'
 
      print *, 'filename: ', trim(filename)
 

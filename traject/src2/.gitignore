@@ -1,4 +1,5 @@
-imput.nml
+input.nml
+*.png
 *.f90
 *.exe
 *.mod

@@ -198,13 +198,13 @@ subroutine output_trajectory(trajectory, n, ct)
    real, dimension(trajectory%nx, trajectory%ny) :: var
 
   !print *, 'Enter output_trajectory'
-   print *, 'n = ', n
+  !print *, 'n = ', n
   !print *, 'trajectory%ncid = ', trajectory%ncid
   !print *, 'trajectory%nx = ', trajectory%nx
   !print *, 'trajectory%ny = ', trajectory%ny
 
    time(1) = ct
-   print *, 'output for time = ', time
+  !print *, 'output for time = ', time
 
    call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
 
