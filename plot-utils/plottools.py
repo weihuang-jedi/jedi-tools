@@ -1494,6 +1494,115 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
+  def get_sclvar(self, var, inbound=False):
+    vm = abs(np.min(var))
+    bm = abs(np.max(var))
+    if(bm > vm):
+      vm = bm
+
+    if(vm < 1.0e-6):
+      vm = 1.0
+    size = np.zeros((len(var)), dtype=float)
+    for n in range(len(size)):
+      size[n] = 1.0 + 100.0*abs(var[n])/vm
+
+    if(inbound):
+      midvar = np.where(var > self.cblevs[0], var, self.cblevs[0])
+      sclvar = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      sclvar = var
+
+    return sclvar, size
+
+  def set_lim(self, plt, varname):
+    if(varname == 'surface_pressure'):
+      plt.xlim((-7, 7))
+      plt.ylim((-7, 7))
+    elif(varname == 'air_temperature'):
+      plt.xlim((-7, 7))
+      plt.ylim((-7, 7))
+    elif(varname == 'eastward_wind' or varname == 'northward_wind'):
+      plt.xlim((-10, 10))
+      plt.ylim((-10, 10))
+    elif(varname == 'specific_humidity'):
+      plt.xlim((-5, 5))
+      plt.ylim((-5, 5))
+
+    plt.xlabel('JEDI_omb', fontsize=14)
+    plt.ylabel('GSI_omb', fontsize=14)
+    plt.grid(True)
+
+  def scatter_plot_panel(self, x, y, varname, prs, pltprs, inbound=False):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    nrow = 2
+    ncol = 4
+    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+
+    self.fig.suptitle(self.title, fontsize=16)
+
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        xomb = self.get_omb(x, prs, pltprs[n])
+        yomb = self.get_omb(y, prs, pltprs[n])
+
+        var = np.array(xomb) - np.array(yomb)
+        sclvar, size = self.get_sclvar(var, inbound=inbound)
+        self.ax[j][i] = self.plt.scatter(xomb, yomb, s=size, c=sclvar,
+                                         cmap=self.cmapname,
+                                         alpha=self.alpha)
+        cb = self.plt.colorbar(orientation=self.orientation, extend='both',
+                               pad=self.pad, ticks=self.cblevs, shrink=0.8)
+    
+        cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+        cb.ax.tick_params(labelsize=self.labelsize)
+        self.set_format(cb)
+
+       #self.set_lim(self.ax[j][i], varname)
+        self.set_lim(self.plt, varname)
+
+        ax = self.plt.gca()
+        ax.xaxis.set_ticks_position('bottom')
+        ax.yaxis.set_ticks_position('left')
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        ax.set_title(axtitle)
+
+    var = np.array(x) - np.array(y)
+    sclvar, size = self.get_sclvar(var, inbound=inbound)
+    self.ax[nrow-1][ncol-1] = self.plt.scatter(x, y, s=size, c=sclvar,
+                                               cmap=self.cmapname, 
+                                               alpha=self.alpha)
+
+    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
+                           pad=self.pad, ticks=self.cblevs, shrink=0.8)
+
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+   #self.set_lim(self.ax[nrow-1][ncol-1], varname)
+    self.set_lim(self.plt, varname)
+
+    ax = self.plt.gca()
+    ax.xaxis.set_ticks_position('bottom')
+    ax.yaxis.set_ticks_position('left')
+
+    axtitle = 'All Obs'
+    ax.set_title(axtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
 # ----
 if __name__ == '__main__':
   debug = 1

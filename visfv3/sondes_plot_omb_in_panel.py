@@ -78,6 +78,8 @@ class StatsHandler():
     lon = np.arange(0.0, 360.0, dlon)
     lat = np.arange(-90.0, 90.0+dlat, dlat)
 
+    obsvar = np.array(self.GSI_omb) - np.array(self.JEDI_omb)
+
     pt = PlotTools(debug=debug, output=output, lat=lat, lon=lon)
 
    #------------------------------------------------------------------------------
@@ -90,6 +92,29 @@ class StatsHandler():
   
     img_label = '%s' %(self.varname)
     ttl_label = '%s' %(self.varname)
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb_scatter' %(img_label)
+    title = '%s GSIomb-JEDIomb Scatter' %(ttl_label)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+
+    pt.scatter_plot_panel(self.JEDI_omb, self.GSI_omb, img_label,
+                          self.pressure, prs, inbound=True)
+
+    return
+
+   #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb' %(img_label)
+    title = '%s GSIomb-JEDIomb' %(ttl_label)
+    meangsiomb = np.mean(np.abs(GSI_omb))
+    title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+  
+    pt.obsonly(obslat, obslon, obsvar, inbound=True)
+
+    return
 
    #------------------------------------------------------------------------------
     imgname = '%s_GSIomb_cdf' %(img_label)
@@ -116,8 +141,6 @@ class StatsHandler():
     label = '%s GSI omb - JEDI omb, units: %s' %(ttl_label, units)
     pt.set_label(label)
 
-    obsvar = np.array(self.GSI_omb) - np.array(self.JEDI_omb)
-
     pt.plot_cdf_panel(obsvar, self.pressure, prs)
 
    #------------------------------------------------------------------------------
@@ -140,26 +163,6 @@ class StatsHandler():
     pt.set_imagename(imgname)
     pt.set_title(title)
     pt.plot_histograph_panel(obsvar, self.pressure, prs)
-
-    return
-
-   #------------------------------------------------------------------------------
-    imgname = '%s_GSIomb-JEDIomb' %(img_label)
-    title = '%s GSIomb-JEDIomb' %(ttl_label)
-    meangsiomb = np.mean(np.abs(GSI_omb))
-    title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
-    pt.set_imagename(imgname)
-    pt.set_title(title)
-  
-    pt.obsonly(obslat, obslon, obsvar, inbound=True)
-
-   #------------------------------------------------------------------------------
-    imgname = '%s_GSIomb-JEDIomb_scatter' %(img_label)
-    title = '%s GSIomb-JEDIomb Scatter' %(ttl_label)
-    pt.set_imagename(imgname)
-    pt.set_title(title)
-
-    pt.scatter_plot(JEDI_omb, GSI_omb, obsvar, img_label, inbound=True)
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
