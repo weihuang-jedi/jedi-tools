@@ -1385,6 +1385,115 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
+#------------------------------------------------------------------------------
+  def get_omb(self, obs, obsprs, pltprs):
+    omb = []
+
+    nobs = len(obs)
+    delt = 0.1
+
+    for n in range(nobs):
+      if(abs(obsprs[n] - pltprs) < delt):
+        omb.append(obs[n])
+
+    return omb
+
+ #----------------------------------------------------------------------------------------------
+  def plot_cdf_panel(self, obs, prs, pltprs):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'obs min: %s, max: %s' % (np.min(obs), np.max(obs))
+    print(msg)
+
+    nrow = 2
+    ncol = 4
+   #self.fig, self.ax = self.plt.subplots(nrow, ncol, tight_layout=True)
+    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+
+    self.fig.suptitle(self.title, fontsize=16)
+   #self.plt.title(self.title, fontsize=16)
+
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        omb = self.get_omb(obs, prs, pltprs[n])
+        dx = 1.0/len(omb)
+        X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+       # Compute the CDF
+        CY = np.cumsum(Y * dx)
+
+       # Plot both
+        self.ax[j][i].plot(X, Y)
+        self.ax[j][i].plot(X, CY, 'r--')
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        self.ax[j][i].set_title(axtitle)
+
+    n = len(pltprs)
+    dx = 1.0/len(omb)
+    X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+   # Compute the CDF
+    CY = np.cumsum(Y * dx)
+
+   # Plot both
+    self.ax[nrow-1][ncol-1].plot(X, Y)
+    self.ax[nrow-1][ncol-1].plot(X, CY, 'r--')
+
+    axtitle = 'All Obs'
+    self.ax[nrow-1][ncol-1].set_title(axtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot_histograph_panel(self, obs, prs, pltprs):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'obs min: %s, max: %s' % (np.min(obs), np.max(obs))
+    print(msg)
+
+    nrow = 2
+    ncol = 4
+   #self.fig, self.ax = self.plt.subplots(nrow, ncol, tight_layout=True)
+    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+
+    self.fig.suptitle(self.title, fontsize=16)
+   #self.plt.title(self.title, fontsize=16)
+
+    n_bins = 21
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        omb = self.get_omb(obs, prs, pltprs[n])
+
+       #N is the count in each bin, bins is the lower-limit of the bin
+        N, bins, patches = self.ax[j][i].hist(omb, bins=n_bins)
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        self.ax[j][i].set_title(axtitle)
+
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches = self.ax[nrow-1][ncol-1].hist(obs, bins=n_bins)
+    axtitle = 'All Obs'
+    self.ax[nrow-1][ncol-1].set_title(axtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
 # ----
 if __name__ == '__main__':
   debug = 1

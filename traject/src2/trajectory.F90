@@ -19,9 +19,9 @@ PROGRAM trajectory
 
    call get_filename(filename)
 
-   call initialize_modelgrid(model0, trim(filename))
+   call initialize_modelgrid(model, trim(filename))
 
-   call initialize_trajectory(model0, traject, height)
+   call initialize_trajectory(model, traject, height)
 
    call create_header(traject, output_flnm)
 
@@ -36,31 +36,21 @@ PROGRAM trajectory
    pt = 0.0
    it = 1
    nomoredata = .false.
+   call initialize_modelgrid(model0, trim(filename))
    do while(.not. nomoredata)
-      print *, 'it = ', it, ', mod(it, 2) = ', mod(it, 2)
-
       call advance_time(nomoredata)
       call get_filename(filename)
 
-      if(1 == it) then
-         call initialize_modelgrid(model1, trim(filename))
-        !print *, 'model1%filename: ', trim(model1%filename)
-      else
-         if(0 == mod(it, 2)) then
-            call setup_modelgrid(model0, trim(filename))
-           !print *, 'model0%filename: ', trim(model0%filename)
-         else
-            call setup_modelgrid(model1, trim(filename))
-           !print *, 'model1%filename: ', trim(model1%filename)
-         end if
-      end if
- 
-      if(1 == mod(it, 2)) then
-         print *, 'model0: ', trim(model0%filename)
-         print *, 'model1: ', trim(model1%filename)
-      else
+      print *, 'it = ', it, ', mod(it, 2) = ', mod(it, 2)
+
+      if(0 == mod(it, 2)) then
+         call initialize_modelgrid(model0, trim(filename))
          print *, 'model0: ', trim(model1%filename)
          print *, 'model1: ', trim(model0%filename)
+      else
+         call initialize_modelgrid(model1, trim(filename))
+         print *, 'model0: ', trim(model0%filename)
+         print *, 'model1: ', trim(model1%filename)
       end if
 
       do n = 1, numbsteps
@@ -70,6 +60,7 @@ PROGRAM trajectory
          else
             call set_modelgrid(model1, model0, model, fac)
          end if
+
          call advance_trajectory(model, traject, dt)
          fac = ct + pt
          call output_trajectory(traject, n, fac)
@@ -83,6 +74,7 @@ PROGRAM trajectory
 
    call finalize_trajectory(traject)
 
+   call finalize_modelgrid(model)
    call finalize_modelgrid(model0)
    call finalize_modelgrid(model1)
 

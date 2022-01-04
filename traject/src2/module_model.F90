@@ -15,9 +15,7 @@ module module_model
   public :: vartype
   public :: modelgrid
   public :: initialize_modelgrid
-  public :: setup_modelgrid
   public :: finalize_modelgrid
-  public :: copy_modelgrid
   public :: set_modelgrid
   public :: check_status
 
@@ -155,6 +153,7 @@ contains
           rc = nf90_get_var(model%fileid, model%varids(n), model%lat)
           call check_status(rc)
        else if(trim(model%vars(n)%varname) == 'alt') then
+          print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
           if(.not. allocated(model%alt)) allocate(model%alt(model%nalt))
           rc = nf90_get_var(model%fileid, model%varids(n), model%alt)
           call check_status(rc)
@@ -211,8 +210,11 @@ contains
        end do
     end do
 
-    model%dlon = 360.0/model%nlon
-    model%dlat = 180.0/(model%nlat - 1)
+   !model%dlon = 360.0/model%nlon
+   !model%dlat = 180.0/(model%nlat - 1)
+
+    model%dlon = model%lon(2) - model%lon(1)
+    model%dlat = model%lat(2) - model%lat(1)
 
     print *, 'Leave initialize_modelgrid'
 
@@ -220,76 +222,6 @@ contains
     call check_status(rc)
 
   end subroutine initialize_modelgrid
-
-  !-----------------------------------------------------------------------
-  subroutine setup_modelgrid(model, filename)
-
-    implicit none
-
-    type(modelgrid),  intent(inout) :: model
-    character(len=*), intent(in)  :: filename
-
-    integer :: n, rc
-
-    character(len=1024) :: dimname, varname
-
-   !print *, 'Enter setup_modelgrid'
-   !print *, 'filename: <', trim(filename), '>'
-
-    model%filename = trim(filename)
-
-    print *, 'open filename: ', trim(model%filename)
-    rc = nf90_open(trim(model%filename), nf90_nowrite, model%fileid)
-    call check_status(rc)
-   !print *, 'fileid: ', model%fileid
-
-    rc = nf90_inquire(model%fileid, model%nDims, model%nVars, &
-                      model%nGlobalAtts, model%unlimdimid)
-    call check_status(rc)
-   !print *, 'nVars: ', model%nVars
-   !print *, 'nDims: ', model%nDims
-
-    do n = 1, model%nVars
-       rc = nf90_inquire_variable(model%fileid, model%varids(n), &
-                name=model%vars(n)%varname)
-       call check_status(rc)
-
-      !print *, 'Var No. ', n, ': name = ', trim(model%vars(n)%varname)
-
-       if(trim(model%vars(n)%varname) == 'U') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%u)
-       else if(trim(model%vars(n)%varname) == 'V') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%v)
-       else if(trim(model%vars(n)%varname) == 'W') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%w)
-       else if(trim(model%vars(n)%varname) == 'T') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%t)
-       else if(trim(model%vars(n)%varname) == 'P') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%p)
-       else if(trim(model%vars(n)%varname) == 'Q') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%q)
-       else if(trim(model%vars(n)%varname) == 'RH') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%rh)
-       else if(trim(model%vars(n)%varname) == 'PW') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%pw)
-       else if(trim(model%vars(n)%varname) == 'TER') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%ter)
-       else if(trim(model%vars(n)%varname) == 'SLP') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%slp)
-       else if(trim(model%vars(n)%varname) == 'TSK') then
-          rc = nf90_get_var(model%fileid, model%varids(n), model%tsk)
-       else
-          cycle
-       end if
-       call check_status(rc)
-    end do
-
-    rc = nf90_close(model%fileid)
-    call check_status(rc)
-
-   !print *, 'Leave setup_modelgrid'
-
-  end subroutine setup_modelgrid
 
   !----------------------------------------------------------------------
   subroutine finalize_modelgrid(model)
@@ -338,59 +270,34 @@ contains
   
     implicit none
 
-    type(modelgrid), intent(in)  :: model0, model1
-    type(modelgrid), intent(out) :: model
-    real,            intent(in)  :: fac
+    type(modelgrid), intent(in)    :: model0, model1
+    type(modelgrid), intent(inout) :: model
+    real,            intent(in)    :: fac
 
-    integer :: i, rc
+    integer :: i, j, k
 
-    model%nlon = model0%nlon
-    model%nlat = model0%nlat
-    model%nalt = model0%nalt
+   !write(unit=*, fmt='(2(a,f6.3))') '(1.0-fac)=', (1.0-fac), ', fac=', fac
 
-    model%lon = model0%lon
-    model%lat = model0%lat
-    model%alt = model0%alt
-
-    model%dlon = model%lon(2) - model%lon(1)
-    model%dlat = model%lat(2) - model%lat(1)
-
-   !model%dlon = model0%dlon
-   !model%dlat = model0%dlat
-
-    model%u = (1.0-fac)*model0%u + fac*model1%u
-    model%v = (1.0-fac)*model0%v + fac*model1%v
-    model%w = (1.0-fac)*model0%w + fac*model1%w
+   !$omp parallel &
+   !$omp shared(model%nlon, model%nlat, model%nlev, &
+   !$omp        model%u, model%v, model%w, &
+   !$omp        model0%u, model0%v, model0%w, &
+   !$omp        model1%u, model1%v, model1%w, fac) &
+   !$omp private(i, j, k)
+   !$omp do schedule(static)
+    do j = 1, model%nlat
+    do k = 1, model%nalt
+    do i = 1, model%nlon
+       model%u(i,j,k) = (1.0-fac)*model0%u(i,j,k) + fac*model1%u(i,j,k)
+       model%v(i,j,k) = (1.0-fac)*model0%v(i,j,k) + fac*model1%v(i,j,k)
+       model%w(i,j,k) = (1.0-fac)*model0%w(i,j,k) + fac*model1%w(i,j,k)
+    end do
+    end do
+    end do
+   !$omp end do
+   !$omp end parallel
 
   end subroutine set_modelgrid
-
-  !----------------------------------------------------------------------
-  subroutine copy_modelgrid(model1, model0)
-
-    implicit none
-
-    type(modelgrid), intent(in)  :: model1
-    type(modelgrid), intent(out) :: model0
-
-    integer :: i, rc
-
-    model0%lon = model1%lon
-    model0%lat = model1%lat
-    model0%alt = model1%alt
-
-    model0%u = model1%u
-    model0%v = model1%v
-    model0%w = model1%w
-   !model0%t = model1%t
-   !model0%p = model1%p
-   !model0%q = model1%q
-   !model0%rh = model1%rh
-   !model0%pw = model1%pw
-   !model0%ter = model1%ter
-   !model0%slp = model1%slp
-   !model0%tsk = model1%tsk
-
-  end subroutine copy_modelgrid
 
   !----------------------------------------------------------------------
   subroutine check_status(rc)

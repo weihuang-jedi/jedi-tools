@@ -28,17 +28,18 @@
 
  syear=2021
  smonth=10
- sday=4
+ sday=15
  shour=00
 
  eyear=2021
  emonth=10
- eday=7
+ eday=20
  ehour=00
 
- datadir=../vertical-interp2
+ datadir=./data
 
- for HEIGHT in 1000 3000 5000 7000 9000 11000 12000 13000 15000
+#for HEIGHT in 1000 3000 5000 7000 9000 11000 12000 13000 15000
+ for HEIGHT in 1000 3000 5000 7000
  do
    sed -e "s?HEIGHT?${HEIGHT}?g" \
        -e "s?DATADIR?${datadir}?g" \

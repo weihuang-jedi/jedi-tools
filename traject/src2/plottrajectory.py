@@ -472,7 +472,7 @@ if __name__ == '__main__':
   pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[0:11:2])
  #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[1::2])
  #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[3:4:2])
- #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[1:3])
+ #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[2:3])
 
  #pt.plotOnMap()
  #pt.plotOnMapAtLat(latlist=[-30, -15, 0, 15, 30])
