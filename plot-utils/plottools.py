@@ -8,12 +8,15 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot
 
-from matplotlib import cm
-from mpl_toolkits.basemap import Basemap
+import matplotlib.cm as cm
+
+from matplotlib.colors import Normalize
 from matplotlib.ticker import MultipleLocator
 
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
+
+from mpl_toolkits.basemap import Basemap
 
 from modelVerticalpressure import ModelVerticalPressure
 
@@ -1516,21 +1519,21 @@ class PlotTools():
 
   def set_lim(self, plt, varname):
     if(varname == 'surface_pressure'):
-      plt.xlim((-7, 7))
-      plt.ylim((-7, 7))
+      plt.set_xlim((-7, 7))
+      plt.set_ylim((-7, 7))
     elif(varname == 'air_temperature'):
-      plt.xlim((-7, 7))
-      plt.ylim((-7, 7))
+      plt.set_xlim((-7, 7))
+      plt.set_ylim((-7, 7))
     elif(varname == 'eastward_wind' or varname == 'northward_wind'):
-      plt.xlim((-10, 10))
-      plt.ylim((-10, 10))
+      plt.set_xlim((-10, 10))
+      plt.set_ylim((-10, 10))
     elif(varname == 'specific_humidity'):
-      plt.xlim((-5, 5))
-      plt.ylim((-5, 5))
+      plt.set_xlim((-5, 5))
+      plt.set_ylim((-5, 5))
 
-    plt.xlabel('JEDI_omb', fontsize=14)
-    plt.ylabel('GSI_omb', fontsize=14)
-    plt.grid(True)
+    plt.set_xlabel('JEDI_omb', fontsize=14)
+    plt.set_ylabel('GSI_omb', fontsize=14)
+    plt.grid(color='grey', linestyle='-', linewidth=0.25, alpha=0.5)
 
   def scatter_plot_panel(self, x, y, varname, prs, pltprs, inbound=False):
     self.plt = matplotlib.pyplot
@@ -1542,9 +1545,9 @@ class PlotTools():
 
     nrow = 2
     ncol = 4
-    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+    fig, ax = self.plt.subplots(nrow, ncol)
 
-    self.fig.suptitle(self.title, fontsize=16)
+    fig.suptitle(self.title, fontsize=16)
 
     for j in range(nrow):
       for i in range(ncol):
@@ -1556,50 +1559,40 @@ class PlotTools():
 
         var = np.array(xomb) - np.array(yomb)
         sclvar, size = self.get_sclvar(var, inbound=inbound)
-        self.ax[j][i] = self.plt.scatter(xomb, yomb, s=size, c=sclvar,
-                                         cmap=self.cmapname,
-                                         alpha=self.alpha)
-        cb = self.plt.colorbar(orientation=self.orientation, extend='both',
-                               pad=self.pad, ticks=self.cblevs, shrink=0.8)
-    
-        cb.set_label(label=self.label, size=self.size, weight=self.weight)
-
-        cb.ax.tick_params(labelsize=self.labelsize)
-        self.set_format(cb)
-
-       #self.set_lim(self.ax[j][i], varname)
-        self.set_lim(self.plt, varname)
-
-        ax = self.plt.gca()
-        ax.xaxis.set_ticks_position('bottom')
-        ax.yaxis.set_ticks_position('left')
+        ax[j][i].scatter(xomb, yomb, s=size, c=sclvar,
+                         cmap=self.cmapname, alpha=self.alpha)
+        self.set_lim(ax[j][i], varname)
 
         axtitle = '%dhPa' %(int(pltprs[n]))
-        ax.set_title(axtitle)
+        ax[j][i].set_title(axtitle)
 
     var = np.array(x) - np.array(y)
     sclvar, size = self.get_sclvar(var, inbound=inbound)
-    self.ax[nrow-1][ncol-1] = self.plt.scatter(x, y, s=size, c=sclvar,
-                                               cmap=self.cmapname, 
-                                               alpha=self.alpha)
+    ax[nrow-1][ncol-1].scatter(x, y, s=size, c=sclvar,
+                               cmap=self.cmapname, alpha=self.alpha)
 
-    cb = self.plt.colorbar(orientation=self.orientation, extend='both',
-                           pad=self.pad, ticks=self.cblevs, shrink=0.8)
+    self.set_lim(ax[nrow-1][ncol-1], varname)
 
+    axtitle = 'All Obs'
+    ax[nrow-1][ncol-1].set_title(axtitle)
+
+   # Normalizer
+    norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
+ 
+   # creating ScalarMappable
+    sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
+    sm.set_array([])
+
+    cb = fig.colorbar(sm, ax=ax.ravel().tolist(), location='bottom', extend='both',
+                      pad=self.pad, ticks=self.cblevs, shrink=0.8)
+
+    self.label = 'OMB'
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.set_clim(self.cblevs[0], self.cblevs[-1])
 
     cb.ax.tick_params(labelsize=self.labelsize)
     self.set_format(cb)
-
-   #self.set_lim(self.ax[nrow-1][ncol-1], varname)
-    self.set_lim(self.plt, varname)
-
-    ax = self.plt.gca()
-    ax.xaxis.set_ticks_position('bottom')
-    ax.yaxis.set_ticks_position('left')
-
-    axtitle = 'All Obs'
-    ax.set_title(axtitle)
 
     self.display(output=self.output, image_name=self.image_name)
 
