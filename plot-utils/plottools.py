@@ -1415,11 +1415,9 @@ class PlotTools():
 
     nrow = 2
     ncol = 4
-   #self.fig, self.ax = self.plt.subplots(nrow, ncol, tight_layout=True)
     self.fig, self.ax = self.plt.subplots(nrow, ncol)
 
     self.fig.suptitle(self.title, fontsize=16)
-   #self.plt.title(self.title, fontsize=16)
 
     for j in range(nrow):
       for i in range(ncol):
@@ -1454,6 +1452,8 @@ class PlotTools():
     axtitle = 'All Obs'
     self.ax[nrow-1][ncol-1].set_title(axtitle)
 
+    self.plt.tight_layout()
+
     self.display(output=self.output, image_name=self.image_name)
 
  #----------------------------------------------------------------------------------------------
@@ -1470,11 +1470,9 @@ class PlotTools():
 
     nrow = 2
     ncol = 4
-   #self.fig, self.ax = self.plt.subplots(nrow, ncol, tight_layout=True)
     self.fig, self.ax = self.plt.subplots(nrow, ncol)
 
     self.fig.suptitle(self.title, fontsize=16)
-   #self.plt.title(self.title, fontsize=16)
 
     n_bins = 21
     for j in range(nrow):
@@ -1494,6 +1492,8 @@ class PlotTools():
     N, bins, patches = self.ax[nrow-1][ncol-1].hist(obs, bins=n_bins)
     axtitle = 'All Obs'
     self.ax[nrow-1][ncol-1].set_title(axtitle)
+
+    self.plt.tight_layout()
 
     self.display(output=self.output, image_name=self.image_name)
 
@@ -1593,6 +1593,8 @@ class PlotTools():
 
     cb.ax.tick_params(labelsize=self.labelsize)
     self.set_format(cb)
+
+    self.plt.tight_layout()
 
     self.display(output=self.output, image_name=self.image_name)
 
@@ -1718,6 +1720,8 @@ class PlotTools():
 
     cb.ax.tick_params(labelsize=self.labelsize)
     self.set_format(cb)
+
+    self.plt.tight_layout()
 
     self.display(output=self.output, image_name=self.image_name)
 

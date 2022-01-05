@@ -104,8 +104,6 @@ class StatsHandler():
     pt.obs_panel(self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb,
                self.pressure, prs, varname, inbound=True)
 
-    return
-
    #------------------------------------------------------------------------------
     imgname = '%s_GSIomb-JEDIomb_scatter' %(img_label)
     title = '%s GSIomb-JEDIomb Scatter' %(ttl_label)
@@ -114,8 +112,6 @@ class StatsHandler():
 
     pt.scatter_plot_panel(self.JEDI_omb, self.GSI_omb, img_label,
                           self.pressure, prs, inbound=True)
-
-    return
 
    #------------------------------------------------------------------------------
     imgname = '%s_GSIomb_cdf' %(img_label)
