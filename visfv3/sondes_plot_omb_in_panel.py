@@ -94,6 +94,19 @@ class StatsHandler():
     ttl_label = '%s' %(self.varname)
 
    #------------------------------------------------------------------------------
+    imgname = '%s_GSIomb-JEDIomb' %(img_label)
+    title = '%s GSIomb-JEDIomb' %(ttl_label)
+    meangsiomb = np.mean(np.abs(self.GSI_omb))
+    title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
+    pt.set_imagename(imgname)
+    pt.set_title(title)
+  
+    pt.obs_panel(self.latitude, self.longitude, self.GSI_omb, self.JEDI_omb,
+               self.pressure, prs, varname, inbound=True)
+
+    return
+
+   #------------------------------------------------------------------------------
     imgname = '%s_GSIomb-JEDIomb_scatter' %(img_label)
     title = '%s GSIomb-JEDIomb Scatter' %(ttl_label)
     pt.set_imagename(imgname)
@@ -101,18 +114,6 @@ class StatsHandler():
 
     pt.scatter_plot_panel(self.JEDI_omb, self.GSI_omb, img_label,
                           self.pressure, prs, inbound=True)
-
-    return
-
-   #------------------------------------------------------------------------------
-    imgname = '%s_GSIomb-JEDIomb' %(img_label)
-    title = '%s GSIomb-JEDIomb' %(ttl_label)
-    meangsiomb = np.mean(np.abs(GSI_omb))
-    title = '%s mean(abs(GSIomb)): %f' %(title, meangsiomb)
-    pt.set_imagename(imgname)
-    pt.set_title(title)
-  
-    pt.obsonly(obslat, obslon, obsvar, inbound=True)
 
     return
 

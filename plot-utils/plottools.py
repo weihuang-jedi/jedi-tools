@@ -1596,6 +1596,131 @@ class PlotTools():
 
     self.display(output=self.output, image_name=self.image_name)
 
+#------------------------------------------------------------------------------
+  def build_basemap4panel(self, ax):
+    basemap_dict = {'resolution': 'c', 'projection': 'cyl',
+                    'llcrnrlat': -90.0, 'llcrnrlon': 0.0,
+                    'urcrnrlat':  90.0, 'urcrnrlon': 360.0}
+    basemap_dict['lat_0'] = 0.0
+    basemap_dict['lon_0'] = 180.0
+    basemap_dict['ax'] = ax
+
+    basemap = Basemap(**basemap_dict)
+
+    return basemap
+#------------------------------------------------------------------------------
+  def get_prs_level_omb(self, latitude, longitude, GSI_omb, JEDI_omb,
+                        pressure, pltprs):
+    if(pressure is None):
+      return latitude, longitude, GSI_omb, JEDI_omb
+
+    olat = []
+    olon = []
+    Gomb = []
+    Jomb = []
+
+    nobs = len(latitude)
+    delt = 0.1
+
+    for n in range(nobs):
+      if(abs(pressure[n] - pltprs) < delt):
+        olat.append(latitude[n])
+        olon.append(longitude[n])
+        Gomb.append(GSI_omb[n])
+        Jomb.append(JEDI_omb[n])
+
+    return olat, olon, Gomb, Jomb
+
+#------------------------------------------------------------------------------
+  def add_coastline(self, plt):
+   #draw coastlines
+    color = 'black'
+    linewidth = 0.5
+    plt.drawcoastlines(color=color, linewidth=linewidth)
+
+   #draw parallels
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+    circles = np.arange(-90,90,30)
+    plt.drawparallels(np.arange(-90,90,30),labels=[1,1,0,1],
+                      color=color, linewidth=linewidth,
+                      dashes=dashes, fontsize=fontsize)
+
+   #draw meridians
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+    meridians = np.arange(0,360,30)
+    plt.drawmeridians(np.arange(0,360,30),labels=[1,1,0,1],
+                      color=color, linewidth=linewidth,
+                      dashes=dashes, fontsize=fontsize)
+
+  def obs_panel(self, latitude, longitude, GSI_omb, JEDI_omb, prs,
+                pltprs, varname, inbound=False):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    newprs = [50.0]
+    newprs.extend(pltprs)
+
+    nrow = 3
+    ncol = 3
+    fig, axes = self.plt.subplots(nrow, ncol)
+
+    fig.suptitle(self.title, fontsize=16)
+
+    n = 0
+    for ax in axes.flat:
+      map_ax = self.build_basemap4panel(ax)
+
+      if(n == (nrow*ncol - 1)):
+        axtitle = 'All Obs'
+        olat = latitude
+        olon = longitude
+        gomb = GSI_omb
+        jomb = JEDI_omb
+      else:
+        axtitle = '%dhPa' %(int(newprs[n]))
+        olat, olon, gomb, jomb = self.get_prs_level_omb(latitude, longitude,
+                                                        GSI_omb, JEDI_omb,
+                                                        prs, newprs[n])
+      n += 1
+      var = np.array(jomb) - np.array(gomb)
+      sclvar, size = self.get_sclvar(var, inbound=inbound)
+      x, y = map_ax(olon, olat)
+      map_ax.scatter(x, y, s=size, c=sclvar,
+                     cmap=self.cmapname, alpha=self.alpha)
+      self.add_coastline(map_ax)
+
+      ax.set_title(axtitle)
+
+   # Normalizer
+    norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
+ 
+   # creating ScalarMappable
+    sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
+    sm.set_array([])
+
+    cb = fig.colorbar(sm, ax=axes.ravel().tolist(), location='bottom', extend='both',
+                      pad=self.pad, ticks=self.cblevs, shrink=0.8)
+
+    self.label = 'OMB'
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.set_clim(self.cblevs[0], self.cblevs[-1])
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.display(output=self.output, image_name=self.image_name)
+
 # ----
 if __name__ == '__main__':
   debug = 1
