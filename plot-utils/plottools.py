@@ -10,8 +10,8 @@ import matplotlib.pyplot
 
 import matplotlib.cm as cm
 
-from matplotlib.colors import Normalize
-from matplotlib.ticker import MultipleLocator
+#from matplotlib.colors import Normalize
+#from matplotlib.ticker import MultipleLocator
 
 from matplotlib import colors
 from matplotlib.ticker import PercentFormatter
@@ -1559,8 +1559,8 @@ class PlotTools():
 
         var = np.array(xomb) - np.array(yomb)
         sclvar, size = self.get_sclvar(var, inbound=inbound)
-        ax[j][i].scatter(xomb, yomb, s=size, c=sclvar,
-                         cmap=self.cmapname, alpha=self.alpha)
+        sc = ax[j][i].scatter(xomb, yomb, s=size, c=sclvar,
+                              cmap=self.cmapname, alpha=self.alpha)
         self.set_lim(ax[j][i], varname)
 
         axtitle = '%dhPa' %(int(pltprs[n]))
@@ -1568,8 +1568,8 @@ class PlotTools():
 
     var = np.array(x) - np.array(y)
     sclvar, size = self.get_sclvar(var, inbound=inbound)
-    ax[nrow-1][ncol-1].scatter(x, y, s=size, c=sclvar,
-                               cmap=self.cmapname, alpha=self.alpha)
+    sc = ax[nrow-1][ncol-1].scatter(x, y, s=size, c=sclvar,
+                                    cmap=self.cmapname, alpha=self.alpha)
 
     self.set_lim(ax[nrow-1][ncol-1], varname)
 
@@ -1577,14 +1577,21 @@ class PlotTools():
     ax[nrow-1][ncol-1].set_title(axtitle)
 
    # Normalizer
-    norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
+   #norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
  
    # creating ScalarMappable
-    sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
-    sm.set_array([])
+   #sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
+   #sm.set_array([])
 
-    cb = fig.colorbar(sm, ax=ax.ravel().tolist(), location='bottom', extend='both',
-                      pad=self.pad, ticks=self.cblevs, shrink=0.8)
+   #cb = fig.colorbar(sm, ax=ax.ravel().tolist(), location='bottom', extend='both',
+   #                  pad=self.pad, ticks=self.cblevs, shrink=0.8)
+
+   # position of colorbar
+   # where arg is [left, bottom, width, height]
+    cax = fig.add_axes([0.25, 0.025, 0.50, 0.02])
+
+    cb = fig.colorbar(sc, cax=cax, orientation='horizontal', extend='both',
+                      ticks=self.cblevs, shrink=0.5)
 
     self.label = 'OMB'
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
@@ -1680,8 +1687,6 @@ class PlotTools():
 
     n = 0
     for ax in axes.flat:
-      map_ax = self.build_basemap4panel(ax)
-
       if(n == (nrow*ncol - 1)):
         axtitle = 'All Obs'
         olat = latitude
@@ -1696,22 +1701,25 @@ class PlotTools():
       n += 1
       var = np.array(jomb) - np.array(gomb)
       sclvar, size = self.get_sclvar(var, inbound=inbound)
-      x, y = map_ax(olon, olat)
-      map_ax.scatter(x, y, s=size, c=sclvar,
-                     cmap=self.cmapname, alpha=self.alpha)
-      self.add_coastline(map_ax)
 
       ax.set_title(axtitle)
+      ax.set_aspect('auto')
 
-   # Normalizer
-    norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
- 
-   # creating ScalarMappable
-    sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
-    sm.set_array([])
+      map_ax = self.build_basemap4panel(ax)
+      x, y = map_ax(olon, olat)
+      sc = map_ax.scatter(x, y, s=size, c=sclvar,
+                          cmap=self.cmapname, alpha=self.alpha)
+      self.add_coastline(map_ax)
 
-    cb = fig.colorbar(sm, ax=axes.ravel().tolist(), location='bottom', extend='both',
-                      pad=self.pad, ticks=self.cblevs, shrink=0.8)
+   #cb = fig.colorbar(sc, ax=axes[nrow-1, :], location='bottom', extend='both',
+   #                  pad=self.pad, ticks=self.cblevs, shrink=0.5)
+
+   # position of colorbar
+   # where arg is [left, bottom, width, height]
+    cax = fig.add_axes([0.25, 0.025, 0.50, 0.02])
+
+    cb = fig.colorbar(sc, cax=cax, orientation='horizontal', extend='both',
+                      ticks=self.cblevs, shrink=0.5)
 
     self.label = 'OMB'
     cb.set_label(label=self.label, size=self.size, weight=self.weight)
@@ -1721,7 +1729,7 @@ class PlotTools():
     cb.ax.tick_params(labelsize=self.labelsize)
     self.set_format(cb)
 
-    self.plt.tight_layout()
+    self.plt.tight_layout(h_pad=1)
 
     self.display(output=self.output, image_name=self.image_name)
 
