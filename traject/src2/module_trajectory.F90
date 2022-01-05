@@ -48,6 +48,9 @@ contains
     allocate(trajectory%y(trajectory%nx, trajectory%ny))
     allocate(trajectory%z(trajectory%nx, trajectory%ny))
 
+   !$omp parallel do default(none) &
+   !$omp shared(model, trajectory, height) &
+   !$omp private(i, j)
     do j = 1, trajectory%ny
     do i = 1, trajectory%nx
        trajectory%x(i,j) = model%lon(i)
@@ -117,7 +120,6 @@ contains
     real,                 intent(in)    :: dt
 
     real, parameter :: er = 6378000.0
-   !real, parameter :: pi = 3.1415926535897932
     real, parameter :: pi = 3.1416
 
     real :: arc2deg, deg2arc, dlon, dlat, dz, z, rlat
@@ -131,8 +133,9 @@ contains
 
    !print *, 'model%dlon, model%dlat=', model%dlon, model%dlat
 
-   !i = 3*trajectory%nx/4
-   !j = 3*trajectory%ny/4
+   !$omp parallel do default(none) &
+   !$omp shared(model, trajectory, arc2deg, deg2arc, rlat, dt) &
+   !$omp private(i, j, k, mi, mj, mk, z, dlon, dlat, dz)
     do j = 1, trajectory%ny
     do i = 1, trajectory%nx
        z = trajectory%z(i,j)

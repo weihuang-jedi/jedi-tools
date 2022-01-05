@@ -27,7 +27,7 @@ UNDERSCORE	=	-DUNDERSCORE
 FC_INCLUDES	=	-I. -I$(NETCDFPATH)/include 
 FC_COMPILE_OPTIONS = 	-cpp #-fdefault-real-8
 
-FC_OPTIMIZATIONS =	-g # -O3 
+FC_OPTIMIZATIONS =	-fopenmp -O3 # -g
 
 ####################################################
 

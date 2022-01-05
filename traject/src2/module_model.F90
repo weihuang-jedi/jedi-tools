@@ -278,13 +278,9 @@ contains
 
    !write(unit=*, fmt='(2(a,f6.3))') '(1.0-fac)=', (1.0-fac), ', fac=', fac
 
-   !$omp parallel &
-   !$omp shared(model%nlon, model%nlat, model%nlev, &
-   !$omp        model%u, model%v, model%w, &
-   !$omp        model0%u, model0%v, model0%w, &
-   !$omp        model1%u, model1%v, model1%w, fac) &
+   !$omp parallel do default(none) &
+   !$omp shared(model, model0, model1, fac) &
    !$omp private(i, j, k)
-   !$omp do schedule(static)
     do j = 1, model%nlat
     do k = 1, model%nalt
     do i = 1, model%nlon
@@ -294,8 +290,6 @@ contains
     end do
     end do
     end do
-   !$omp end do
-   !$omp end parallel
 
   end subroutine set_modelgrid
 

@@ -19,6 +19,8 @@
 
  cd /work2/noaa/gsienkf/weihuang/tools/traject/src2
 
+ export OMP_NUM_THREADS=4
+
  generate_weights=0
 
  executable=/work2/noaa/gsienkf/weihuang/tools/traject/src2/trajectory.exe
@@ -38,8 +40,8 @@
 
  datadir=./data
 
-#for HEIGHT in 1000 3000 5000 7000 9000 11000 12000 13000 15000
- for HEIGHT in 1000 3000 5000 7000
+#for HEIGHT in 1000 3000 5000 7000
+ for HEIGHT in 1000 3000 5000 7000 9000 11000 13000 15000
  do
    sed -e "s?HEIGHT?${HEIGHT}?g" \
        -e "s?DATADIR?${datadir}?g" \

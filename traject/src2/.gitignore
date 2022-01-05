@@ -6,3 +6,5 @@ input.nml
 *.nc
 *.o
 *.a
+data
+day*
