@@ -59,14 +59,14 @@ GsiInputObsError:
 GsiQCWeight:
   type: group
   variables:
-    air_temperature
+    air_temperature:
       type: float
       _FillValue: 9.96921e+36
 
 GsiUseFlag:
   type: group
   variables:
-    air_temperature
+    air_temperature:
       type: int
       _FillValue: -2147483647
 
@@ -75,57 +75,37 @@ MetaData:
   variables:
     air_pressure:
       type: float
-      air_pressure_FillValue: 9.96921e+36
-      string air_pressure:units: "Pa"
+      _FillValue: 9.96921e+36
+      units: "Pa"
     datetime:
       type: string
       _FillValue: ""
       units: "UTC Time in YYYY-MM-DDTHH:MM:SSZ format"
-    height
+    height:
       type: float
       _FillValue: 9.96921e+36
       units: "m"
-    latitude
+    latitude:
       type: float
       _FillValue: 9.96921e+36
       units: "degrees_north"
-    longitude
+    longitude:
       type: float
       _FillValue: 9.96921e+36
       units: "degrees_east"
-    station_elevation
+    station_elevation:
       type: float
       _FillValue: 9.96921e+36
       _elevation:units: "m"
-    station_id
+    station_id:
       type: string
       _FillValue: "00000"
 
 ObsError:
   type: group
   variables:
-    float:
-      name: air_temperature
-      _FillValue: 9.96921e+36
-      units: "K"
-      coordinates: "longitude latitude"
-    float:
-      name: eastward_wind
-      _FillValue: 9.96921e+36
-      units: "m s-1"
-      coordinates: "longitude latitude"
-    float:
-      name: northward_wind
-      _FillValue: 9.96921e+36
-      units: "m s-1"
-      coordinates: "longitude latitude"
-    float:
-      name: specific_humidity
-      _FillValue: 9.96921e+36
-      units: "1"
-      coordinates: "longitude latitude"
-    float:
-      name: virtual_temperature
+    air_temperature:
+      type: float
       _FillValue: 9.96921e+36
       units: "K"
       coordinates: "longitude latitude"
@@ -133,47 +113,15 @@ ObsError:
 ObsType:
   type: group
   variables:
-    int:
-      name: air_temperature
-      _FillValue: -2147483647
-    int:
-      name: eastward_wind
-      _FillValue: -2147483647
-    int:
-      name: northward_wind
-      _FillValue: -2147483647
-    int:
-      name: specific_humidity
-      _FillValue: -2147483647
-    int:
-      name: virtual_temperature
+    air_temperature:
+      type: int
       _FillValue: -2147483647
 
 ObsValue:
   type: group
   variables:
-    float:
-      name: air_temperature
-      _FillValue: 9.96921e+36
-      units: "K"
-      coordinates: "longitude latitude"
-    float:
-      name: eastward_wind
-      _FillValue: 9.96921e+36
-      units: "m s-1"
-      coordinates: "longitude latitude"
-    float:
-      name: northward_wind
-      _FillValue: 9.96921e+36
-      units: "m s-1"
-      coordinates: "longitude latitude"
-    float:
-      name: specific_humidity
-      _FillValue: 9.96921e+36
-      units: "1"
-      coordinates: "longitude latitude"
-    float:
-      name: virtual_temperature
+    air_temperature:
+      type: float
       _FillValue: 9.96921e+36
       units: "K"
       coordinates: "longitude latitude"
@@ -181,28 +129,8 @@ ObsValue:
 PreQC:
   type: group
   variables:
-    int:
-      name: air_temperature
-      _FillValue: -2147483647
-      units: "unitless"
-      coordinates: "longitude latitude"
-    int:
-      name: eastward_wind
-      _FillValue: -2147483647
-      units: "unitless"
-      coordinates: "longitude latitude"
-    int:
-      name: northward_wind
-      _FillValue: -2147483647
-      units: "unitless"
-      coordinates: "longitude latitude"
-    int:
-      name: specific_humidity
-      _FillValue: -2147483647
-      units: "unitless"
-      coordinates: "longitude latitude"
-    int:
-      name: virtual_temperature
+    air_temperature:
+      type: int
       _FillValue: -2147483647
       units: "unitless"
       coordinates: "longitude latitude"
@@ -210,18 +138,6 @@ PreQC:
 PreUseFlag:
   type: group
   variables:
-    int:
-      name: air_temperature
-      _FillValue: -2147483647
-    int:
-      name: eastward_wind
-      _FillValue: -2147483647
-    int:
-      name: northward_wind
-      _FillValue: -2147483647
-    int:
-      name: specific_humidity
-      _FillValue: -2147483647
-    int:
-      name: virtual_temperature
+    air_temperature:
+      type: int
       _FillValue: -2147483647
