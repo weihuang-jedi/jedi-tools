@@ -132,22 +132,22 @@ class WriteIODA2Obs():
         for vname in vars.keys():
           print('\t\tvname: %s' %(vname))
           vdict = vars[vname]
+
           type = vdict['type']
           if(type == 'float'):
-            var = group.createVariable(vname, np.float32, (self.dimname,))
+            var = group.createVariable(vname, np.float32, (self.dimname,), fill_value=vdict['_FillValue'])
           else:
-            var = group.createVariable(vname, np.int32, (self.dimname,))
-   #lat.units = 'degrees_north'
-   #lat.long_name = 'latitude'
-   #lat[:] = 17.002
+            var = group.createVariable(vname, np.int32, (self.dimname,), fill_value=vdict['_FillValue'])
+
           for attr in vdict.keys():
             print('\t\t\tattr: %s' %(attr))
-            if(attr == '_FillValue'):
-              var._FillValue = vdict[attr]
-            elif(attr == 'units'):
+            if(attr == 'units'):
               var.units = vdict[attr]
             elif(attr == 'coordinates'):
               var.coordinates = vdict[attr]
+           #elif(attr == '_FillValue'):
+           #  var._FillValue = vdict[attr]
+
           #Assign value
           if(gname == 'GsiAdjustObsError'):
             var[:] = 1.2
@@ -165,6 +165,16 @@ class WriteIODA2Obs():
             var[:] = 1.0
           elif(gname == 'ObsValue'):
             var[:] = 220.8092
+          elif(gname == 'GsiEffectiveQC'):
+            var[:] = 0
+          elif(gname == 'GsiUseFlag'):
+            var[:] = 1
+          elif(gname == 'ObsType'):
+            var[:] = 120
+          elif(gname == 'PreQC'):
+            var[:] = 2
+          elif(gname == 'PreUseFlag'):
+            var[:] = 0
 
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':
