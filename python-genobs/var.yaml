@@ -1,0 +1,227 @@
+dimensions:
+  nlocs: 4
+variables:
+  nlocs:
+    type: int
+    suggested_chunk_dim: 100
+
+global attributes:
+  _ioda_layout: "ObsGroup"
+  _ioda_layout_version: 0
+  input_files: "sample"
+
+GsiAdjustObsError:
+  type: group
+  variables:
+    air_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiEffectiveQC:
+  type: group
+  variables:
+    air_temperature:
+      type: int
+      _FillValue: -2147483647
+      units: "unitless"
+
+GsiFinalObsError:
+  type: group
+  variables:
+    air_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiHofX:
+  type: group
+  variables:
+    air_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiHofXBc:
+  type: group
+  variables:
+    air_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiInputObsError:
+  type: group
+  variables:
+    eastward_wind:
+      type: float
+      _FillValue: 9.96921e+36
+    northward_wind:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiQCWeight:
+  type: group
+  variables:
+    air_temperature
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiUseFlag:
+  type: group
+  variables:
+    air_temperature
+      type: int
+      _FillValue: -2147483647
+
+MetaData:
+  type: group
+  variables:
+    air_pressure:
+      type: float
+      air_pressure_FillValue: 9.96921e+36
+      string air_pressure:units: "Pa"
+    datetime:
+      type: string
+      _FillValue: ""
+      units: "UTC Time in YYYY-MM-DDTHH:MM:SSZ format"
+    height
+      type: float
+      _FillValue: 9.96921e+36
+      units: "m"
+    latitude
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_north"
+    longitude
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_east"
+    station_elevation
+      type: float
+      _FillValue: 9.96921e+36
+      _elevation:units: "m"
+    station_id
+      type: string
+      _FillValue: "00000"
+
+ObsError:
+  type: group
+  variables:
+    float:
+      name: air_temperature
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+    float:
+      name: eastward_wind
+      _FillValue: 9.96921e+36
+      units: "m s-1"
+      coordinates: "longitude latitude"
+    float:
+      name: northward_wind
+      _FillValue: 9.96921e+36
+      units: "m s-1"
+      coordinates: "longitude latitude"
+    float:
+      name: specific_humidity
+      _FillValue: 9.96921e+36
+      units: "1"
+      coordinates: "longitude latitude"
+    float:
+      name: virtual_temperature
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+
+ObsType:
+  type: group
+  variables:
+    int:
+      name: air_temperature
+      _FillValue: -2147483647
+    int:
+      name: eastward_wind
+      _FillValue: -2147483647
+    int:
+      name: northward_wind
+      _FillValue: -2147483647
+    int:
+      name: specific_humidity
+      _FillValue: -2147483647
+    int:
+      name: virtual_temperature
+      _FillValue: -2147483647
+
+ObsValue:
+  type: group
+  variables:
+    float:
+      name: air_temperature
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+    float:
+      name: eastward_wind
+      _FillValue: 9.96921e+36
+      units: "m s-1"
+      coordinates: "longitude latitude"
+    float:
+      name: northward_wind
+      _FillValue: 9.96921e+36
+      units: "m s-1"
+      coordinates: "longitude latitude"
+    float:
+      name: specific_humidity
+      _FillValue: 9.96921e+36
+      units: "1"
+      coordinates: "longitude latitude"
+    float:
+      name: virtual_temperature
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+
+PreQC:
+  type: group
+  variables:
+    int:
+      name: air_temperature
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+    int:
+      name: eastward_wind
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+    int:
+      name: northward_wind
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+    int:
+      name: specific_humidity
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+    int:
+      name: virtual_temperature
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+
+PreUseFlag:
+  type: group
+  variables:
+    int:
+      name: air_temperature
+      _FillValue: -2147483647
+    int:
+      name: eastward_wind
+      _FillValue: -2147483647
+    int:
+      name: northward_wind
+      _FillValue: -2147483647
+    int:
+      name: specific_humidity
+      _FillValue: -2147483647
+    int:
+      name: virtual_temperature
+      _FillValue: -2147483647

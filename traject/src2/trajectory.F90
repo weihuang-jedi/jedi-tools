@@ -45,12 +45,12 @@ PROGRAM trajectory
 
       if(0 == mod(it, 2)) then
          call initialize_modelgrid(model0, trim(filename))
-         print *, 'model0: ', trim(model1%filename)
-         print *, 'model1: ', trim(model0%filename)
+         print *, 'model0: ', trim(model1%filename), ', height=', height
+         print *, 'model1: ', trim(model0%filename), ', height=', height
       else
          call initialize_modelgrid(model1, trim(filename))
-         print *, 'model0: ', trim(model0%filename)
-         print *, 'model1: ', trim(model1%filename)
+         print *, 'model0: ', trim(model0%filename), ', height=', height
+         print *, 'model1: ', trim(model1%filename), ', height=', height
       end if
 
       do n = 1, numbsteps

@@ -20,7 +20,7 @@ if __name__ == '__main__':
   m.drawcoastlines(linewidth=0.72, color='gray')
   m.drawcountries(zorder=0, color='gray')
 
-  filename = 'trajectory.nc'
+  filename = 'trajectory_1000m.nc'
   ncfile = netCDF4.Dataset(filename, 'r')
   lon = ncfile.variables['x'][:,:,:]
   lat = ncfile.variables['y'][:,:,:]
@@ -33,19 +33,10 @@ if __name__ == '__main__':
   print('nlat = ', nlat)
   print('nlon = ', nlon)
 
-  latc = int(nlat/2)
-  lonc = int(nlon/2)
-
-  x = lon[:, latc, lonc]
-  y = lat[:, latc, lonc]
-
-  print('x = ', x)
-  print('y = ', y)
-
-  for j in range(0, nlat, 10):
-    for i in range(0, nlon, 10):
-      x = lon[:, j, i]
-      y = lat[:, j, i]
+  for j in range(5, nlat-5, 10):
+    for i in range(60, nlon-60, 10):
+      x = lon[:5, j, i]
+      y = lat[:5, j, i]
       m.plot(x, y)
 
   plt.legend()

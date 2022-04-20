@@ -26,16 +26,16 @@
  executable=/work2/noaa/gsienkf/weihuang/tools/traject/src2/trajectory.exe
 
  intvhour=12
- dt=600
+ dt=60
 
  syear=2021
  smonth=10
- sday=15
+ sday=16
  shour=00
 
  eyear=2021
  emonth=10
- eday=20
+ eday=18
  ehour=00
 
  datadir=./data
@@ -59,14 +59,16 @@
 
    if [ ! -f 'trajectory_${HEIGHT}m.nc' ]
    then
-     ${executable} &
-     sleep 5
+    #${executable} &
+    #sleep 5
+
+     ${executable}
    fi
 
    n=$(( $n + 1 ))
  done
 
- wait
+#wait
 
  exit 0
 

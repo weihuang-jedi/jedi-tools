@@ -239,6 +239,73 @@ class PlotTrajectory():
     self.image_name = 'trajectory_lathgt_at_%d.png' %(int(ilon/2))
     self.display(output=self.output, image_name=self.image_name)
 
+  def plotLonHgtAverageBetween(self, startlat=-90, endlat=90):
+    self.plt = plt
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    ib = 20
+    ie = 700
+
+    jb = int(2*(90+startlat))
+    je = int(2*(90+endlat)) + 1
+
+    self.fig = self.plt.figure()
+    self.ax = self.plt.subplot()
+
+    for filename in self.filelist:
+      print('Working on file: ', filename)
+      ncfile = netCDF4.Dataset(filename, 'r')
+      lon = ncfile.variables['x'][:,:,:]
+      lat = ncfile.variables['y'][:,:,:]
+      hgt = ncfile.variables['z'][:,:,:]
+      ncfile.close()
+
+      nt, nlat, nlon = lon.shape
+
+      print('nt = ', nt)
+      print('nlon = ', nlon)
+      print('nlat = ', nlat)
+
+      avglon = np.mean(lon[:,jb:je,ib:ie], axis=1)
+      avghgt = np.mean(hgt[:,jb:je,ib:ie], axis=1)
+      print('avglon.shape = ', avglon.shape)
+
+      naltplt, nlonplt = avglon.shape
+      for i in range(nlonplt):
+        x = avglon[:, i]
+        y = avghgt[:, i]
+        self.plt.plot(x, y, '-o', markersize=2, markevery=x.size)
+
+    self.title = 'Trajectory_between_Lat_%d, %d' %(startlat, endlat)
+
+    self.ax.set_title(self.title)
+
+    self.plt.xlim((0.0, 360.0))
+    self.plt.ylim((0.0, 16000.0))
+
+    major_ticks_top=np.linspace(0,360,25)
+    self.ax.set_xticks(major_ticks_top)
+
+    major_ticks_top=np.linspace(0,16000,17)
+    self.ax.set_yticks(major_ticks_top)
+
+    minor_ticks_top=np.linspace(0,360,73)
+    self.ax.set_xticks(minor_ticks_top,minor=True)
+
+    minor_ticks_top=np.linspace(0,16000,33)
+    self.ax.set_yticks(minor_ticks_top,minor=True)
+
+    self.ax.grid(b=True, which='major', color='green', linestyle='-', alpha=0.5)
+    self.ax.grid(b=True, which='minor', color='green', linestyle='dotted', alpha=0.2)
+
+   #self.plt.legend()
+    self.image_name = 'trajectory_lonhgt_avg_%d-%d.png' %(startlat, endlat)
+    self.display(output=self.output, image_name=self.image_name)
+
   def plotLatHgtCrossingPole(self, ilon=1):
     self.plt = plt
     try:
@@ -436,22 +503,10 @@ if __name__ == '__main__':
   debug = 1
   output = 0
 
- #filelist = ['trajectory_500m.nc',  'trajectory_1000m.nc',
- #            'trajectory_2000m.nc', 'trajectory_3000m.nc',
- #            'trajectory_4000m.nc', 'trajectory_5000m.nc',
- #            'trajectory_6000m.nc', 'trajectory_7000m.nc',
- #            'trajectory_8000m.nc', 'trajectory_9000m.nc',
- #            'trajectory_10000m.nc', 'trajectory_11000m.nc',
- #            'trajectory_12000m.nc', 'trajectory_13000m.nc',
- #            'trajectory_14000m.nc', 'trajectory_15000m.nc']
-
   filelist = ['trajectory_1000m.nc', 'trajectory_3000m.nc',
               'trajectory_5000m.nc', 'trajectory_7000m.nc',
               'trajectory_9000m.nc', 'trajectory_11000m.nc',
               'trajectory_13000m.nc', 'trajectory_15000m.nc']
-
- #            'trajectory_18000m.nc', 'trajectory_22000m.nc',
- #            'trajectory_25000m.nc']
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'output=', 'filelist='])
 
@@ -469,18 +524,26 @@ if __name__ == '__main__':
   print('output = ', output)
   print('filelist = ', filelist)
 
-  pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[0:11:2])
- #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[1::2])
+ #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[0:11:2])
+  pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[0:2])
  #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[3:4:2])
  #pt = PlotTrajectory(debug=debug, output=output, filelist=filelist[2:3])
 
  #pt.plotOnMap()
  #pt.plotOnMapAtLat(latlist=[-30, -15, 0, 15, 30])
 
+  pt.plotLonHgtAverageBetween(startlat=-10, endlat=10)
+  pt.plotLonHgtAverageBetween(startlat=-5, endlat=5)
+  pt.plotLonHgtAverageBetween(startlat=-2, endlat=2)
+
+  for j in [-10, -5, 0, 5, 10]:
+    jlat = 2*(j+90)
+    pt.plotLonHgt(jlat=jlat)
+
  #for i in [0, 90, 160, 180, 200, 225, 270]:
-  for i in [0, 180]:
-    ilon = 2*i
-    pt.plotLatHgt(ilon=ilon)
+ #for i in [0, 180]:
+ #  ilon = 2*i
+ #  pt.plotLatHgt(ilon=ilon)
 
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=360)
  #pt.plotLatHgtAverageBetween(startlon=0, endlon=180)
@@ -495,7 +558,7 @@ if __name__ == '__main__':
  #pt.plotLatHgtAverageBetween(startlon=160, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=180, endlon=200)
 
-  pt.plotLatHgtAverageBetween(startlon=170, endlon=190)
+ #pt.plotLatHgtAverageBetween(startlon=170, endlon=190)
  #pt.plotLatHgtAverageBetween(startlon=170, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=180, endlon=190)
 
@@ -503,7 +566,7 @@ if __name__ == '__main__':
  #pt.plotLatHgtAverageBetween(startlon=175, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=180, endlon=185)
 
-  pt.plotLatHgtAverageBetween(startlon=178, endlon=182)
+ #pt.plotLatHgtAverageBetween(startlon=178, endlon=182)
  #pt.plotLatHgtAverageBetween(startlon=178, endlon=180)
  #pt.plotLatHgtAverageBetween(startlon=180, endlon=182)
 
@@ -511,8 +574,4 @@ if __name__ == '__main__':
   for i in [0]:
     ilon = 2*i
     pt.plotLatHgtCrossingPole(ilon=ilon)
-
- #for j in [-60, -30, 0, 30, 60]:
- #  jlat = 2*(j+90)
- #  pt.plotLonHgt(jlat=jlat)
 
