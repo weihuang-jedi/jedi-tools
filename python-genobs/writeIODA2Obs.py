@@ -55,15 +55,12 @@ class WriteIODA2Obs():
       print('debug = ', debug)
       print('filename = ', filename)
 
-    self.ndatetime = 0
-    self.nlocs = 0
-    self.nstring = 0
-    self.ngrps = 0
+    self.nvars = 4
 
-    ry = ReadYAML(yamlpath=yamlfile)
+    ry = ReadYAML(yamlpath=self.yamlpath)
     self.dict = ry.get_dict()
 
-    self.set_filename(self, filename=filename)
+    self.set_filename(filename=self.filename)
 
   def set_filename(self, filename=None):
     self.filename = filename
@@ -76,12 +73,16 @@ class WriteIODA2Obs():
   def createNCfile(self):
     self.ncfile = netCDF4.Dataset(self.filename, 'w', format='NETCDF4')
 
+    adict = self.dict['global attributes']
     self.ncfile.title='Manually created IODA V2 Sondes data'
-    self.ncfile._ioda_layout_version = 0
+    self.ncfile._ioda_layout = adict['_ioda_layout']
+    self.ncfile._ioda_layout_version = adict['_ioda_layout_version']
+    self.ncfile.yamlfile = self.yamlpath
+   #self.ncfile.datafile = self.datafile
+    self.ncfile.filename = self.filename
 
-    print(self.ncfile.title)
-    print(self.ncfile._ioda_layout_version)
-    print(self.ncfile)
+   #print(self.ncfile.title)
+   #print(self.ncfile)
 
    #self.date_time = netCDF4.stringtochar(np.array(['2020-01-10T06:58:21Z'], 'S20'))
 
@@ -89,66 +90,81 @@ class WriteIODA2Obs():
     self.ncfile.createDimension('nlocs', None)
    #self.ncfile.createDimension('nchar', 20)
 
-    nlocs = nc.createVariable('nlocs', 'i4', ('nlocs',))
+    vdict = self.dict['variables']['nlocs']
+    self.dimname = 'nlocs'
+    self.nlocs = self.ncfile.createVariable('nlocs', 'i4', (self.dimname,))
+    self.nlocs.suggested_chunk_dim = vdict['suggested_chunk_dim']
+    self.nlocs[:] = [n for n in range(4)]
 
-   #lat = ncfile.createVariable('lat', np.float32, ('lat',))
-   #lat.units = 'degrees_north'
-   #lat.long_name = 'latitude'
-   #lat[:] = 17.002
-
-    for dim in self.ncfile.dimensions.items():
-      print(dim)
+   #for dim in self.ncfile.dimensions.items():
+   #  print(dim)
 
    #nc_f0 = Dataset('path_to_nc','r')
    #var = nc_f0.groups['group_name'].variables['var_name']
 
-  def get_grpvar(self, grpname, varname):
-    ncfile = netCDF4.Dataset(self.filename, 'r')
-
-    if (grpname is None):
-      var = ncfile.variables[varname][:]
-    else:
-      var = ncfile.groups[grpname].variables[varname][:]
-    ncfile.close()
-
-    return var
+    self.writeVars()
 
   def put_grpvar(self, grpname, varname, var, val1, val2):
-    if (grpname is None):
+     #var = self.ncfile.groups[grpname].variables[varname][:]
       I = np.where(var == val1)
       var[I] = val2
-      ncfile.variables[varname][:] = var
-    else:
-     #var = ncfile.groups[grpname].variables[varname][:]
-      I = np.where(var == val1)
-      var[I] = val2
-      ncfile.groups[grpname].variables[varname][:] = var
+      self.ncfile.groups[grpname].variables[varname][:] = var
 
-    ncfile.close()
+  def writeVars(self):
+    n = 0
+    for gname in self.dict.keys():
+      if(gname in ['dimensions', 'variables', 'global attributes']):
+        continue
 
-    return var
+      n += 1
+     #type = self.dict[gname]['type']
+      vars = self.dict[gname]['variables']
+      print('group %d: %s' %(n, gname))
+      print('\tvars: ', vars)
 
-  def get_fileinfo(self):
-    return self.nc_attrs, self.nc_dims, self.nc_grps
-
-  def set_vardims(self):
-    ncfile = netCDF4.Dataset(self.filename, 'r')
-    if(self.debug):
-      print('self.filename = ', self.filename)
-    self.nc_attrs, self.nc_dims, self.nc_grps = self.ncdump(ncfile, verb=True)
-
-    if(self.debug):
-      print('nc_attrs: ', self.nc_attrs)
-      print('nc_dims: ', self.nc_dims)
-      print('nc_grps: ', self.nc_grps)
-
-    ncfile.close()
-
-  def get_latlon(self):
-    lat = self.get_grpvar('MetaData', 'latitude')
-    lon = self.get_grpvar('MetaData', 'longitude')
-
-    return lat, lon
+      if(gname == 'MetaData'):
+        print('need to handle %s' %(gname))
+      else:
+       #Create group
+        group = self.ncfile.createGroup(gname)
+       #group.createDimension('nlocs', len(self.nlocs))
+       #group.self.ncfile
+        for vname in vars.keys():
+          print('\t\tvname: %s' %(vname))
+          vdict = vars[vname]
+          type = vdict['type']
+          if(type == 'float'):
+            var = group.createVariable(vname, np.float32, (self.dimname,))
+          else:
+            var = group.createVariable(vname, np.int32, (self.dimname,))
+   #lat.units = 'degrees_north'
+   #lat.long_name = 'latitude'
+   #lat[:] = 17.002
+          for attr in vdict.keys():
+            print('\t\t\tattr: %s' %(attr))
+            if(attr == '_FillValue'):
+              var._FillValue = vdict[attr]
+            elif(attr == 'units'):
+              var.units = vdict[attr]
+            elif(attr == 'coordinates'):
+              var.coordinates = vdict[attr]
+          #Assign value
+          if(gname == 'GsiAdjustObsError'):
+            var[:] = 1.2
+          elif(gname == 'GsiFinalObsError'):
+            var[:] = 1.5
+          elif(gname == 'GsiHofX'):
+            var[:] = 220.8092
+          elif(gname == 'GsiHofXBc'):
+            var[:] = 220.8092
+          elif(gname == 'GsiInputObsError'):
+            var[:] = 2.5
+          elif(gname == 'GsiQCWeight'):
+            var[:] = 4.0
+          elif(gname == 'ObsError'):
+            var[:] = 1.0
+          elif(gname == 'ObsValue'):
+            var[:] = 220.8092
 
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':

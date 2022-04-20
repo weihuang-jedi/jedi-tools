@@ -96,7 +96,7 @@ MetaData:
     station_elevation:
       type: float
       _FillValue: 9.96921e+36
-      _elevation:units: "m"
+      units: "m"
     station_id:
       type: string
       _FillValue: "00000"
