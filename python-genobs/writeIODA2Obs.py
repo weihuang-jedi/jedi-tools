@@ -46,19 +46,29 @@ class ReadYAML():
 
 #=========================================================================
 class WriteIODA2Obs():
-  def __init__(self, debug=0, filename=None, yamlfile=None):
+  def __init__(self, debug=0, filename=None, yamlfile=None, datafile=None):
     self.debug = debug
     self.filename = filename
     self.yamlpath = yamlfile
+    self.datapath = datafile
 
     if(self.debug):
       print('debug = ', debug)
       print('filename = ', filename)
+      print('yamlfile = ', yamlfile)
+      print('datafile = ', datafile)
 
-    self.nvars = 4
+    rb = ReadYAML(yamlpath=self.yamlpath)
+    self.dict = rb.get_dict()
 
-    ry = ReadYAML(yamlpath=self.yamlpath)
-    self.dict = ry.get_dict()
+    rd = ReadYAML(yamlpath=self.datapath)
+   #rd.print()
+    self.metadata = rd.get_dict()
+   #print('self.metadata = ', self.metadata)
+    self.meta = self.metadata['MetaData']
+   #print('self.meta = ', self.meta)
+
+    self.nvars = len(self.meta['latitude'])
 
     self.set_filename(filename=self.filename)
 
@@ -77,14 +87,9 @@ class WriteIODA2Obs():
     self.ncfile.title='Manually created IODA V2 Sondes data'
     self.ncfile._ioda_layout = adict['_ioda_layout']
     self.ncfile._ioda_layout_version = adict['_ioda_layout_version']
-    self.ncfile.yamlfile = self.yamlpath
-   #self.ncfile.datafile = self.datafile
+    self.ncfile.basefile = self.yamlpath
+    self.ncfile.datafile = self.datapath
     self.ncfile.filename = self.filename
-
-   #print(self.ncfile.title)
-   #print(self.ncfile)
-
-   #self.date_time = netCDF4.stringtochar(np.array(['2020-01-10T06:58:21Z'], 'S20'))
 
    #Create the unlimited time dimension:
     self.ncfile.createDimension('nlocs', None)
@@ -94,21 +99,12 @@ class WriteIODA2Obs():
     self.dimname = 'nlocs'
     self.nlocs = self.ncfile.createVariable('nlocs', 'i4', (self.dimname,))
     self.nlocs.suggested_chunk_dim = vdict['suggested_chunk_dim']
-    self.nlocs[:] = [n for n in range(4)]
+    self.nlocs[:] = [n for n in range(self.nvars)]
 
    #for dim in self.ncfile.dimensions.items():
    #  print(dim)
 
-   #nc_f0 = Dataset('path_to_nc','r')
-   #var = nc_f0.groups['group_name'].variables['var_name']
-
     self.writeVars()
-
-  def put_grpvar(self, grpname, varname, var, val1, val2):
-     #var = self.ncfile.groups[grpname].variables[varname][:]
-      I = np.where(var == val1)
-      var[I] = val2
-      self.ncfile.groups[grpname].variables[varname][:] = var
 
   def writeVars(self):
     n = 0
@@ -119,18 +115,49 @@ class WriteIODA2Obs():
       n += 1
      #type = self.dict[gname]['type']
       vars = self.dict[gname]['variables']
-      print('group %d: %s' %(n, gname))
-      print('\tvars: ', vars)
+     #print('group %d: %s' %(n, gname))
+     #print('\tvars: ', vars)
 
       if(gname == 'MetaData'):
-        print('need to handle %s' %(gname))
+       #handle Metadata
+        group = self.ncfile.createGroup(gname)
+        for vname in vars.keys():
+         #print('\tvname: %s' %(vname))
+          vdict = vars[vname]
+         #print('\tvdict = ', vdict)
+
+          type = vdict['type']
+          if(type == 'float'):
+            var = group.createVariable(vname, np.float32, (self.dimname,), fill_value=vdict['_FillValue'])
+          else:
+            var = group.createVariable(vname, str, (self.dimname,), fill_value=vdict['_FillValue'])
+
+          for attr in vdict.keys():
+           #print('\t\t\tattr: %s' %(attr))
+            if(attr == 'units'):
+              var.units = vdict[attr]
+            elif(attr == 'coordinates'):
+              var.coordinates = vdict[attr]
+
+          if(vname == 'station_id'):
+            sid = []
+            for n in range(self.nvars):
+              tid = '%d' %(10000+n)
+              sid.append(tid)
+            str_out = np.array(sid, dtype='object')
+           #print('\tsid =', sid)
+           #print('\tstr_out =', str_out)
+            var[:] = str_out
+          elif(vname == 'datetime'):
+            str_out = np.array(self.meta[vname], dtype='object')
+            var[:] = str_out
+          else:
+            var[:] = self.meta[vname]
       else:
        #Create group
         group = self.ncfile.createGroup(gname)
-       #group.createDimension('nlocs', len(self.nlocs))
-       #group.self.ncfile
         for vname in vars.keys():
-          print('\t\tvname: %s' %(vname))
+         #print('\t\tvname: %s' %(vname))
           vdict = vars[vname]
 
           type = vdict['type']
@@ -140,7 +167,7 @@ class WriteIODA2Obs():
             var = group.createVariable(vname, np.int32, (self.dimname,), fill_value=vdict['_FillValue'])
 
           for attr in vdict.keys():
-            print('\t\t\tattr: %s' %(attr))
+           #print('\t\t\tattr: %s' %(attr))
             if(attr == 'units'):
               var.units = vdict[attr]
             elif(attr == 'coordinates'):
@@ -181,7 +208,7 @@ if __name__ == '__main__':
   debug = 1
   filename = './ioda_v2_sondes_sample.nc'
   yamlfile = 'base.yaml'
-  datafile = 'data.yaml'
+  datafile = 'metadata.yaml'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'yamlfile=', 'datafile='])
 
@@ -197,5 +224,5 @@ if __name__ == '__main__':
    #else:
    #  assert False, 'unhandled option'
 
-  wio = WriteIODA2Obs(filename=filename, yamlfile=yamlfile)
+  wio = WriteIODA2Obs(filename=filename, yamlfile=yamlfile, datafile=datafile)
 
