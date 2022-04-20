@@ -64,7 +64,7 @@ class WriteIODA2Obs():
     rd = ReadYAML(yamlpath=self.datapath)
    #rd.print()
     self.metadata = rd.get_dict()
-   #print('self.metadata = ', self.metadata)
+    print('self.metadata = ', self.metadata)
     self.meta = self.metadata['MetaData']
    #print('self.meta = ', self.meta)
 
@@ -181,9 +181,15 @@ class WriteIODA2Obs():
           elif(gname == 'GsiFinalObsError'):
             var[:] = 1.5
           elif(gname == 'GsiHofX'):
-            var[:] = 220.8092
+            if(gname in self.metadata.keys()):
+              var[:] = self.metadata[gname]
+            else:
+              var[:] = 220.8092
           elif(gname == 'GsiHofXBc'):
-            var[:] = 220.8092
+            if(gname in self.metadata.keys()):
+              var[:] = self.metadata[gname]
+            else:
+              var[:] = 220.8092
           elif(gname == 'GsiInputObsError'):
             var[:] = 2.5
           elif(gname == 'GsiQCWeight'):
@@ -191,7 +197,10 @@ class WriteIODA2Obs():
           elif(gname == 'ObsError'):
             var[:] = 1.0
           elif(gname == 'ObsValue'):
-            var[:] = 220.8092
+            if(gname in self.metadata.keys()):
+              var[:] = self.metadata[gname]
+            else:
+              var[:] = 220.8092
           elif(gname == 'GsiEffectiveQC'):
             var[:] = 0
           elif(gname == 'GsiUseFlag'):
