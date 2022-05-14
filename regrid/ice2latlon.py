@@ -154,10 +154,15 @@ class Ice2LatLon():
 if __name__ == '__main__':
   debug = 1
   wgtdir = 'grids/'
-  icesrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
-  outdir = 'output/'
+ #icesrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
+  icesrc = '/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/mem001/RESTART/'
+  outdir = './'
+  year = None
+  month = None
+  day = None
+  hour = None
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'icesrc='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'icesrc=', 'year=', 'month=', 'day=', 'hour='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -166,15 +171,27 @@ if __name__ == '__main__':
       wgtdir = a
     elif o in ('--icesrc'):
       icesrc = a
+    elif o in ('--year'):
+      year = a
+    elif o in ('--month'):
+      month = a
+    elif o in ('--day'):
+      day = a
+    elif o in ('--hour'):
+      hour = a
    #else:
    #  assert False, 'unhandled option'
 
   print('debug = ', debug)
   print('wgtdir = ', wgtdir)
-  print('wgtdir = ', wgtdir)
 
  #open input file to get input grid
-  files=glob.glob(icesrc + 'iced.????-??-??-?????.nc')
+ #files=glob.glob(icesrc + 'iced.????-??-??-?????.nc')
+
+  second = '%5d' %(int(hour)*3600)
+  filelist = '%siced.%s-%s-%s-%s.nc' %(icesrc, year, month, day, second)
+  files=glob.glob(filelist)
+
   files.sort()
 
   i2ll = Ice2LatLon(debug=debug, wgtdir=wgtdir)
