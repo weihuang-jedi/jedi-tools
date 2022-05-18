@@ -23,7 +23,7 @@ def cmdout(command):
 """ Profiler """
 class Profiler:
   """ Constructor """
-  def __init__(self, debug=0, linear=0, corelist=None, filelist=None, lay_list=None, output=0):
+  def __init__(self, debug=0, linear=0, output=0, corelist=None, filelist=None, lay_list=None):
 
     """ Initialize class attributes """
     self.debug = debug
@@ -48,6 +48,10 @@ class Profiler:
       else:
         print('Filename ' + flnm + ' does not exit. Stop')
         sys.exit(-1)
+
+    self.functionlist = ['Total', 'computeHofX', 'State', 'Geometry', 'diff',
+                         'Local_compHofX', 'measurementUpdate', 'initialize', 'VariableChange', 'Increment',
+                         'getLocal', 'setLocal']
 
   def process(self):
     self.stats_list = []
@@ -151,15 +155,15 @@ class Profiler:
       nl = 0
       while(nl < num_lines):
         if(lines[nl].find('Parallel Timing Statistics') > 0):
-         #if(self.debug):
-         #  print('Start Parallel Timing Statistics')
+          if(self.debug):
+            print('Start Parallel Timing Statistics')
           nl, par_stats, index = self.parallel_time_stats(lines, nl)
           prof[2] = par_stats
           prof[3] = index
           nl += num_lines
         elif(lines[nl].find('Timing Statistics') > 0):
-         #if(self.debug):
-         #  print('Start Timing Statistics')
+          if(self.debug):
+            print('Start Timing Statistics')
           nl, gen_stats, index = self.time_stats(lines, nl)
           prof[0] = gen_stats
           prof[1] = index
@@ -189,7 +193,11 @@ class Profiler:
       item = line.split(' : ')
      #print(item)
       nlist = item[0].strip().split('::')
-      name = nlist[-1]
+
+      if(nlist[-2] == 'LocalEnsembleSolver'):
+        name = 'Local_compHofX'
+      else:
+        name = nlist[-1]
 
       tstr = item[1].strip()
       while(tstr.find('  ') > 0):
@@ -203,8 +211,8 @@ class Profiler:
 
       tinfo = {}
       tinfo['name'] = name
-      tinfo['time'] = ft
-      tinfo['call'] = int(tlist[1])
+      tinfo['time'] = ft/1000.0
+      tinfo['call'] = int(tlist[1])/1000.0
 
       stats[idx] = tinfo
 
@@ -213,7 +221,6 @@ class Profiler:
       idx += 1
 
     index = self.get_index(stats, 'time', 1)
-
    #if(self.debug):
    #  for idx in index:
    #    pinfo = '\t%50s%10.2f%8d' %(stats[idx]['name'], stats[idx]['time'], stats[idx]['call'])
@@ -237,8 +244,12 @@ class Profiler:
 
       item = line.split(' : ')
      #print(item)
-      nlist = item[0].strip().split(' ')
-      name = nlist[1]
+      nlist = item[0].strip().split('::')
+
+      if(nlist[-2] == 'LocalEnsembleSolver'):
+        name = 'Local_compHofX'
+      else:
+        name = nlist[-1]
 
       tstr = item[1].strip()
       while(tstr.find('  ') > 0):
@@ -250,11 +261,10 @@ class Profiler:
 
       tinfo = {}
       tinfo['name'] = name
-      tinfo['min'] = ft
-      tinfo['max'] = float(nlist[1])
-      tinfo['avg'] = float(nlist[2])
+      tinfo['min'] = ft/1000.0
+      tinfo['max'] = float(nlist[1])/1000.0
+      tinfo['avg'] = float(nlist[2])/1000.0
 
-     #total = 100. * avg / total
       tinfo['total'] = float(nlist[3])
    
      #imbalance = 100. * (max - min) / avg
@@ -268,12 +278,10 @@ class Profiler:
       idx += 1
 
     index = self.get_index(stats, 'avg', 2)
-
    #if(self.debug):
    #  for idx in index:
    #    pinfo = '\t%50s%10.2f' %(stats[idx]['name'], stats[idx]['avg'])
    #    print(pinfo)
-
     return ns, stats, index
 
   def get_index(self, stats, varname, nleft):
@@ -302,8 +310,8 @@ class Profiler:
 
     for i in range(nc):
       nl = len(self.stats_list[i][2])
-      t1 = 0.001*self.stats_list[i][2][nl-1]['avg']
-      t2 = 0.001*self.stats_list[i][2][nl-2]['avg']
+      t1 = self.stats_list[i][2][nl-1]['avg']
+      t2 = self.stats_list[i][2][nl-2]['avg']
       y1.append(t1)
       y2.append(t2)
 
@@ -382,7 +390,7 @@ class Profiler:
       ts[n] = []
       for i in range(nc):
         ni = self.find_gen_name_idx(i, idx)
-        t = 0.001*self.stats_list[i][0][ni]['time']
+        t = self.stats_list[i][0][ni]['time']
        #print('n = ' + str(n) + ', i = ' + str(i) + ', ni = ' + str(ni) + ', t = ' + str(t))
         ts[n].append(t)
         if(t > ymax):
@@ -481,7 +489,7 @@ class Profiler:
       for n in range(pv):
         idx = idxlist[n]
         ni = self.find_par_name_idx(i, idx)
-        t = 0.001*self.stats_list[i][2][ni]['avg']
+        t = self.stats_list[i][2][ni]['avg']
         ts[i].append(t)
         if(t > ymax):
           ymax = t
@@ -493,22 +501,109 @@ class Profiler:
 
     idx = np.asarray([i for i in range(pv)])
 
-    width = 0.2
+    width = (1.0-0.1)/len(corelist);
 
-    ax.bar(idx, ts[0], width, color='r')
-    ax.bar(idx+width, ts[1], width, color='b')
+    colorlist = ['red', 'blue', 'cyan', 'magenta', 'orange',
+                 'royalblue', 'coral', 'palegreen', 'dodgeblue', 'orchid',
+                 'dimgrey', 'brown', 'yellow', 'teal', 'violet', 'skyblue']
+    lengenlist = []
+
+    for n in range(len(corelist)):
+   #for n in range(5):
+      ax.bar(idx+n*width, ts[n], width, color=colorlist[n])
+      lengenlist.append(str(self.corelist[n]))
 
     ax.set_xticks(idx)
     ax.set_xticklabels(namelist, rotation=65)
-    ax.legend([str(self.corelist[0]), str(self.corelist[1])])
+    ax.legend(lengenlist)
     ax.set_xlabel('Functions')
     ax.set_ylabel('Time (second)')
 
+    plt.title(title)
+
     fig.tight_layout()
+
+    imgname = 'top_bar_%d.png' %(pv)
+
+    if(self.output):
+      plt.savefig(imgname)
+    else:
+      plt.show()
+
+    plt.cla()
+    plt.clf()
+
+  def find_func_name_idx(self, cn, name):
+    nl = len(self.stats_list[cn][2])
+    indx = 0
+    for n in range(nl):
+      if(name == self.stats_list[cn][2][n]['name']):
+       #print('name = ' + name + ', new name = ' + self.stats_list[cn][0][n]['name'])
+        indx = n
+        break
+    return indx
+
+  def plot_select_funcs_bar(self):
+    pv = len(self.functionlist)
+    nv = len(self.stats_list[0][3])
+    if(nv < pv):
+      print('Cannot plot ' + str(pv) + ' vars, as we only have ' + str(nv) + ' in file.')
+      return
+
+    title = 'Bar Plot for selected Functions'
+
+    nc = len(self.corelist)
+    x = np.array(self.corelist)
+    ts = {}
+    idxlist = []
+    namelist = []
+
+   #for i in range(nc):
+   #  nv = len(self.stats_list[i][3])
+   #  print('Case ' + str(i) + ' has ' + str(nv) + ' vars')
+
+    ymin = 1.0e+36
+    ymax = 0.0
+
+    for i in range(nc):
+      ts[i] = []
+      for n in range(pv):
+        name = self.functionlist[n]
+        ni = self.find_func_name_idx(i, name)
+        t = self.stats_list[i][2][ni]['avg']
+        ts[i].append(t)
+        if(t > ymax):
+          ymax = t
+        if(t < ymin):
+          ymin = t
+
+   #the actual graph:
+    fig, ax = plt.subplots(figsize = (10,4))
+
+    idx = np.asarray([i for i in range(pv)])
+
+    width = (1.0-0.1)/len(corelist);
+
+    colorlist = ['red', 'blue', 'cyan', 'magenta', 'orange',
+                 'royalblue', 'coral', 'palegreen', 'dodgeblue', 'orchid',
+                 'dimgrey', 'brown', 'yellow', 'teal', 'violet', 'skyblue']
+    lengenlist = []
+
+    for n in range(len(corelist)):
+      ax.bar(idx+n*width, ts[n], width, color=colorlist[n])
+      lengenlist.append(str(self.corelist[n]))
+
+    ax.set_xticks(idx)
+    ax.set_xticklabels(self.functionlist, rotation=65)
+    ax.legend(lengenlist)
+    ax.set_xlabel('Functions')
+    ax.set_ylabel('Time (second)')
 
     plt.title(title)
 
-    imgname = 'par_bar_%d.png' %(pv)
+    fig.tight_layout()
+
+    imgname = 'select_functions_bar_%d.png' %(pv)
 
     if(self.output):
       plt.savefig(imgname)
@@ -521,8 +616,8 @@ class Profiler:
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
   debug = 1
-  linear = 1
-  output = 1
+  linear = 0
+  output = 0
   workdir = '.'
   mtpn = 6
   nodelist = [   28,   30,   32,   35,   36,   40,    45,    50,  60]
@@ -553,9 +648,9 @@ if __name__== '__main__':
     else:
       assert False, 'unhandled option'
 
-  pr = Profiler(debug=debug, linear=linear, corelist=corelist, filelist=filelist, output=output)
+  pr = Profiler(debug=debug, linear=linear, output=output, corelist=corelist, filelist=filelist)
   pr.process()
  #pr.plot_total()
  #pr.plot_par_bar(10)
-  pr.plot_multiple(1,8)
+  pr.plot_select_funcs_bar()
 
