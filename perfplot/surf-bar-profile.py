@@ -524,19 +524,19 @@ if __name__== '__main__':
   linear = 1
   output = 1
   workdir = '.'
-  corelist = [   6,   12,   18,   24,   30,   36,    72,    78]
-  nodelist = [   1,    1,    1,    1,    1,    1,     2,     2]
-  lay_list = ["1,1","1,2","1,3","1,4","1,5","1,6","1,12","1,13"]
+  mtpn = 6
+  nodelist = [   28,   30,   32,   35,   36,   40,    45,    50,  60]
+  corelist = mtpn * nodelist
 
   print("corelist:", corelist)
   print("nodelist:", nodelist)
   print("lay_list:", lay_list)
 
-  rundir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf'
+ #rundir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf'
+  rundir = '/scratch2/BMC/gsienkf/Wei.Huang/ufs/soca-solver'
   filelist = []
-  mtpn = 40
   for n in range(len(corelist)):
-    flnm = '%s/run_80.%dt%dn_%dp/stdoutNerr/stdout.00000000' %(rundir, mtpn, nodelist[n], corelist[n])
+    flnm = '%s/soca_solver.%dt%dn_%dp/log.soca_solver' %(rundir, mtpn, nodelist[n], corelist[n])
     filelist.append(flnm)
 
   print('filelist:', filelist)
