@@ -1,0 +1,143 @@
+dimensions:
+  nlocs: 4
+variables:
+  nlocs:
+    type: int
+    suggested_chunk_dim: 100
+
+global attributes:
+  _ioda_layout: "ObsGroup"
+  _ioda_layout_version: 0
+  input_files: "sample"
+
+GsiAdjustObsError:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiEffectiveQC:
+  type: group
+  variables:
+    surface_pressure:
+      type: int
+      _FillValue: -2147483647
+      units: "unitless"
+
+GsiFinalObsError:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiHofX:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiHofXBc:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiInputObsError:
+  type: group
+  variables:
+    eastward_wind:
+      type: float
+      _FillValue: 9.96921e+36
+    northward_wind:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiQCWeight:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+
+GsiUseFlag:
+  type: group
+  variables:
+    surface_pressure:
+      type: int
+      _FillValue: -2147483647
+
+MetaData:
+  type: group
+  variables:
+    air_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "hPa"
+    datetime:
+      type: string
+      _FillValue: ""
+      units: "UTC Time in YYYY-MM-DDTHH:MM:SSZ format"
+    height:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "m"
+    latitude:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_north"
+    longitude:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_east"
+    station_elevation:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "m"
+    station_id:
+      type: string
+      _FillValue: "00000"
+
+ObsError:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "Pa"
+      coordinates: "longitude latitude"
+
+ObsType:
+  type: group
+  variables:
+    surface_pressure:
+      type: int
+      _FillValue: -2147483647
+
+ObsValue:
+  type: group
+  variables:
+    surface_pressure:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "Pa"
+      coordinates: "longitude latitude"
+
+PreQC:
+  type: group
+  variables:
+    surface_pressure:
+      type: int
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+
+PreUseFlag:
+  type: group
+  variables:
+    surface_pressure:
+      type: int
+      _FillValue: -2147483647
