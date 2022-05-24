@@ -176,48 +176,22 @@ class WriteIODA2Obs():
            #  var._FillValue = vdict[attr]
 
           #Assign value
-          if(gname == 'GsiAdjustObsError'):
-            var[:] = 1.4
-          elif(gname == 'GsiFinalObsError'):
-            var[:] = 1.25
-          elif(gname == 'GsiFinalObsError'):
-            var[:] = 1.5
-          elif(gname == 'GsiHofX'):
-            if(gname in self.metadata.keys()):
-              var[:] = self.metadata[gname]
-            else:
-              var[:] = 1009.869
-          elif(gname == 'GsiHofXBc'):
-            if(gname in self.metadata.keys()):
-              var[:] = self.metadata[gname]
-            else:
-              var[:] = 1009.869
-          elif(gname == 'GsiInputObsError'):
-            var[:] = 2.5
-          elif(gname == 'GsiQCWeight'):
-            var[:] = 4.0
-          elif(gname == 'ObsError'):
-            var[:] = 1.0
+          if(gname == 'ObsError'):
+            var[:] = 0.5
           elif(gname == 'ObsValue'):
             if(gname in self.metadata.keys()):
               var[:] = self.metadata[gname]
             else:
-              var[:] = 220.8092
-          elif(gname == 'GsiEffectiveQC'):
-            var[:] = 0
-          elif(gname == 'GsiUseFlag'):
-            var[:] = 1
-          elif(gname == 'ObsType'):
-            var[:] = 181
+              var[:] = 30.5
           elif(gname == 'PreQC'):
-            var[:] = 2
+            var[:] = 0
           elif(gname == 'PreUseFlag'):
             var[:] = 0
 
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
-  filename = './ioda_v2_sondes_sample.nc'
+  filename = './ioda_v2_sst_avhrrmta_l3u_nesdis_sample.nc'
   yamlfile = 'base.yaml'
   datafile = 'metadata.yaml'
 

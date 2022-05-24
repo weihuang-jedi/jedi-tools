@@ -235,8 +235,8 @@ class ReadIODA2Obs():
 if __name__ == '__main__':
   debug = 1
 
-  dirname = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/ioda_v2_data'
-  filename = 'ioda_v2_sfc_ps_obs_2020011006.nc4'
+  dirname = '/work/noaa/gsienkf/weihuang/soca/soca_letkf_data'
+  filename = 'ioda_v2_input_sst_avhrr19_l3u_nesdis_2015120112.nc'
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'dirname=', 'filename='])
 
@@ -259,8 +259,7 @@ if __name__ == '__main__':
 
   nc_attrs, nc_dims, nc_grps = rio.get_fileinfo()
 
- #for varname in ['air_temperature', 'eastward_wind', 'northward_wind', 'specific_humidity', 'virtual_temperature']:
-  for varname in ['surface_pressure']:
+  for varname in ['sea_surface_skin_temperature']:
     print('\tvarname = ', varname)
 
     n = 0
@@ -275,10 +274,11 @@ if __name__ == '__main__':
      #  if(varname not in ['eastward_wind', 'northward_wind']):
      #    continue
 
-      var = rio.get_grpvar(grp, varname)
-      print('\tvalue = ', var)
-      print('\tmin: %f, max: %f, avg: %f' %(np.min(var), np.max(var), np.mean(var)))
-      print('\n')
+      if(grp != 'VarMetaData'):
+        var = rio.get_grpvar(grp, varname)
+        print('\tvalue = ', var)
+        print('\tmin: %f, max: %f, avg: %f' %(np.min(var), np.max(var), np.mean(var)))
+        print('\n')
 
      #for i in range(len(var)):
      #  if(var[i] > 1.0e7):
