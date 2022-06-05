@@ -191,7 +191,7 @@ class WriteIODA2Obs():
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
-  filename = './ioda_v2_sst_avhrrmta_l3u_nesdis_sample.nc'
+  filename = './ioda_v2_sst_avhrrmta_l3u_nesdis.nc'
   yamlfile = 'base.yaml'
   datafile = 'metadata.yaml'
 
