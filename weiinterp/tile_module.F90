@@ -91,10 +91,10 @@ contains
 
     character(len=1024) :: dimname, varname
 
-    print *, 'Enter initialize_tilegrid'
-    print *, 'File: ', __FILE__, ', line: ', __LINE__
-    print *, 'dname: <', trim(dname), '>'
-    print *, 'ftype: <', trim(ftype), '>'
+   !print *, 'Enter initialize_tilegrid'
+   !print *, 'File: ', __FILE__, ', line: ', __LINE__
+   !print *, 'dname: <', trim(dname), '>'
+   !print *, 'ftype: <', trim(ftype), '>'
 
     include_parents = 0
 
@@ -107,16 +107,16 @@ contains
          write(tile(n)%filename, fmt='(2a, i1, a)') &
                trim(dname), trim(ftype), n, '.nc'
       end if
-      print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
+     !print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
       rc = nf90_open(trim(tile(n)%filename), nf90_nowrite, tile(n)%fileid)
       call check_status(rc)
-      print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
+     !print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
 
       rc = nf90_inquire(tile(n)%fileid, tile(n)%nDims, tile(n)%nVars, &
                tile(n)%nGlobalAtts, tile(n)%unlimdimid)
       call check_status(rc)
-      print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
-      print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
+     !print *, 'Tile ', n, ', nVars: ', tile(n)%nVars
+     !print *, 'Tile ', n, ', nDims: ', tile(n)%nDims
 
       ! Allocate memory.
       allocate(tile(n)%dimids(tile(n)%nDims))
@@ -126,14 +126,14 @@ contains
       rc = nf90_inq_dimids(tile(n)%fileid, tile(n)%nDims, tile(n)%dimids, include_parents)
       call check_status(rc)
 
-      print *, 'Tile ', n, ', dimids: ', tile(n)%dimids
+     !print *, 'Tile ', n, ', dimids: ', tile(n)%dimids
       tile(n)%nz = 1
       tile(n)%ns = 1
 
       do i = 1, tile(n)%nDims
          rc = nf90_inquire_dimension(tile(n)%fileid, tile(n)%dimids(i), dimname, dimlen)
          call check_status(rc)
-         print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
+        !print *, 'Dim No. ', i, ': ', trim(dimname), ', dimlen=', dimlen
 
          if(trim(dimname) == 'grid_xt') then
             tile(n)%nx = dimlen
@@ -159,8 +159,8 @@ contains
 
       if((ny2 > 0) .and. (tile(n)%ny > ny2)) tile(n)%ny = ny2
 
-      print *, 'tile(n)%nx = ', tile(n)%nx, ', tile(n)%ny = ', tile(n)%ny, &
-             ', tile(n)%nz = ', tile(n)%nz, ', tile(n)%nt = ', tile(n)%nt
+     !print *, 'tile(n)%nx = ', tile(n)%nx, ', tile(n)%ny = ', tile(n)%ny, &
+     !       ', tile(n)%nz = ', tile(n)%nz, ', tile(n)%nt = ', tile(n)%nt
 
       ! Allocate memory.
       allocate(tile(n)%varids(tile(n)%nVars))
@@ -178,7 +178,7 @@ contains
       rc = nf90_inq_varids(tile(n)%fileid, tile(n)%nVars, tile(n)%varids)
       call check_status(rc)
 
-      print *, 'Tile ', n, ', nvars = ', tile(n)%nVars, ', varids: ', tile(n)%varids
+     !print *, 'Tile ', n, ', nvars = ', tile(n)%nVars, ', varids: ', tile(n)%varids
 
       do i = 1, tile(n)%nVars
          rc = nf90_inquire_variable(tile(n)%fileid, tile(n)%varids(i), &

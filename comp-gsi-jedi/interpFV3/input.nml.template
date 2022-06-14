@@ -1,0 +1,23 @@
+&control_param
+ generate_weights = .false.
+
+ griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/',
+ grid_type = 'C96_grid.tile',
+
+ dirname = 'DIRNAME',
+ output_flnm = 'OUTPUTFILE',
+ wgt_flnm = 'WEIGHTFILE',
+
+ prefix = 'PREFIX',
+
+ has_prefix = .true.,
+ use_uv_directly = .true.,
+
+ nlon = 360
+ nlat = 180
+ npnt = 4
+
+ num_types = NUM_TYPES,
+ data_types = DATATYPES,
+/
+
