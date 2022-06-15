@@ -33,8 +33,8 @@ class ModelVerticalPressure():
    #print('ak = ', ak)
    #print('bk = ', bk)
 
-    print('len(ak) = ', len(ak))
-    print('len(bk) = ', len(bk))
+   #print('len(ak) = ', len(ak))
+   #print('len(bk) = ', len(bk))
 
     nlevs = len(ak)
 
@@ -64,10 +64,10 @@ class ModelVerticalPressure():
   
     self.logp = -np.log(self.halfpres) # (ranges from -2 to -11)
 
-    print('self.fullpres = ', self.fullpres)
-    print('self.halfpres = ', self.halfpres)
-    print('self.logp = ', self.logp)
-    print('len(self.logp) = ', len(self.logp))
+   #print('self.fullpres = ', self.fullpres)
+   #print('self.halfpres = ', self.halfpres)
+   #print('self.logp = ', self.logp)
+   #print('len(self.logp) = ', len(self.logp))
 
   def get_pressure(self):
     return self.halfpres

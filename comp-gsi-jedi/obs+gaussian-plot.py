@@ -210,8 +210,12 @@ if __name__ == '__main__':
 #------------------------------------------------------------------------------
  #clevs = np.arange(-0.5, 0.51, 0.01)
  #cblevs = np.arange(-0.5, 0.6, 0.1)
-  clevs = np.arange(-0.2, 0.21, 0.01)
-  cblevs = np.arange(-0.2, 0.3, 0.1)
+ #clevs = np.arange(-0.2, 0.21, 0.01)
+ #cblevs = np.arange(-0.2, 0.3, 0.1)
+ #gp.set_precision(precision=1)
+  clevs = np.arange(-2.0, 2.1, 0.1)
+  cblevs = np.arange(-2.0, 2.5, 0.5)
+  gp.set_precision(precision=1)
   gp.set_clevs(clevs=clevs)
   gp.set_cblevs(cblevs=cblevs)
 
