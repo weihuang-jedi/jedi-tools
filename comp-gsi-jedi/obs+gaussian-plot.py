@@ -232,34 +232,36 @@ if __name__ == '__main__':
     gp.plot(pvar, addmark=1, marker='x', size=1, color='green')
 
 #------------------------------------------------------------------------------
-  lons = [40, 105, 170, 270, 300]
+  lons = [0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330]
 
   for lon in lons:
     pvar = var[:,:,lon]
     title = '%s longitude %d' %(titleprefix, lon)
-    gp.set_title(title)
 
     imgname = '%s_lon_%d_logp.png' %(imageprefix, lon)
     gp.set_imagename(imgname)
+    gp.set_title(title)
     gp.plot_meridional_section_logp(pvar)
 
     imgname = '%s_lon_%d_level.png' %(imageprefix, lon)
     gp.set_imagename(imgname)
+    gp.set_title(title)
     gp.plot_meridional_section(pvar)
 
 #------------------------------------------------------------------------------
-  lats = [-30, 0, 45, 70]
+  lats = [-60, -45, -30, -15, 0, 15, 30, 45, 60]
 
   for lat in lats:
     pvar = var[:,90+lat,:]
-    gp.set_title(title)
     title = '%s latitude %d' %(titleprefix, lat)
 
     imgname = '%s_lat_%d_logp.png' %(imageprefix, lat)
     gp.set_imagename(imgname)
+    gp.set_title(title)
     gp.plot_zonal_section_logp(pvar)
 
     imgname = '%s_lat_%d_level.png' %(imageprefix, lat)
     gp.set_imagename(imgname)
+    gp.set_title(title)
     gp.plot_zonal_section(pvar)
 
