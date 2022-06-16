@@ -21,10 +21,12 @@ class ReadIODA2Obs():
     self.nstring = 0
     self.nvars = 0
 
-    self.set_vardims()
+    if(filename is not None):
+      self.set_vardims()
 
   def set_filename(self, filename=None):
     self.filename = filename
+    self.set_vardims()
 
   def get_groupNvar_name(self, gvstr):
     np = gvstr.rfind('/')

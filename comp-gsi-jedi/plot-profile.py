@@ -57,10 +57,13 @@ with open('profile_data.txt', 'r') as filehandle:
            color='red',  
            linewidth=2.0)
 
-  plt.xlim((0, 0.10))  
+ #plt.xlim((0, 0.10))  
+ #plt.xlim((0, 0.20))  
  #plt.xlim((0, 0.30))  
  #plt.xlim((0, 0.40))  
  #plt.xlim((0, 0.50))  
+ #plt.xlim((0, 0.60))  
+  plt.xlim((0, 0.80))  
   plt.ylim((0, nz-1))  
 
   ax = plt.gca()
@@ -86,7 +89,8 @@ with open('profile_data.txt', 'r') as filehandle:
            linewidth=2.0)
 
  #plt.xlim((0, 120.0))
-  plt.xlim((0, 200.0))
+ #plt.xlim((0, 200.0))
+  plt.xlim((0, 400.0))
   plt.ylim((0, nz-1))  
 
   ax = plt.gca()

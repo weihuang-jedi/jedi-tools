@@ -31,16 +31,25 @@ class ReadFile():
       print('debug = ', debug)
       print('filename = ', filename)
 
+  def get_latlonNvar(self, varname):
+    print('varname =', varname)
+
+    ncfile = netCDF4.Dataset(self.filename, 'r')
+    lat = ncfile.variables['lat'][:] 
+    lon = ncfile.variables['lon'][:] 
+    var = ncfile.variables[varname][:, :, :] 
+    ncfile.close()
+
+    return lon, lat, var
+
   def get_var(self, varname):
     print('varname =', varname)
 
     ncfile = netCDF4.Dataset(self.filename, 'r')
-    lat = ncfile.variables['lat'][:, :]
-    lon = ncfile.variables['lon'][:, :]
-    var = ncfile.variables[varname][:, :, :, :]
+    var = ncfile.variables[varname][:, :, :]
     ncfile.close()
 
-    return lon, lat, var
+    return var
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
@@ -61,51 +70,33 @@ if __name__ == '__main__':
   print('output = ', output)
 
 #=======================================================================================================================
-  gsi_data_dir = '/work2/noaa/gsienkf/weihuang/C96_psonly_delp/2020011006'
-  gsi_bkg_name = '%s/sfg_2020011006_fhr06_ensmean' %(gsi_data_dir)
-  gsi_anl_name = '%s/sanl_2020011006_fhr06_ensmean' %(gsi_data_dir)
+  gsi_data_dir = '.'
+  gsi_bkg_name = '%s/latlon_sfg_2020011006_fhr06_ensmean.nc' %(gsi_data_dir)
+  gsi_anl_name = '%s/latlon_sanl_2020011006_fhr06_ensmean.nc' %(gsi_data_dir)
 
-  jedi_data_dir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_24p'
-  jedi_filename = '%s/analysis/increment/xainc.20200110_030000z.nc4' %(jedi_data_dir)
+  jedi_data_dir = '.'
+  jedi_filename = '%s/latlon_xainc.20200110_030000z.nc4' %(jedi_data_dir)
 
 #=======================================================================================================================
   reader = ReadFile(debug=debug, filename=gsi_bkg_name)
-  lon, lat, bkg = reader.get_var('tmp')
+  lon, lat, bkg = reader.get_latlonNvar('t')
 
   reader.set_filename(filename=gsi_anl_name)
-  lon, lat, anl = reader.get_var('tmp')
+  anl = reader.get_var('t')
 
-  gsi_incr = anl - bkg
+  gsi_var = anl - bkg
 
   print('anl.shape = ', anl.shape)
-  ntime, nlev, nlat, nlon = anl.shape
+  nlev, nlat, nlon = anl.shape
 
-  ncf = netCDF4.Dataset(jedi_filename)
-  jlat = ncf.variables['lat'][:]
-  jlon = ncf.variables['lon'][:]
-  jedi_incr = ncf.variables['t'][:, :, :, :]
-  ncf.close()
-
-  print('jedi_incr.shape = ', jedi_incr.shape)
-
-  lon1d = lon.flatten()
-  lat1d = lat.flatten()
- #gsi1d = gsi_incr.flatten()
- #jedi1d = jedi_incr.flatten()
-
-#=======================================================================================================================
- #rg = regridder(debug=debug, datafiles=[], gridspecfiles=[])
- #gsi_var = rg.interp2latlon_data(lon1d, lat1d, gsi_incr, nlon=nlon, nlat=nlat, method='linear')
- #jedi_var = rg.interp2latlon_data(lon1d, lat1d, jedi_incr, nlon=nlon, nlat=nlat, method='linear')
-
- #print('gsi_var.ndim = ', gsi_var.ndim)
- #print('gsi_var.shape = ', gsi_var.shape)
+  reader.set_filename(filename=jedi_filename)
+  jedi_var = reader.get_var('t')
 
 #=======================================================================================================================
   var = jedi_var - gsi_var
 
   print('var.shape = ', var.shape)
-  nt, nz, ny, nx = var.shape
+  nz, ny, nx = var.shape
 
 #=======================================================================================================================
   gsi_sqrt = np.zeros((nz))
@@ -113,9 +104,9 @@ if __name__ == '__main__':
   gsi_jedi_sqrt = np.zeros((nz))
 
   for lvl in range(nz):
-    gsi_sqrt[lvl] = np.sqrt(np.mean(gsi_var[0,lvl,:,:]*gsi_var[0,lvl,:,:]))
-    jedi_sqrt[lvl] = np.sqrt(np.mean(jedi_var[0,lvl,:,:]*jedi_var[0,lvl,:,:]))
-    gsi_jedi_sqrt[lvl] = np.sqrt(np.mean(var[0,lvl,:,:]*var[0,lvl,:,:]))
+    gsi_sqrt[lvl] = np.sqrt(np.mean(gsi_var[lvl,:,:]*gsi_var[lvl,:,:]))
+    jedi_sqrt[lvl] = np.sqrt(np.mean(jedi_var[lvl,:,:]*jedi_var[lvl,:,:]))
+    gsi_jedi_sqrt[lvl] = np.sqrt(np.mean(var[lvl,:,:]*var[lvl,:,:]))
 
   print('gsi_sqrt.shape = ', gsi_sqrt.shape)
 

@@ -29,6 +29,13 @@ class ReadGSIobs():
 
     return lat, lon
 
+  def get_var(self, varname):
+    ncfile = netCDF4.Dataset(self.filename, 'r')
+    var = ncfile.variables[varname][:]
+    ncfile.close()
+
+    return var
+
 # ----
 if __name__ == '__main__':
   debug = 1
