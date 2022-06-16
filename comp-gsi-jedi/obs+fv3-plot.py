@@ -44,7 +44,8 @@ if __name__ == '__main__':
   print('addobs = ', addobs)
 
 #------------------------------------------------------------------------------
-  casedir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_24p'
+ #casedir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_24p'
+  casedir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_30p'
   filename = '%s/analysis/increment/xainc.20200110_030000z.nc4' %(casedir)
 
   nc = Dataset(filename)
