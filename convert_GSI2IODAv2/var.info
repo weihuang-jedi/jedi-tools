@@ -1,0 +1,248 @@
+netcdf ioda_v2_sondes_obs_2020011006 {
+dimensions:
+	nlocs = UNLIMITED ; // (2826 currently)
+variables:
+	int nlocs(nlocs) ;
+		nlocs:suggested_chunk_dim = 100LL ;
+
+// global attributes:
+		string :_ioda_layout = "ObsGroup" ;
+		:_ioda_layout_version = 0 ;
+		string :converter = "gsi_ncdiag.py" ;
+		string :input_files = "/work2/noaa/gsienkf/weihuang/scripts/convert/sondesobs/output/sondes_q_obs_2020011006.nc4;/work2/noaa/gsienkf/weihuang/scripts/convert/sondesobs/output/sondes_tsen_obs_2020011006.nc4;/work2/noaa/gsienkf/weihuang/scripts/convert/sondesobs/output/sondes_tv_obs_2020011006.nc4;/work2/noaa/gsienkf/weihuang/scripts/convert/sondesobs/output/sondes_uv_obs_2020011006.nc4" ;
+
+group: GsiAdjustObsError {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  } // group GsiAdjustObsError
+
+group: GsiEffectiveQC {
+  variables:
+  	int air_temperature(nlocs) ;
+  		air_temperature:_FillValue = -2147483647 ;
+  		string air_temperature:units = "unitless" ;
+  	int eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = -2147483647 ;
+  		string eastward_wind:units = "unitless" ;
+  	int northward_wind(nlocs) ;
+  		northward_wind:_FillValue = -2147483647 ;
+  		string northward_wind:units = "unitless" ;
+  	int specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = -2147483647 ;
+  		string specific_humidity:units = "unitless" ;
+  	int virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = -2147483647 ;
+  		string virtual_temperature:units = "unitless" ;
+  } // group GsiEffectiveQC
+
+group: GsiFinalObsError {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  } // group GsiFinalObsError
+
+group: GsiHofX {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  } // group GsiHofX
+
+group: GsiHofXBc {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  } // group GsiHofXBc
+
+group: GsiInputObsError {
+  variables:
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  } // group GsiInputObsError
+
+group: GsiQCWeight {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  } // group GsiQCWeight
+
+group: GsiUseFlag {
+  variables:
+  	int air_temperature(nlocs) ;
+  		air_temperature:_FillValue = -2147483647 ;
+  	int eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = -2147483647 ;
+  	int northward_wind(nlocs) ;
+  		northward_wind:_FillValue = -2147483647 ;
+  	int specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = -2147483647 ;
+  	int virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = -2147483647 ;
+  } // group GsiUseFlag
+
+group: MetaData {
+  variables:
+  	float air_pressure(nlocs) ;
+  		air_pressure:_FillValue = 9.96921e+36f ;
+  		string air_pressure:units = "Pa" ;
+  	string datetime(nlocs) ;
+  		string datetime:_FillValue = "" ;
+  		string datetime:units = "UTC Time in YYYY-MM-DDTHH:MM:SSZ format" ;
+  	float height(nlocs) ;
+  		height:_FillValue = 9.96921e+36f ;
+  		string height:units = "m" ;
+  	float latitude(nlocs) ;
+  		latitude:_FillValue = 9.96921e+36f ;
+  		string latitude:units = "degrees_north" ;
+  	float longitude(nlocs) ;
+  		longitude:_FillValue = 9.96921e+36f ;
+  		string longitude:units = "degrees_east" ;
+  	float station_elevation(nlocs) ;
+  		station_elevation:_FillValue = 9.96921e+36f ;
+  		string station_elevation:units = "m" ;
+  	string station_id(nlocs) ;
+  		string station_id:_FillValue = "" ;
+  } // group MetaData
+
+group: ObsError {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  		string air_temperature:units = "K" ;
+  		string air_temperature:coordinates = "longitude latitude" ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  		string eastward_wind:units = "m s-1" ;
+  		string eastward_wind:coordinates = "longitude latitude" ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  		string northward_wind:units = "m s-1" ;
+  		string northward_wind:coordinates = "longitude latitude" ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  		string specific_humidity:units = "1" ;
+  		string specific_humidity:coordinates = "longitude latitude" ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  		string virtual_temperature:units = "K" ;
+  		string virtual_temperature:coordinates = "longitude latitude" ;
+  } // group ObsError
+
+group: ObsType {
+  variables:
+  	int air_temperature(nlocs) ;
+  		air_temperature:_FillValue = -2147483647 ;
+  	int eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = -2147483647 ;
+  	int northward_wind(nlocs) ;
+  		northward_wind:_FillValue = -2147483647 ;
+  	int specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = -2147483647 ;
+  	int virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = -2147483647 ;
+  } // group ObsType
+
+group: ObsValue {
+  variables:
+  	float air_temperature(nlocs) ;
+  		air_temperature:_FillValue = 9.96921e+36f ;
+  		string air_temperature:units = "K" ;
+  		string air_temperature:coordinates = "longitude latitude" ;
+  	float eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = 9.96921e+36f ;
+  		string eastward_wind:units = "m s-1" ;
+  		string eastward_wind:coordinates = "longitude latitude" ;
+  	float northward_wind(nlocs) ;
+  		northward_wind:_FillValue = 9.96921e+36f ;
+  		string northward_wind:units = "m s-1" ;
+  		string northward_wind:coordinates = "longitude latitude" ;
+  	float specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = 9.96921e+36f ;
+  		string specific_humidity:units = "1" ;
+  		string specific_humidity:coordinates = "longitude latitude" ;
+  	float virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = 9.96921e+36f ;
+  		string virtual_temperature:units = "K" ;
+  		string virtual_temperature:coordinates = "longitude latitude" ;
+  } // group ObsValue
+
+group: PreQC {
+  variables:
+  	int air_temperature(nlocs) ;
+  		air_temperature:_FillValue = -2147483647 ;
+  		string air_temperature:units = "unitless" ;
+  		string air_temperature:coordinates = "longitude latitude" ;
+  	int eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = -2147483647 ;
+  		string eastward_wind:units = "unitless" ;
+  		string eastward_wind:coordinates = "longitude latitude" ;
+  	int northward_wind(nlocs) ;
+  		northward_wind:_FillValue = -2147483647 ;
+  		string northward_wind:units = "unitless" ;
+  		string northward_wind:coordinates = "longitude latitude" ;
+  	int specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = -2147483647 ;
+  		string specific_humidity:units = "unitless" ;
+  		string specific_humidity:coordinates = "longitude latitude" ;
+  	int virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = -2147483647 ;
+  		string virtual_temperature:units = "unitless" ;
+  		string virtual_temperature:coordinates = "longitude latitude" ;
+  } // group PreQC
+
+group: PreUseFlag {
+  variables:
+  	int air_temperature(nlocs) ;
+  		air_temperature:_FillValue = -2147483647 ;
+  	int eastward_wind(nlocs) ;
+  		eastward_wind:_FillValue = -2147483647 ;
+  	int northward_wind(nlocs) ;
+  		northward_wind:_FillValue = -2147483647 ;
+  	int specific_humidity(nlocs) ;
+  		specific_humidity:_FillValue = -2147483647 ;
+  	int virtual_temperature(nlocs) ;
+  		virtual_temperature:_FillValue = -2147483647 ;
+  } // group PreUseFlag
+}
