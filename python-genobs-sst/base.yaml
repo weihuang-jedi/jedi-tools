@@ -1,0 +1,58 @@
+dimensions:
+  nlocs: 4
+variables:
+  nlocs:
+    type: int
+    suggested_chunk_dim: 100
+
+global attributes:
+  _ioda_layout: "ObsGroup"
+  _ioda_layout_version: 0
+  input_files: "sample"
+
+MetaData:
+  type: group
+  variables:
+    datetime:
+      type: string
+      _FillValue: ""
+      units: "UTC Time in YYYY-MM-DDTHH:MM:SSZ format"
+    latitude:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_north"
+    longitude:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "degrees_east"
+    time:
+      type: float
+      _FillValue: 9.96921e+36
+
+ObsError:
+  type: group
+  variables:
+    sea_surface_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+
+ObsValue:
+  type: group
+  variables:
+    sea_surface_temperature:
+      type: float
+      _FillValue: 9.96921e+36
+      units: "K"
+      coordinates: "longitude latitude"
+
+PreQC:
+  type: group
+  variables:
+    sea_surface_temperature:
+      type: int
+      _FillValue: -2147483647
+      units: "unitless"
+      coordinates: "longitude latitude"
+

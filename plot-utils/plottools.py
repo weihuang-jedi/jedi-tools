@@ -8,9 +8,15 @@ import numpy as np
 import matplotlib
 import matplotlib.pyplot
 
-from matplotlib import cm
+import matplotlib.cm as cm
+
+#from matplotlib.colors import Normalize
+#from matplotlib.ticker import MultipleLocator
+
+from matplotlib import colors
+from matplotlib.ticker import PercentFormatter
+
 from mpl_toolkits.basemap import Basemap
-from matplotlib.ticker import MultipleLocator
 
 from modelVerticalpressure import ModelVerticalPressure
 
@@ -1260,6 +1266,470 @@ class PlotTools():
    #cb.ax.tick_params(labelsize=self.labelsize)
 
     self.ax.set_title(self.title)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot_histograph(self, dist1):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+   #self.fig = self.plt.figure()
+   #self.ax = self.plt.subplot()
+
+    msg = 'dist1 min: %s, max: %s' % (np.min(dist1), np.max(dist1))
+    print(msg)
+
+    self.fig, self.axs = self.plt.subplots(1, 2, tight_layout=True)
+
+    n_bins = 21
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches = self.axs[0].hist(dist1, bins=n_bins)
+
+   #We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+   #we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+   #We can also normalize our inputs by the total number of counts
+    self.axs[1].hist(dist1, bins=n_bins, density=True)
+
+   #Now we format the y-axis to display percentage
+    self.axs[1].yaxis.set_major_formatter(PercentFormatter(xmax=1))
+
+    ltitle = self.title + ' counts'
+    self.axs[0].set_title(ltitle)
+    rtitle = self.title + ' percent'
+    self.axs[1].set_title(rtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot2histogram(self, dist1, dist2, name1=' ', name2=' '):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'dist1 min: %s, max: %s' % (np.min(dist1), np.max(dist1))
+    print(msg)
+    msg = 'dist2 min: %s, max: %s' % (np.min(dist2), np.max(dist2))
+    print(msg)
+
+    self.fig, self.axs = self.plt.subplots(1, 2, tight_layout=True)
+
+    n_bins = 21
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches0 = self.axs[0].hist(dist1, bins=n_bins)
+    N, bins, patches1 = self.axs[1].hist(dist2, bins=n_bins)
+
+   #We can set the number of bins with the *bins* keyword argument.
+   #self.axs[0].hist(dist1, bins=n_bins)
+   #self.axs[1].hist(dist2, bins=n_bins)
+
+   #We'll color code by height, but you could use any scalar
+    fracs = N / N.max()
+   #we need to normalize the data to 0..1 for the full range of the colormap
+    norm = colors.Normalize(fracs.min(), fracs.max())
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches0):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+   #Now, we'll loop through our objects and set the color of each accordingly
+    for thisfrac, thispatch in zip(fracs, patches1):
+      color = self.plt.cm.viridis(norm(thisfrac))
+      thispatch.set_facecolor(color)
+
+    ltitle = self.title + ' ' + name1
+    self.axs[0].set_title(ltitle)
+    rtitle = self.title + ' ' + name2
+    self.axs[1].set_title(rtitle)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot_cdf(self, omb, omin=-1.0, omax=1.0):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'omb min: %s, max: %s' % (np.min(omb), np.max(omb))
+    print(msg)
+
+    self.fig, self.ax = self.plt.subplots(1, 1, tight_layout=True)
+
+    dx = 1.0/len(omb)
+    X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+   # Compute the CDF
+    CY = np.cumsum(Y * dx)
+
+   # Plot both
+    self.plt.plot(X, Y)
+    self.plt.plot(X, CY, 'r--')
+
+    self.ax.set_title(self.title)
+
+    self.display(output=self.output, image_name=self.image_name)
+
+#------------------------------------------------------------------------------
+  def get_omb(self, obs, obsprs, pltprs):
+    omb = []
+
+    nobs = len(obs)
+    delt = 0.1
+
+    for n in range(nobs):
+      if(abs(obsprs[n] - pltprs) < delt):
+        omb.append(obs[n])
+
+    return omb
+
+ #----------------------------------------------------------------------------------------------
+  def plot_cdf_panel(self, obs, prs, pltprs):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'obs min: %s, max: %s' % (np.min(obs), np.max(obs))
+    print(msg)
+
+    nrow = 2
+    ncol = 4
+    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+
+    self.fig.suptitle(self.title, fontsize=16)
+
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        omb = self.get_omb(obs, prs, pltprs[n])
+        dx = 1.0/len(omb)
+        X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+       # Compute the CDF
+        CY = np.cumsum(Y * dx)
+
+       # Plot both
+        self.ax[j][i].plot(X, Y)
+        self.ax[j][i].plot(X, CY, 'r--')
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        self.ax[j][i].set_title(axtitle)
+
+    n = len(pltprs)
+    dx = 1.0/len(omb)
+    X, Y = sorted(omb), np.arange(len(omb)) / len(omb)
+
+   # Compute the CDF
+    CY = np.cumsum(Y * dx)
+
+   # Plot both
+    self.ax[nrow-1][ncol-1].plot(X, Y)
+    self.ax[nrow-1][ncol-1].plot(X, CY, 'r--')
+
+    axtitle = 'All Obs'
+    self.ax[nrow-1][ncol-1].set_title(axtitle)
+
+    self.plt.tight_layout()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+ #----------------------------------------------------------------------------------------------
+  def plot_histograph_panel(self, obs, prs, pltprs):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    msg = 'obs min: %s, max: %s' % (np.min(obs), np.max(obs))
+    print(msg)
+
+    nrow = 2
+    ncol = 4
+    self.fig, self.ax = self.plt.subplots(nrow, ncol)
+
+    self.fig.suptitle(self.title, fontsize=16)
+
+    n_bins = 21
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        omb = self.get_omb(obs, prs, pltprs[n])
+
+       #N is the count in each bin, bins is the lower-limit of the bin
+        N, bins, patches = self.ax[j][i].hist(omb, bins=n_bins)
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        self.ax[j][i].set_title(axtitle)
+
+   #N is the count in each bin, bins is the lower-limit of the bin
+    N, bins, patches = self.ax[nrow-1][ncol-1].hist(obs, bins=n_bins)
+    axtitle = 'All Obs'
+    self.ax[nrow-1][ncol-1].set_title(axtitle)
+
+    self.plt.tight_layout()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+  def get_sclvar(self, var, inbound=False):
+    vm = abs(np.min(var))
+    bm = abs(np.max(var))
+    if(bm > vm):
+      vm = bm
+
+    if(vm < 1.0e-6):
+      vm = 1.0
+    size = np.zeros((len(var)), dtype=float)
+    for n in range(len(size)):
+      size[n] = 1.0 + 100.0*abs(var[n])/vm
+
+    if(inbound):
+      midvar = np.where(var > self.cblevs[0], var, self.cblevs[0])
+      sclvar = np.where(midvar < self.cblevs[-1], midvar, self.cblevs[-1])
+    else:
+      sclvar = var
+
+    return sclvar, size
+
+  def set_lim(self, plt, varname):
+    if(varname == 'surface_pressure'):
+      plt.set_xlim((-7, 7))
+      plt.set_ylim((-7, 7))
+    elif(varname == 'air_temperature'):
+      plt.set_xlim((-7, 7))
+      plt.set_ylim((-7, 7))
+    elif(varname == 'eastward_wind' or varname == 'northward_wind'):
+      plt.set_xlim((-10, 10))
+      plt.set_ylim((-10, 10))
+    elif(varname == 'specific_humidity'):
+      plt.set_xlim((-5, 5))
+      plt.set_ylim((-5, 5))
+
+    plt.set_xlabel('JEDI_omb', fontsize=14)
+    plt.set_ylabel('GSI_omb', fontsize=14)
+    plt.grid(color='grey', linestyle='-', linewidth=0.25, alpha=0.5)
+
+  def scatter_plot_panel(self, x, y, varname, prs, pltprs, inbound=False):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    nrow = 2
+    ncol = 4
+    fig, ax = self.plt.subplots(nrow, ncol)
+
+    fig.suptitle(self.title, fontsize=16)
+
+    for j in range(nrow):
+      for i in range(ncol):
+        n = j*ncol + i
+        if(n == (nrow*ncol - 1)):
+           continue
+        xomb = self.get_omb(x, prs, pltprs[n])
+        yomb = self.get_omb(y, prs, pltprs[n])
+
+        var = np.array(xomb) - np.array(yomb)
+        sclvar, size = self.get_sclvar(var, inbound=inbound)
+        sc = ax[j][i].scatter(xomb, yomb, s=size, c=sclvar,
+                              cmap=self.cmapname, alpha=self.alpha)
+        self.set_lim(ax[j][i], varname)
+
+        axtitle = '%dhPa' %(int(pltprs[n]))
+        ax[j][i].set_title(axtitle)
+
+    var = np.array(x) - np.array(y)
+    sclvar, size = self.get_sclvar(var, inbound=inbound)
+    sc = ax[nrow-1][ncol-1].scatter(x, y, s=size, c=sclvar,
+                                    cmap=self.cmapname, alpha=self.alpha)
+
+    self.set_lim(ax[nrow-1][ncol-1], varname)
+
+    axtitle = 'All Obs'
+    ax[nrow-1][ncol-1].set_title(axtitle)
+
+   # Normalizer
+   #norm = colors.Normalize(vmin=self.cblevs[0], vmax=self.cblevs[-1])
+ 
+   # creating ScalarMappable
+   #sm = cm.ScalarMappable(cmap=self.cmapname, norm=norm)
+   #sm.set_array([])
+
+   #cb = fig.colorbar(sm, ax=ax.ravel().tolist(), location='bottom', extend='both',
+   #                  pad=self.pad, ticks=self.cblevs, shrink=0.8)
+
+   # position of colorbar
+   # where arg is [left, bottom, width, height]
+    cax = fig.add_axes([0.25, 0.025, 0.50, 0.02])
+
+    cb = fig.colorbar(sc, cax=cax, orientation='horizontal', extend='both',
+                      ticks=self.cblevs, shrink=0.5)
+
+    self.label = 'OMB'
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.set_clim(self.cblevs[0], self.cblevs[-1])
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.plt.tight_layout()
+
+    self.display(output=self.output, image_name=self.image_name)
+
+#------------------------------------------------------------------------------
+  def build_basemap4panel(self, ax):
+    basemap_dict = {'resolution': 'c', 'projection': 'cyl',
+                    'llcrnrlat': -90.0, 'llcrnrlon': 0.0,
+                    'urcrnrlat':  90.0, 'urcrnrlon': 360.0}
+    basemap_dict['lat_0'] = 0.0
+    basemap_dict['lon_0'] = 180.0
+    basemap_dict['ax'] = ax
+
+    basemap = Basemap(**basemap_dict)
+
+    return basemap
+#------------------------------------------------------------------------------
+  def get_prs_level_omb(self, latitude, longitude, GSI_omb, JEDI_omb,
+                        pressure, pltprs):
+    if(pressure is None):
+      return latitude, longitude, GSI_omb, JEDI_omb
+
+    olat = []
+    olon = []
+    Gomb = []
+    Jomb = []
+
+    nobs = len(latitude)
+    delt = 0.1
+
+    for n in range(nobs):
+      if(abs(pressure[n] - pltprs) < delt):
+        olat.append(latitude[n])
+        olon.append(longitude[n])
+        Gomb.append(GSI_omb[n])
+        Jomb.append(JEDI_omb[n])
+
+    return olat, olon, Gomb, Jomb
+
+#------------------------------------------------------------------------------
+  def add_coastline(self, plt):
+   #draw coastlines
+    color = 'black'
+    linewidth = 0.5
+    plt.drawcoastlines(color=color, linewidth=linewidth)
+
+   #draw parallels
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+    circles = np.arange(-90,90,30)
+    plt.drawparallels(np.arange(-90,90,30),labels=[1,1,0,1],
+                      color=color, linewidth=linewidth,
+                      dashes=dashes, fontsize=fontsize)
+
+   #draw meridians
+    color = 'green'
+    linewidth = 0.5
+    fontsize = 8
+    dashes = [10, 10]
+    meridians = np.arange(0,360,30)
+    plt.drawmeridians(np.arange(0,360,30),labels=[1,1,0,1],
+                      color=color, linewidth=linewidth,
+                      dashes=dashes, fontsize=fontsize)
+
+  def obs_panel(self, latitude, longitude, GSI_omb, JEDI_omb, prs,
+                pltprs, varname, inbound=False):
+    self.plt = matplotlib.pyplot
+    try:
+      self.plt.close('all')
+      self.plt.clf()
+    except Exception:
+      pass
+
+    newprs = [50.0]
+    newprs.extend(pltprs)
+
+    nrow = 3
+    ncol = 3
+    fig, axes = self.plt.subplots(nrow, ncol)
+
+    fig.suptitle(self.title, fontsize=16)
+
+    n = 0
+    for ax in axes.flat:
+      if(n == (nrow*ncol - 1)):
+        axtitle = 'All Obs'
+        olat = latitude
+        olon = longitude
+        gomb = GSI_omb
+        jomb = JEDI_omb
+      else:
+        axtitle = '%dhPa' %(int(newprs[n]))
+        olat, olon, gomb, jomb = self.get_prs_level_omb(latitude, longitude,
+                                                        GSI_omb, JEDI_omb,
+                                                        prs, newprs[n])
+      n += 1
+      var = np.array(jomb) - np.array(gomb)
+      sclvar, size = self.get_sclvar(var, inbound=inbound)
+
+      ax.set_title(axtitle)
+      ax.set_aspect('auto')
+
+      map_ax = self.build_basemap4panel(ax)
+      x, y = map_ax(olon, olat)
+      sc = map_ax.scatter(x, y, s=size, c=sclvar,
+                          cmap=self.cmapname, alpha=self.alpha)
+      self.add_coastline(map_ax)
+
+   #cb = fig.colorbar(sc, ax=axes[nrow-1, :], location='bottom', extend='both',
+   #                  pad=self.pad, ticks=self.cblevs, shrink=0.5)
+
+   # position of colorbar
+   # where arg is [left, bottom, width, height]
+    cax = fig.add_axes([0.25, 0.025, 0.50, 0.02])
+
+    cb = fig.colorbar(sc, cax=cax, orientation='horizontal', extend='both',
+                      ticks=self.cblevs, shrink=0.5)
+
+    self.label = 'OMB'
+    cb.set_label(label=self.label, size=self.size, weight=self.weight)
+
+    cb.set_clim(self.cblevs[0], self.cblevs[-1])
+
+    cb.ax.tick_params(labelsize=self.labelsize)
+    self.set_format(cb)
+
+    self.plt.tight_layout(h_pad=1)
 
     self.display(output=self.output, image_name=self.image_name)
 

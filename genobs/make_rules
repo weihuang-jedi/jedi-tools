@@ -13,16 +13,16 @@ RANLIB	=       echo
 
 ####################################################
 
-NETCDFPATH      =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/netcdf/4.7.4
-HDF5PATH        =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/hdf5/1.12.0
+#NETCDF_ROOT     =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/netcdf/4.7.4
+#HDF5_ROOT       =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/hdf5/1.12.0
 
-#NETCDFPATH      =       /scratch1/NCEPDEV/jcsda/jedipara/opt/modules/intel-2020.2/impi-2020.2/netcdf/4.7.4
-#HDF5PATH        =       /scratch1/NCEPDEV/jcsda/jedipara/opt/modules/intel-2020.2/impi-2020.2/hdf5/1.12.0
+#NETCDF_ROOT     =       /scratch1/NCEPDEV/jcsda/jedipara/opt/modules/intel-2020.2/impi-2020.2/netcdf/4.7.4
+#HDF5_ROOT       =       /scratch1/NCEPDEV/jcsda/jedipara/opt/modules/intel-2020.2/impi-2020.2/hdf5/1.12.0
 
 ####################################################
 
-NETCDF_LIB      =       -L$(NETCDFPATH)/lib -lnetcdff -lnetcdf
-HDF5_LIB        =       -L$(HDF5PATH)/lib -lhdf5_hl -lhdf5
+NETCDF_LIB      =       -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf
+HDF5_LIB        =       -L$(HDF5_ROOT)/lib -lhdf5_hl -lhdf5
 
 FC_INCLUDES	=	-I. -I$(NETCDFPATH)/include 
 FC_COMPILE_OPTIONS = 	-fpp #-cpp #-fdefault-real-8

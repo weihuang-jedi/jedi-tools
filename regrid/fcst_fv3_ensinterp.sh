@@ -2,8 +2,8 @@
 
 #SBATCH --ntasks-per-node=6
 #SBATCH -N 1
-#SBATCH -n 6
-#SBATCH -t 01:15:00
+#SBATCH -n 1
+#SBATCH -t 05:15:00
 #SBATCH -A gsienkf
 ##SBATCH --partition=orion
 #SBATCH --partition=bigmem
@@ -22,15 +22,38 @@
 
  executable=/work2/noaa/gsienkf/weihuang/tools/weiinterp/fv3interp2latlon.exe
 
- yymmdd=20160111
- analhour=06
- fcsthout=12
- PREFIX=${yymmdd}.${fcsthout}0000.
+ if [ "generate_weights" -eq "1" ]
+ then
+   cp input.nml.weights input.nml
+   ${executable}
+   generate_weights=0
+ fi
 
-#ensdir=/work/noaa/gsienkf/weihuang/jedi/EnsembleDaVal/Data/ens
- ensdir=/work2/noaa/gsienkf/weihuang/data/UFSRNR_GSI_SOCA_LETKF_COUPLED_012016_FROLOV_IAU/20160111060000/intercom/forecast
-#latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
- latlondir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata
+ year=2015
+ month=12
+ day=6
+ hour=3
+#hour=9
+
+ second=$((hour*3600))
+ monthstr=`printf "%02d\n" $month`
+ daystr=`printf "%02d\n" $day`
+ hourstr=`printf "%02d\n" $hour`
+ secondtr=`printf "%02d\n" $second`
+ yymmdd=${year}${monthstr}${daystr}
+ prefix=${yymmdd}.${hourstr}0000.
+
+ topdatadir=/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production
+ atmlatlondir=${topdatadir}/latlongrid/ATM
+ ocnlatlondir=${topdatadir}/latlongrid/OCN
+ icelatlondir=${topdatadir}/latlongrid/ICE
+ weightfilename=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc
+ numberoftypes=5
+ datatypes="'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile'"
+
+ mkdir -p ${atmlatlondir}
+ mkdir -p ${ocnlatlondir}
+ mkdir -p ${icelatlondir}
 
  number_members=80
 
@@ -50,38 +73,29 @@
      ensfile=ens1_000${n}.nc
    fi
 
-   datadir=${ensdir}/${member_str}/bkgrd/
-   grid_fv3=${latlondir}/${ensfile}
+   datadir=${topdatadir}/${member_str}/RESTART/
+   outfv3filename=${atmlatlondir}/${ensfile}
 
-   if [ "generate_weights" -eq "1" ]
-   then
-     cp input.nml.weights input.nml
-   else
-     DIRNAME=${datadir}
-     OUTPUTFILE=${grid_fv3}
-     WEIGHTFILE=/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc
-     NUM_TYPES=5
-     DATATYPES="'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',"
-
-     sed -e "s?DIRNAME?${DIRNAME}?g" \
-         -e "s?OUTPUTFILE?${OUTPUTFILE}?g" \
-         -e "s?WEIGHTFILE?${WEIGHTFILE}?g" \
-         -e "s?PREFIX?${PREFIX}?g" \
-         -e "s?NUM_TYPES?${NUM_TYPES}?g" \
-         -e "s?DATATYPES?${DATATYPES}?g" \
-         input.nml.template > input.nml
-   fi
+   sed -e "s?DIRNAME?${datadir}?g" \
+       -e "s?OUTPUTFILE?${outfv3filename}?g" \
+       -e "s?WEIGHTFILE?${weightfilename}?g" \
+       -e "s?PREFIX?${prefix}?g" \
+       -e "s?NUM_TYPES?${numberoftypes}?g" \
+       -e "s?DATATYPES?${datatypes}?g" \
+       input.nml.template > input.nml
 
    ${executable}
 
+   python ocean2latlon.py --nemsrc=${datadir} --year=${year} --month=${monthstr} --day=${daystr} --hour=${hourstr}
+
+  #mv MOM.res.${year}-${monthstr}-${daystr}-${hourstr}-00-00_360x180.nc ${ocnlatlondir}/${ensfile}
+   mv MOM.res.*.nc ${ocnlatlondir}/${ensfile}
+
+   python ice2latlon.py --icesrc=${datadir} --year=${year} --month=${monthstr} --day=${daystr} --hour=${hourstr}
+
+  #mv iced.${year}-${monthstr}-${daystr}-${secondstr}_360x180.nc ${icelatlondir}/${ensfile}
+   mv iced.*.nc ${icelatlondir}/${ensfile}
+
    n=$(( $n + 1 ))
  done
-
-#nemsrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
-
-#python ocean2latlon.py --nemsrc=${nemsrc}
-
-#icesrc=/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/
-
-#python ice2latlon.py --icesrc=${icesrc}
 

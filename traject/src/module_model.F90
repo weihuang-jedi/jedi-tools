@@ -69,8 +69,8 @@ contains
 
     character(len=1024) :: dimname, varname
 
-   !print *, 'Enter initialize_modelgrid'
-   !print *, 'filename: <', trim(filename), '>'
+    print *, 'Enter initialize_modelgrid'
+    print *, 'filename: <', trim(filename), '>'
 
     include_parents = 0
 
@@ -84,8 +84,8 @@ contains
     rc = nf90_inquire(model%fileid, model%nDims, model%nVars, &
                       model%nGlobalAtts, model%unlimdimid)
     call check_status(rc)
-   !print *, 'nVars: ', model%nVars
-   !print *, 'nDims: ', model%nDims
+    print *, 'nVars: ', model%nVars
+    print *, 'nDims: ', model%nDims
 
    !Allocate memory.
     allocate(model%dimids(model%nDims))
@@ -95,7 +95,7 @@ contains
     rc = nf90_inq_dimids(model%fileid, model%nDims, model%dimids, include_parents)
     call check_status(rc)
 
-   !print *, 'dimids: ', model%dimids
+    print *, 'dimids: ', model%dimids
 
     do n = 1, model%nDims
        rc = nf90_inquire_dimension(model%fileid, model%dimids(n), dimname, dimlen)
@@ -147,15 +147,6 @@ contains
        call check_status(rc)
       !print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
 
-      !rc = nf90_inquire_variable(model%fileid, model%varids(n), &
-      !         model%vars(n)%varname, model%vars(n)%xtype, &
-      !         model%vars(n)%ndims, model%vars(n)%dimids, &
-      !         model%vars(n)%nAtts, model%vars(n)%contiguous, &
-      !         model%vars(n)%chunksizes, model%vars(n)%deflate_level, &
-      !         model%vars(n)%shuffle, model%vars(n)%fletcher32, &
-      !         model%vars(n)%endianness)
-      !call check_status(rc)
-
        if(trim(model%vars(n)%varname) == 'lon') then
           print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
           allocate(model%lon(model%nlon))
@@ -175,11 +166,13 @@ contains
        else if(trim(model%vars(n)%varname) == 'hor') then
           if(.not. allocated(model%hor)) allocate(model%hor(model%nhor))
           rc = nf90_get_var(model%fileid, model%varids(n), model%hor)
-       else if(trim(model%vars(n)%varname) == 'ua') then
+       else if((trim(model%vars(n)%varname) == 'ua') &
+          .or. (trim(model%vars(n)%varname) == 'u')) then
           print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
           allocate(model%u(model%nlon, model%nlat, model%nlev))
           rc = nf90_get_var(model%fileid, model%varids(n), model%u)
-       else if(trim(model%vars(n)%varname) == 'va') then
+       else if((trim(model%vars(n)%varname) == 'va') &
+          .or. (trim(model%vars(n)%varname) == 'v')) then
           print *, 'Var No. ', n, ': ', trim(model%vars(n)%varname)
           allocate(model%v(model%nlon, model%nlat, model%nlev))
           rc = nf90_get_var(model%fileid, model%varids(n), model%v)
@@ -236,7 +229,7 @@ contains
     end do
     end do
 
-   !print *, 'Leave initialize_modelgrid'
+    print *, 'Leave initialize_modelgrid'
 
   end subroutine initialize_modelgrid
 

@@ -15,10 +15,10 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
 
    integer :: rc
 
-  !print *, 'Enter generate_header'
-  !print *, 'k = ', k
-  !print *, 'gridtype = ', trim(gridtype)
-  !print *, 'flnm = ', trim(flnm)
+   print *, 'Enter generate_header'
+   print *, 'k = ', k
+   print *, 'gridtype = ', trim(gridtype)
+   print *, 'flnm = ', trim(flnm)
   
    if(k == 1) then
       call create_coord(tile(1)%nt, tile(1)%time(1:tile(1)%nt), latlon, flnm)
@@ -36,6 +36,8 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
       call create_phy_data_var_attr(tile, latlon)
    end if
 
+   print *, 'last = ', last
+
    if(last) then
      !End define mode.
       rc = nf90_enddef(latlon%ncid)
@@ -48,7 +50,7 @@ subroutine generate_header(k, tile, latlon, gridtype, flnm, last)
       end if
    end if
 
-  !print *, 'Leave generate_header'
+   print *, 'Leave generate_header'
 
 end subroutine generate_header
 

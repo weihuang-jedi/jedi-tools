@@ -254,10 +254,15 @@ class Ocean2LatLon():
 if __name__ == '__main__':
   debug = 1
   wgtdir = 'grids/'
-  nemsrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
-  outdir = 'output/'
+ #nemsrc = '/work/noaa/gsienkf/weihuang/jedi/vis_tools/sergey.samples/RESTART/'
+  nemsrc = '/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/mem001/RESTART/'
+  outdir = './'
+  year = None
+  month = None
+  day = None
+  hour = None
 
-  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'nemsrc='])
+  opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'wgtdir=', 'nemsrc=', 'year=', 'month=', 'day=', 'hour='])
 
   for o, a in opts:
     if o in ('--debug'):
@@ -266,6 +271,14 @@ if __name__ == '__main__':
       wgtdir = a
     elif o in ('--nemsrc'):
       nemsrc = a
+    elif o in ('--year'):
+      year = a
+    elif o in ('--month'):
+      month = a
+    elif o in ('--day'):
+      day = a
+    elif o in ('--hour'):
+      hour = a
    #else:
    #  assert False, 'unhandled option'
 
@@ -274,7 +287,13 @@ if __name__ == '__main__':
 
  #open input file to get input grid
  #files=glob.glob('ocn_????_??_??.nc')
-  files=glob.glob(nemsrc + 'MOM.res.????-??-??-??-00-00.nc')
+ #files=glob.glob(nemsrc + 'MOM.res.????-??-??-??-00-00.nc')
+ #if(hour is None):
+ #  filelist = '%sMOM.res.????-??-??-??-00-00.nc' %(nemsrc)
+ #else:
+ #  filelist = '%sMOM.res.????-??-??-%s-00-00.nc' %(nemsrc, hour)
+  filelist = '%sMOM.res.%s-%s-%s-%s-00-00.nc' %(nemsrc, year, month, day, hour)
+  files=glob.glob(filelist)
   files.sort()
 
   o2ll = Ocean2LatLon(debug=debug, wgtdir=wgtdir)

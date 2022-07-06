@@ -4,11 +4,11 @@
  griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/',
  grid_type = 'C96_grid.tile',
 
- dirname = '/work2/noaa/gsienkf/weihuang/data/UFSRNR_GSI_SOCA_LETKF_COUPLED_012016_FROLOV_IAU/20160111060000/intercom/forecast/mem080/bkgrd/',
- output_flnm = '/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata/ens1_000080.nc',
+ dirname = '/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/mem080/RESTART/',
+ output_flnm = '/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/latlongrid/ATM/ens1_000080.nc',
  wgt_flnm = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc',
 
- prefix = '20160111.120000.',
+ prefix = '20151206.030000.',
 
  has_prefix = .true.,
  use_uv_directly = .true.,
@@ -18,6 +18,6 @@
  npnt = 4
 
  num_types = 5,
- data_types = 'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile',,
+ data_types = 'fv_core.res.tile', 'sfc_data.tile', 'fv_tracer.res.tile', 'fv_srf_wnd.res.tile', 'phy_data.tile'
 /
 

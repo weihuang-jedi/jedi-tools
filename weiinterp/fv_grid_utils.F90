@@ -473,7 +473,7 @@ end subroutine cubed_to_latlon
   enddo
 
 !-------------------------------------------------------------------
-! Page 41, Silverman's book on Vector Algebra; spherical trigonmetry
+! Page 41, 'Silverman's book on Vector Algebra; spherical trigonmetry
 !-------------------------------------------------------------------
 ! Vector P:= e1 X e2
    px = e1(2)*e2(3) - e1(3)*e2(2) 

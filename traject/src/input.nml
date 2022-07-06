@@ -3,6 +3,7 @@
  output_flnm = 'trajectory.nc',
  numbstep = 200,
  dt = 300.0,
+ height = 5000.0,
  debug_on = .true.,
 /
 

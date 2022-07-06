@@ -1,0 +1,21 @@
+&control_param
+ datadir = 'DATADIR',
+ output_flnm = 'trajectory_HEIGHTm.nc',
+ dt = DT.0,
+ height = HEIGHT.0,
+ debug_on = .true.,
+
+ start_year = SYEAR,
+ start_month = SMONTH,
+ start_day = SDAY,
+ start_hour = SHOUR,
+
+ end_year = EYEAR,
+ end_month = EMONTH,
+ end_day = EDAY,
+ end_hour = EHOUR,
+
+ interval_hour = INTVHOUR,
+/
+
+

@@ -1,0 +1,23 @@
+&control_param
+ generate_weights = .false.
+
+ griddirname = '/work/noaa/gsienkf/weihuang/UFS-RNR-tools/JEDI.FV3-increments/grid/C96/',
+ grid_type = 'C96_grid.tile',
+
+ dirname = '/work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/analysis.1/increment/',
+ output_flnm = 'latlondata/latlon_increment.nc',
+ wgt_flnm = '/work2/noaa/gsienkf/weihuang/tools/weiinterp/weights.nc',
+
+ prefix = '20200110.030000.',
+
+ has_prefix = .true.,
+ use_uv_directly = .true.,
+
+ nlon = 360
+ nlat = 180
+ npnt = 4
+
+ num_types = 2,
+ data_types = 'fv_core.res.tile', 'fv_tracer.res.tile',
+/
+

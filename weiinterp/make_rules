@@ -13,8 +13,11 @@ RANLIB	=       echo
 
 ####################################################
 
-NETCDFPATH      =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/netcdf/4.7.4
-HDF5PATH        =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/hdf5/1.12.0
+#NETCDFPATH      =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/netcdf/4.7.4
+#HDF5PATH        =       /work/noaa/da/grubin/opt/modules/intel-2020/impi-2020/hdf5/1.12.0
+
+NETCDFPATH      =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/netcdf/4.7.4
+HDF5PATH        =       /work/noaa/da/jedipara/opt/modules/intel-2020.2/impi-2020.2/hdf5/1.12.0
 
 ####################################################
 

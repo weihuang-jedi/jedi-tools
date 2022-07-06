@@ -14,6 +14,7 @@ MODULE namelist_module
   character(len=128)  :: grid_type
   character(len=128), dimension(max_types) :: data_types
   integer :: nlat, nlon, npnt, num_types
+  integer :: debug_level
   logical :: generate_weights, debug_on, has_prefix, use_uv_directly
 
 contains
@@ -31,6 +32,7 @@ contains
                              num_types, data_types, &
                              generate_weights, prefix, &
                              griddirname, grid_type, &
+                             debug_on, debug_level, &
                              has_prefix, use_uv_directly
 
     program_name = 'Interpolate FV3 to regular Lat-Lon Grid'
@@ -56,6 +58,7 @@ contains
 
     generate_weights = .false.
     debug_on = .false.
+    debug_level = 0
 
     ! Check whether file exists.
     inquire(file=file_path, iostat=rc)

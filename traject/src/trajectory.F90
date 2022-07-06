@@ -16,7 +16,7 @@ PROGRAM trajectory
 
    call initialize_modelgrid(model, trim(filename))
 
-   call initialize_trajectory(model, traject)
+   call initialize_trajectory(model, traject, height)
 
    call create_header(traject, output_flnm, numbstep, dt)
 

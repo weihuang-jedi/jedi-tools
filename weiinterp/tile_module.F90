@@ -92,6 +92,7 @@ contains
     character(len=1024) :: dimname, varname
 
    !print *, 'Enter initialize_tilegrid'
+   !print *, 'File: ', __FILE__, ', line: ', __LINE__
    !print *, 'dname: <', trim(dname), '>'
    !print *, 'ftype: <', trim(ftype), '>'
 

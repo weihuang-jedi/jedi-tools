@@ -18,6 +18,6 @@
  npnt = 4
 
  num_types = NUM_TYPES,
- data_types = DATATYPES,
+ data_types = DATATYPES
 /
 

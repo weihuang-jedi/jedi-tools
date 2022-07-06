@@ -14,27 +14,21 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
 
    real, dimension(1:trajectory%nx) :: lon
    real, dimension(1:trajectory%ny) :: lat
-   real, dimension(1:trajectory%nz) :: alt
    real, dimension(numbstep+1)      :: time
 
    integer :: i, j, k, rc
    logical :: fileExists
 
    do i = 1, trajectory%nx
-      lon(i) = trajectory%x(i,1,1)
+      lon(i) = trajectory%x(i,1)
    end do
 
    do j = 1, trajectory%ny
-      lat(j) = trajectory%y(1,j,1)
-   end do
-
-   do k = 1, trajectory%nz
-      alt(k) = real(k-1)
+      lat(j) = trajectory%y(1,j)
    end do
 
   !print *, 'lon = ', lon
   !print *, 'lat = ', lat
-  !print *, 'alt = ', alt
 
    do i = 0, numbstep
       time(i) = i * dt
@@ -61,12 +55,9 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
    call check_status(rc)
    rc = nf90_def_dim(trajectory%ncid, 'lat', trajectory%ny, trajectory%dimidy)
    call check_status(rc)
-   rc = nf90_def_dim(trajectory%ncid, 'alt', trajectory%nz, trajectory%dimidz)
-   call check_status(rc)
 
   !print *, 'dimidx = ', trajectory%dimidx
   !print *, 'dimidy = ', trajectory%dimidy
-  !print *, 'dimidz = ', trajectory%dimidz
   !print *, 'dimidt = ', trajectory%dimidt
 
    call write_global_attr(trajectory%ncid, flnm, 'Trajectory', 'Start from model grid')
@@ -88,9 +79,6 @@ subroutine create_header(trajectory, flnm, numbstep, dt)
 
   !write lat
    call nc_put1Dvar0(trajectory%ncid, 'lat', lat, 1, trajectory%ny)
-
-  !write alt
-   call nc_put1Dvar0(trajectory%ncid, 'alt', alt, 1, trajectory%nz)
 
   !write time
    call nc_put1Dvar0(trajectory%ncid, 'time', time, 1, numbstep+1)
@@ -135,15 +123,6 @@ subroutine write_var_attr(trajectory)
                       "degree_north", &
                       "Latitude" )
 
-   dimids(1) = trajectory%dimidz
-   nd = 1
-!--Field alt
-   call nc_putAxisAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
-                      "alt", &
-                      "Altitude Coordinate", &
-                      "meter", &
-                      "Altitude" )
-
    dimids(1) = trajectory%dimidt
    nd = 1
 !--Field time
@@ -155,16 +134,15 @@ subroutine write_var_attr(trajectory)
 
    dimids(1) = trajectory%dimidx
    dimids(2) = trajectory%dimidy
-   dimids(3) = trajectory%dimidz
-   dimids(4) = trajectory%dimidt
-   nd = 4
+   dimids(3) = trajectory%dimidt
+   nd = 3
 
 !--Field x
    call nc_putAttr(trajectory%ncid, nd, dimids, NF90_REAL, &
                    "x", &
                    "Longitude of Trajectory", &
                    "degree_east", &
-                   "time alt lat lon", &
+                   "time lat lon", &
                    missing_real)
 
 !--Field y
@@ -172,7 +150,7 @@ subroutine write_var_attr(trajectory)
                    "y", &
                    "Latitude of Trajectory", &
                    "degree_north", &
-                   "time alt lat lon", &
+                   "time lat lon", &
                    missing_real)
 
 !--Field z
@@ -180,7 +158,7 @@ subroutine write_var_attr(trajectory)
                    "z", &
                    "Altitude of Trajectory", &
                    "meter", &
-                   "time alt lat lon", &
+                   "time lat lon", &
                    missing_real)
 
 end subroutine write_var_attr
@@ -215,38 +193,30 @@ subroutine output_trajectory(trajectory, n, dt)
    integer :: rc, nd
    real, dimension(1:1) :: time
 
-   real, dimension(trajectory%nx, trajectory%ny, trajectory%nz) :: var
+   real, dimension(trajectory%nx, trajectory%ny) :: var
 
   !print *, 'Enter output_trajectory'
    print *, 'n = ', n, ', dt = ', dt, ', time = ', n*dt
   !print *, 'trajectory%ncid = ', trajectory%ncid
   !print *, 'trajectory%nx = ', trajectory%nx
   !print *, 'trajectory%ny = ', trajectory%ny
-  !print *, 'trajectory%nz = ', trajectory%nz
 
    time(1) = n * dt
-  !print *, 'trajectory%x = ', trajectory%x(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
   !print *, 'time = ', time
 
   !call nc_put1Dvar(trajectory%ncid, 'time', time, n+1, 1, 1)
 
    var = trajectory%x
-  !print *, 'var x = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
-  !call nc_put3Dvar(trajectory%ncid, 'x', trajectory%x, n+1, &
-   call nc_put3Dvar(trajectory%ncid, 'x', var, n+1, &
-        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+   call nc_put2Dvar(trajectory%ncid, 'x', var, n+1, &
+        1, trajectory%nx, 1, trajectory%ny)
 
    var = trajectory%y
-  !print *, 'var y = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
-  !call nc_put3Dvar(trajectory%ncid, 'y', trajectory%y, n+1, &
-   call nc_put3Dvar(trajectory%ncid, 'y', var, n+1, &
-        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+   call nc_put2Dvar(trajectory%ncid, 'y', var, n+1, &
+        1, trajectory%nx, 1, trajectory%ny)
 
    var = trajectory%z
-  !print *, 'var z = ', var(1:trajectory%nx:30,1:trajectory%ny:30,1:trajectory%nz:30)
-  !call nc_put3Dvar(trajectory%ncid, 'z', trajectory%z, n+1, &
-   call nc_put3Dvar(trajectory%ncid, 'z', var, n+1, &
-        1, trajectory%nx, 1, trajectory%ny, 1, trajectory%nz)
+   call nc_put2Dvar(trajectory%ncid, 'z', var, n+1, &
+        1, trajectory%nx, 1, trajectory%ny)
 
   !print *, 'Leave output_trajectory'
 

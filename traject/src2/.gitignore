@@ -1,0 +1,10 @@
+input.nml
+*.png
+*.f90
+*.exe
+*.mod
+*.nc
+*.o
+*.a
+data
+day*

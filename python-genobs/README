@@ -1,0 +1,24 @@
+This is a python program to generate IODA V2 format single (or few) observation(s).
+
+For now, it worked for air_temperature.
+
+1. Have base.yaml file, for the ncdump of one IODA V2 obs file
+
+2. have a metadata.yaml file, which define the observations.
+
+	a. latitude/longitude/air_pressure to define the location
+	b. datetime to define the time of the obs.
+	c. height and station_evelation are not used here.
+	d. GsiHofX, GsiHofXBc, and ObsValue to define the observations.
+
+One may not know what GsiHofX, GsiHofXBc, and ObsValue should be at first.
+To get a good value for: GsiHofX, GsiHofXBc, and ObsValue
+One can do this for steps:
+
+1. Set some guess value for: GsiHofX, GsiHofXBc, and ObsValue.
+   Run GETKF, and check ioda output obs file. find goog value for
+   them, such as from one of those hofx value.
+
+2. use the new value for: GsiHofX, GsiHofXBc, and ObsValue,
+   and re-run this program.
+

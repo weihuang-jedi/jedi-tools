@@ -2,8 +2,8 @@
 
 #SBATCH --ntasks-per-node=6
 #SBATCH -N 1
-#SBATCH -n 6
-#SBATCH -t 01:15:00
+#SBATCH -n 1
+#SBATCH -t 03:15:00
 #SBATCH -A gsienkf
 ##SBATCH --partition=orion
 #SBATCH --partition=bigmem
@@ -19,8 +19,13 @@
 #executable=/work2/noaa/gsienkf/weihuang/tools/concatefiles/concatefiles.exe
  executable=/work/noaa/gsienkf/weihuang/tools/concatefiles/concatefiles.exe
 
- sourcedir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
- targetdir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata
+#sourcedir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/latlondata
+#targetdir=/work/noaa/gsienkf/weihuang/jedi/case_study/bump/tmplatlondata
+
+ sourcedir=/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/latlongrid
+ targetdir=/work2/noaa/gsienkf/weihuang/WCLEKF_PRODFORECAST/20151205000000/production/latlongrid/AtmOcnIce
+
+ mkdir -p ${targetdir}
 
  number_members=80
 #number_members=1
@@ -41,10 +46,10 @@
      ensfile=ens1_000${n}.nc
    fi
 
-   atmfile=${sourcedir}/${ensfile}
-   ocnfile=${sourcedir}/ocean_${ensfile}
-   icefile=${sourcedir}/ice_${ensfile}
-   combinedfile=${targetdir}/AtmOcnIce_${ensfile}
+   atmfile=${sourcedir}/ATM/${ensfile}
+   ocnfile=${sourcedir}/OCN/${ensfile}
+   icefile=${sourcedir}/ICE/${ensfile}
+   combinedfile=${targetdir}/${ensfile}
 
    sed -e "s?ATMFILE?${atmfile}?" \
        -e "s?OCNFILE?${ocnfile}?" \
