@@ -138,10 +138,15 @@ class ModifyIODA2Obs():
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
-  indir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/amsua/amsua-obs'
-  inflnm = 'amsua_n19_obs_2020121500_m.nc4'
 
-  outdir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/amsua/manmade-amsua-obs'
+ #indir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/amsua/amsua-obs'
+ #outdir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/amsua/manmade-amsua-obs'
+ #inflnm = 'amsua_n19_obs_2020121500_m.nc4'
+
+  indir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/iasi/iasi-obs'
+  outdir = '/work2/noaa/gsienkf/weihuang/jedi/case_study/iasi/manmade-iasi-obs'
+ #inflnm = 'iasi_metop-a_obs_2020121500_m.nc4'
+  inflnm = 'iasi_metop-b_obs_2020121500_m.nc4'
 
  #opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'dirname=', 'filename='])
 
