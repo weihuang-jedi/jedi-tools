@@ -6,8 +6,5 @@ sfcship/
 sondes/
 vadwind/
 windprof/
-sondes-ts.yaml
-gsi-made-ps-only.yaml
-gsi-made-ship-ps-only.yaml
-gsi-made-sondes-ps-only.yaml
-obscoef.yaml
+*.yaml
+*.png
