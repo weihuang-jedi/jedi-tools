@@ -8,7 +8,7 @@ diagnostics:
     datasets:
       - name: experiment
         filenames:
-          - 2020-12-15T00:00:00Z/ncdiag.exp.ob.PT6H.amsua_n19.2020-12-14T21:00:00Z.nc4
+          - /work/noaa/gsienkf/weihuang/tools/eva/src/eva/tests/data/amsua_n19.hofx.2020-12-14T21:00:00Z.nc4
         channels: &channels 1-15
         groups:
           - name: ObsValue
@@ -18,8 +18,10 @@ diagnostics:
           - name: hofx
           - name: EffectiveQC
           - name: MetaData
-          - name: GsiGeoVaLs
-          - name: GeoVaLs
+          - name: GsiHofX
+          - name: ObsValue
+         #- name: GsiGeoVaLs
+         #- name: GeoVaLs
 
   transforms:
 

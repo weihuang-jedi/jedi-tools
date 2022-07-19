@@ -7,14 +7,15 @@ diagnostics:
     datasets:
       - name: experiment
         filenames:
-          - /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/ioda_v2_data/out.12/sfc_ps_obs_2020011006_0003.nc4
+          - OBSFILE
         groups:
           - name: ObsValue
-            variables: &variables [surface_pressure]
+            variables: &variables [VARNAME]
           - name: hofx_y_mean_xb0
           - name: EffectiveQC0
           - name: GsiHofX
-          - name: GsiEffectiveQC
+         #- name: GsiEffectiveQC
+          - name: PreQC
           - name: MetaData
 
   transforms:
@@ -38,7 +39,7 @@ diagnostics:
       new name: experiment::hofxPassedQc::${variable}
       starting field: experiment::GsiHofX::${variable}
       where:
-        - experiment::GsiEffectiveQC::${variable} == 0
+        - experiment::PreQC::${variable} == 0
       for:
         variable: *variables
 
@@ -47,7 +48,7 @@ diagnostics:
       new name: experiment::hofx_y_mean_xb0PassedQc::${variable}
       starting field: experiment::hofx_y_mean_xb0::${variable}
       where:
-        - experiment::GsiEffectiveQC::${variable} == 0
+        - experiment::PreQC::${variable} == 0
       for:
         variable: *variables
 
@@ -56,7 +57,7 @@ diagnostics:
       new name: experiment::ObsValueMinushofxPassedQc::${variable}
       starting field: experiment::ObsValueMinusHofx::${variable}
       where:
-        - experiment::GsiEffectiveQC::${variable} == 0
+        - experiment::PreQC::${variable} == 0
       for:
         variable: *variables
 
@@ -65,7 +66,7 @@ diagnostics:
       new name: experiment::ObsValueMinushofx_y_mean_xb0PassedQc::${variable}
       starting field: experiment::ObsValueMinushofx_y_mean_xb0::${variable}
       where:
-        - experiment::GsiEffectiveQC::${variable} == 0
+        - experiment::PreQC::${variable} == 0
       for:
         variable: *variables
 
@@ -77,8 +78,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. JEDI h(x) | Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/jedi_hofx_vs_obs_surf_${variable}.png
+        title: 'Observations vs. JEDI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/jedi_hofx_vs_obs_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
           add_ylabel: 'JEDI h(x)'
@@ -109,8 +110,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. GSI h(x) | Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_hofx_vs_obs_surf_${variable}.png
+        title: 'Observations vs. GSI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_hofx_vs_obs_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
           add_ylabel: 'GSI h(x)'
@@ -142,8 +143,9 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI h(x) vs. GSI h(x) | Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_hofx_vs_jedi_hofx_surf_${variable}.png
+        title: 'JEDI h(x) vs. GSI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_hofx_vs_jedi_hofx_${variable}.png
+        bbox_inches: 'tight'
       plots:
         - add_xlabel: 'GSI h(x)'
           add_ylabel: 'JEDI h(x)'
@@ -175,8 +177,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI omb vs. GSI omb| Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_omb_vs_jedi_omb_surf_${variable}.png
+        title: 'JEDI omb vs. GSI omb| CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_omb_vs_jedi_omb_${variable}.png
       plots:
         - add_xlabel: 'GSI observation minus h(x)'
           add_ylabel: 'JEDI observation minus h(x)'

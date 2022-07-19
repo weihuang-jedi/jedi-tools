@@ -7,15 +7,11 @@ diagnostics:
     datasets:
       - name: experiment
         filenames:
-          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/ioda_v2_data/out.12/sfc_ps_obs_2020011006_0003.nc4
-          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfc_ps_obs_2020011006_0000.nc4
-          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/sfc-ship/obsout/sfcship_ps_obs_2020011006_0000.nc4
-          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfcship_ps_obs_2020011006_0000.nc4
-          - /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfcship_ps_obs_2020011006_0000.nc4
+          - OBSFILE
         groups:
           - name: ObsValue
-            variables: &variables [surface_pressure]
-          - name: GsiHofXBc
+            variables: &variables [VARNAME]
+          - name: hofx_y_mean_xb0
           - name: EffectiveQC0
           - name: GsiHofX
           - name: GsiEffectiveQC
@@ -25,8 +21,8 @@ diagnostics:
 
     # Generate omb for GSI
     - transform: arithmetic
-      new name: experiment::ObsValueMinusGsiHofXBc::${variable}
-      equals: experiment::ObsValue::${variable}-experiment::GsiHofXBc::${variable}
+      new name: experiment::ObsValueMinushofx_y_mean_xb0::${variable}
+      equals: experiment::ObsValue::${variable}-experiment::hofx_y_mean_xb0::${variable}
       for:
         variable: *variables
 
@@ -48,8 +44,8 @@ diagnostics:
 
     # Generate GSI hofx that passed JEDI QC
     - transform: accept where
-      new name: experiment::GsiHofXBcPassedQc::${variable}
-      starting field: experiment::GsiHofXBc::${variable}
+      new name: experiment::hofx_y_mean_xb0PassedQc::${variable}
+      starting field: experiment::hofx_y_mean_xb0::${variable}
       where:
         - experiment::GsiEffectiveQC::${variable} == 0
       for:
@@ -66,8 +62,8 @@ diagnostics:
 
     # Generate omb that passed QC for GSI
     - transform: accept where
-      new name: experiment::ObsValueMinusGsiHofXBcPassedQc::${variable}
-      starting field: experiment::ObsValueMinusGsiHofXBc::${variable}
+      new name: experiment::ObsValueMinushofx_y_mean_xb0PassedQc::${variable}
+      starting field: experiment::ObsValueMinushofx_y_mean_xb0::${variable}
       where:
         - experiment::GsiEffectiveQC::${variable} == 0
       for:
@@ -81,8 +77,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. JEDI h(x) | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/jedi_hofx_vs_obs_surf_${variable}.png
+        title: 'Observations vs. JEDI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/jedi_hofx_vs_obs_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
           add_ylabel: 'JEDI h(x)'
@@ -113,8 +109,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. GSI h(x) | ${variable_title}'
-        output name: observation_scatter_plots/${variable}/gsi_hofx_vs_obs_${variable}.png
+        title: 'Observations vs. GSI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_hofx_vs_obs_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
           add_ylabel: 'GSI h(x)'
@@ -126,7 +122,7 @@ diagnostics:
             x:
               variable: experiment::ObsValue::${variable}
             y:
-              variable: experiment::GsiHofXBc::${variable}
+              variable: experiment::hofx_y_mean_xb0::${variable}
             markersize: 5
             color: 'black'
             label: 'GSI h(x) versus obs (all obs)'
@@ -134,7 +130,7 @@ diagnostics:
             x:
               variable: experiment::ObsValue::${variable}
             y:
-              variable: experiment::GsiHofXBcPassedQc::${variable}
+              variable: experiment::hofx_y_mean_xb0PassedQc::${variable}
             markersize: 5
             color: 'red'
             label: 'GSI h(x) versus obs (passed QC in JEDI)'
@@ -146,8 +142,9 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI h(x) vs. GSI h(x) | ${variable_title}'
-        output name: observation_scatter_plots/${variable}/gsi_hofx_vs_jedi_hofx_${variable}.png
+        title: 'JEDI h(x) vs. GSI h(x) | CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_hofx_vs_jedi_hofx_${variable}.png
+        bbox_inches: 'tight'
       plots:
         - add_xlabel: 'GSI h(x)'
           add_ylabel: 'JEDI h(x)'
@@ -157,7 +154,7 @@ diagnostics:
           layers:
           - type: Scatter
             x:
-              variable: experiment::GsiHofXBc::${variable}
+              variable: experiment::hofx_y_mean_xb0::${variable}
             y:
               variable: experiment::GsiHofX::${variable}
             markersize: 5
@@ -165,7 +162,7 @@ diagnostics:
             label: 'JEDI h(x) versus GSI h(x)'
           - type: Scatter
             x:
-              variable: experiment::GsiHofXBcPassedQc::${variable}
+              variable: experiment::hofx_y_mean_xb0PassedQc::${variable}
             y:
               variable: experiment::hofxPassedQc::${variable}
             markersize: 5
@@ -179,8 +176,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI omb vs. GSI omb| ${variable_title}'
-        output name: observation_scatter_plots/${variable}/gsi_omb_vs_jedi_omb_${variable}.png
+        title: 'JEDI omb vs. GSI omb| CASENAME | ${variable_title}'
+        output name: PLOTDIR/${variable}/gsi_omb_vs_jedi_omb_${variable}.png
       plots:
         - add_xlabel: 'GSI observation minus h(x)'
           add_ylabel: 'JEDI observation minus h(x)'
@@ -190,7 +187,7 @@ diagnostics:
           layers:
           - type: Scatter
             x:
-              variable: experiment::ObsValueMinusGsiHofXBc::${variable}
+              variable: experiment::ObsValueMinushofx_y_mean_xb0::${variable}
             y:
               variable: experiment::ObsValueMinusHofx::${variable}
             markersize: 5
@@ -198,7 +195,7 @@ diagnostics:
             label: 'GSI omb vs JEDI omb (all obs)'
           - type: Scatter
             x:
-              variable: experiment::ObsValueMinusGsiHofXBcPassedQc::${variable}
+              variable: experiment::ObsValueMinushofx_y_mean_xb0PassedQc::${variable}
             y:
               variable: experiment::ObsValueMinushofxPassedQc::${variable}
             markersize: 5
