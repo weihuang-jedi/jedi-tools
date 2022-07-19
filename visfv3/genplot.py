@@ -275,7 +275,8 @@ class GeneratePlot():
       vm = 1.0
     size = np.zeros((len(obsvar)), dtype=float)
     for n in range(len(size)):
-      size[n] = 1.0 + 500.0*abs(obsvar[n])/vm
+      size[n] = 1.0 + 5*abs(obsvar[n])/vm
+     #size[n] = 1.0 + 500.0*abs(obsvar[n])/vm
    #obsplot = self.basemap.scatter(x, y, s=size, c=size, cmap=self.cmapname, 
     obsplot = self.basemap.scatter(x, y, s=size, c=obsvar, cmap=self.cmapname, 
                                    alpha=self.alpha)

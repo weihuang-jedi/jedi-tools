@@ -9,20 +9,19 @@
 #ioda-bundle build dir:
  export ioda_bld_dir=/work2/noaa/gsienkf/weihuang/ioda/ioda-bundle-bld
 
-#work dir:
- work_dir=/work2/noaa/gsienkf/weihuang/scripts/convert/sondesobs
-
 #output dir.
- output_dir=${work_dir}/output
+ output_dir=output
  mkdir -p ${output_dir}
 
 #input file fir.
- input_dir=${work_dir}/obs
+ input_dir=obs
  
 #usage: proc_gsi_ncdiag.py [-h] [-o OBS_DIR] [-g GEOVALS_DIR] [-d OBSDIAG_DIR] [-b ADD_OBSBIAS] [-q ADD_QCVARS] [-r ADD_TESTREFS] input_dir
 
 #Convert to ioda_v1 data
  python ${ioda_bld_dir}/bin/proc_gsi_ncdiag.py -o ${output_dir} ${input_dir}
+
+ exit 0
 
 #file name of the combined file.
  input1=sondes_q_obs_2020011006.nc4

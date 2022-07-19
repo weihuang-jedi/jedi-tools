@@ -111,6 +111,19 @@ class ModifyIODA2Obs():
    #Group information.
     if (self.debug):
       print("NetCDF group information:")
+
+    updategrplist = []
+    gsifilelist = []
+    for n in range(nem+1):
+      if(0 == n):
+        grp = 'hofx_y_mean_xb0'
+        gsipath = 'ensmean/%s' %(gsiflnm)
+      else:
+        grp = 'hofx0_%d' %(n)
+        gsipath = 'mem%3.3d/%s' %(n, gsiflnm)
+      updategrplist.append(grp)
+      gsifilelist.append(gsipath)
+
     n = 0
     for grp in self.ncin.groups:
       n += 1
@@ -127,7 +140,38 @@ class ModifyIODA2Obs():
         if (self.debug):
           print('\t\tvar No %d Name: %s' %(i, varname))
         variable = self.ncin.groups[grp].variables[varname]
-        self.write_var(grpout, variable, varname)
+
+        if((varname in varlist) and (grp in updategrplist)):
+          idx = -1
+          for k in range(nem+1):
+            if(grp == updategrplist[k]):
+              idx = k
+              break
+          if(idx < 0):
+            print('Could find related grp, exit.')
+            sys.exit(-1)
+          value = self.get_filegrpvar(gsifilelist[idx], 'GsiHofX', varname)
+          self.write_var_with_value(grpout, variable, varname, value)
+        else:
+          self.write_var(grpout, variable, varname)
+
+  def write_var_with_value(self, ncout, variable, varname, value):
+    attrs = variable.ncattrs()
+    if('_FillValue' in attrs):
+      fv = variable.getncattr('_FillValue')
+      ncout.createVariable(varname, variable.datatype, variable.dimensions,
+                                fill_value=fv)
+    else:
+      ncout.createVariable(varname, variable.datatype, variable.dimensions)
+
+   #NetCDF variable attributes
+    for attr in attrs:
+      if('_FillValue' == attr):
+        continue
+      attr_value = variable.getncattr(attr)
+      ncout.variables[varname].setncattr(attr, attr_value)
+
+    ncout.variables[varname][:] = value
 
   def write_var(self, ncout, variable, varname):
     if (self.debug):
@@ -156,17 +200,6 @@ class ModifyIODA2Obs():
 
     var = variable[:]
     ncout.variables[varname][:] = var[self.unique_index]
-
-  def get_grpvar(self, grpname, varname):
-    if(self.debug):
-      print('get "/%s/%s"' %(grpname, varname))
-
-    if (grpname is None):
-      var = self.ncin.variables[varname][:]
-    else:
-      var = self.ncin.groups[grpname].variables[varname][:]
-
-    return var
 
   def get_filegrpvar(self, filename, grpname, varname):
     if(self.debug):
@@ -211,26 +244,4 @@ if __name__ == '__main__':
   mf.set_idx(gsifile)
 
   mf.process('ensmean', gsiflnm, nem=80, varlist=['surface_pressure'])
-
-##for varname in ['air_temperature', 'eastward_wind', 'northward_wind',
-##                'specific_humidity', 'virtual_temperature']:
-# for varname in ['surface_pressure']:
-#   print('\tvarname = ', varname)
-
-#   for n in range(81):
-#     if(0 == n):
-#       grp = 'hofx_y_mean_xb0'
-#       gsipath = 'ensmean/%s' %(gsiflnm)
-#     else:
-#       grp = 'hofx0_%d' %(n)
-#       gsipath = 'mem%3.3d/%s' %(n, gsiflnm)
-
-#     var = mf.get_filegrpvar(gsipath, 'GsiHofX', varname)
-
-#     print('Group No %d: %s, gsipath: %s' %(n, grp, gsipath))
-# 
-#    #var0 = mf.get_grpvar(grp, varname)
-#     mf.put_grpvar(grp, varname, var)
-
-# mf.close()
 

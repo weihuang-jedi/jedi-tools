@@ -92,9 +92,9 @@ contains
     character(len=1024) :: dimname, varname
 
    !print *, 'Enter initialize_tilegrid'
-   !print *, 'File: ', __FILE__, ', line: ', __LINE__
-   !print *, 'dname: <', trim(dname), '>'
-   !print *, 'ftype: <', trim(ftype), '>'
+    print *, 'File: ', __FILE__, ', line: ', __LINE__
+    print *, 'dname: <', trim(dname), '>'
+    print *, 'ftype: <', trim(ftype), '>'
 
     include_parents = 0
 
@@ -107,10 +107,10 @@ contains
          write(tile(n)%filename, fmt='(2a, i1, a)') &
                trim(dname), trim(ftype), n, '.nc'
       end if
-     !print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
+      print *, 'Tile ', n, ', open filename: ', trim(tile(n)%filename)
       rc = nf90_open(trim(tile(n)%filename), nf90_nowrite, tile(n)%fileid)
       call check_status(rc)
-     !print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
+      print *, 'Tile ', n, ', fileid: ', tile(n)%fileid
 
       rc = nf90_inquire(tile(n)%fileid, tile(n)%nDims, tile(n)%nVars, &
                tile(n)%nGlobalAtts, tile(n)%unlimdimid)
