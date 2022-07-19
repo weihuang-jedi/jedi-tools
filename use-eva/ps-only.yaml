@@ -7,7 +7,11 @@ diagnostics:
     datasets:
       - name: experiment
         filenames:
-          - /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/ioda_v2_data/out.12/sfc_ps_obs_2020011006_0003.nc4
+          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/ioda_v2_data/out.12/sfc_ps_obs_2020011006_0003.nc4
+          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfc_ps_obs_2020011006_0000.nc4
+          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/sfc-ship/obsout/sfcship_ps_obs_2020011006_0000.nc4
+          #- /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfcship_ps_obs_2020011006_0000.nc4
+          - /work2/noaa/gsienkf/weihuang/jedi/case_study/surf/run_80.40t1n_36p/obsout/sfcship_ps_obs_2020011006_0000.nc4
         groups:
           - name: ObsValue
             variables: &variables [surface_pressure]
@@ -77,7 +81,7 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. JEDI h(x) | Surface Pressure | ${variable_title}'
+        title: 'Observations vs. JEDI h(x) | ${variable_title}'
         output name: observation_scatter_plots/surf/${variable}/jedi_hofx_vs_obs_surf_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
@@ -109,8 +113,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'Observations vs. GSI h(x) | Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_hofx_vs_obs_surf_${variable}.png
+        title: 'Observations vs. GSI h(x) | ${variable_title}'
+        output name: observation_scatter_plots/${variable}/gsi_hofx_vs_obs_${variable}.png
       plots:
         - add_xlabel: 'Observation Value'
           add_ylabel: 'GSI h(x)'
@@ -142,8 +146,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI h(x) vs. GSI h(x) | Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_hofx_vs_jedi_hofx_surf_${variable}.png
+        title: 'JEDI h(x) vs. GSI h(x) | ${variable_title}'
+        output name: observation_scatter_plots/${variable}/gsi_hofx_vs_jedi_hofx_${variable}.png
       plots:
         - add_xlabel: 'GSI h(x)'
           add_ylabel: 'JEDI h(x)'
@@ -175,8 +179,8 @@ diagnostics:
         variables: *variables
       figure:
         layout: [1,1]
-        title: 'JEDI omb vs. GSI omb| Surface Pressure | ${variable_title}'
-        output name: observation_scatter_plots/surf/${variable}/gsi_omb_vs_jedi_omb_surf_${variable}.png
+        title: 'JEDI omb vs. GSI omb| ${variable_title}'
+        output name: observation_scatter_plots/${variable}/gsi_omb_vs_jedi_omb_${variable}.png
       plots:
         - add_xlabel: 'GSI observation minus h(x)'
           add_ylabel: 'JEDI observation minus h(x)'
