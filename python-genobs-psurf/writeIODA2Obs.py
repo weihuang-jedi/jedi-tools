@@ -217,7 +217,7 @@ class WriteIODA2Obs():
 #-----------------------------------------------------------------------------------------
 if __name__ == '__main__':
   debug = 1
-  filename = './ioda_v2_sondes_sample.nc'
+  filename = './ioda_v2_psurf.nc'
   yamlfile = 'base.yaml'
   datafile = 'metadata.yaml'
 

@@ -24,22 +24,29 @@ def cmdout(command):
 """ Profiler """
 class Profiler:
   """ Constructor """
-  def __init__(self, debug=0, corelist=[], filelist=[], linear=0, show=0):
+  def __init__(self, debug=0, corelist=[], filelist=[], linear=0, tpn=20, show=0):
 
     """ Initialize class attributes """
     self.debug = debug
     self.corelist = corelist
     self.filelist = filelist
     self.linear = linear
+    self.tpn = tpn
     self.show = show
 
-    self.function_list = ['total', 'measurementUpdate', 'ObsSpace', 'write', 'State', 'print']
-    self.fullfunction_list = ['util::Timers::Total', 'oops::GETKFSolver::measurementUpdate',
-                              'oops::ObsSpace::ObsSpace', 'oops::State::write',
-                              'oops::State::State', 'oops::State::print']
+    self.colorlist = ['red', 'blue', 'green', 'orange', 'royalblue', 'cyan']
+    self.function_list = ['total', 'computeHofX', 'GetValues', 'LocalInterpolator', 'ObsSpace', 'State']
+    self.fullfunction_list = ['util::Timers::Total', 'oops::LocalEnsembleSolver::computeHofX',
+                              'oops::GetValues::GetValues', 'oops::LocalInterpolator::LocalInterpolator',
+                              'oops::ObsSpace::ObsSpace', 'oops::State::State']
+  def set_core_file(self, corelist=[], filelist=[]):
+    self.corelist = corelist
+    self.filelist = filelist
 
   def process(self):
     self.stats_list = {}
+   #print('self.corelist = ', self.corelist)
+   #print('self.filelist = ', self.filelist)
     for n in range(len(self.corelist)):
       core = self.corelist[n]
       flnm = self.filelist[n]
@@ -51,7 +58,7 @@ class Profiler:
         print('File <' + flnm + '> does not exist.')
 
   def stats(self, flnm):
-    avgtime = []
+    avgtime = {}
 
     with open(flnm) as fp:
       lines = fp.readlines()
@@ -97,12 +104,12 @@ class Profiler:
         funcname = self.fullfunction_list[i]
         if(name == funcname):
           avgtime[i] = float(nlist[2])
-          print('      ' + name + ':' + nlist[2])
+         #print('      ' + name + ':' + nlist[2])
 
     return ns, avgtime
 
   def plot(self):
-    title = 'Total time and top function time'
+    title = 'Top function timing of %d Cores per Node' %(self.tpn)
 
     x = np.array(self.function_list)
     ts = {}
@@ -113,9 +120,14 @@ class Profiler:
 
     nc = len(self.corelist)
     nf = len(self.function_list)
+   #print('nc = ', nc)
+   #print('nf = ', nf)
+
     for n in range(nc):
       core = self.corelist[n]
       ts[n] = []
+     #print('core = ', core)
+     #print('self.stats_list[core] = ', self.stats_list[core])
       for i in range(nf):
         t = 0.001*self.stats_list[core][i]
         ts[n].append(t)
@@ -142,31 +154,37 @@ class Profiler:
     plt.xlim([x[0], x[-1]])
     plt.ylim([tmin, tmax])
 
-    label0 = str(self.corelist[0])
-    label1 = str(self.corelist[1])
+    nf = len(self.function_list)
+    nc = len(self.corelist)
+
+    labellist = []
+    for core in self.corelist:
+      label = str(core)
+      labellist.append(label)
 
    #the actual graph:
     fig, ax = plt.subplots(figsize = (10,4))
 
-    idx = np.asarray([i for i in range(len(self.function_list))])
+    idx = np.asarray([i for i in range(nf)])
 
-    width = 0.2
+    width = 1.0/(nf+2)
 
-    ax.bar(idx, ts[0], width, color='r')
-    ax.bar(idx+width, ts[1], width, color='b')
+    for n in range(nc):
+      ax.bar(idx+n*width, ts[n], width, color=self.colorlist[n])
 
     ax.set_xticks(idx)
     ax.set_xticklabels(self.function_list, rotation=65)
-    ax.legend([str(self.corelist[0]), str(self.corelist[1])])
+    ax.legend(labellist)
     ax.set_xlabel('Functions')
     ax.set_ylabel('Time (second)')
+    ax.set_title(title)
 
     fig.tight_layout()
 
     if(self.linear):
-      imgname = 'lin_bar.png'
+      imgname = 'lin_bar_%dtpn.png' %(self.tpn)
     else:
-      imgname = 'log_bar.png'
+      imgname = 'log_bar_%dtpn.png' %(self.tpn)
       plt.yscale("log")
      #plt.yscale("log", base=2)
      #plt.yscale("log", base=10)
@@ -179,6 +197,9 @@ class Profiler:
     plt.cla()
     plt.clf()
 
+  def set_tpn(self, tpn=20):
+    self.tpn = tpn
+
   def set_linear(self, linear=1):
     self.linear = linear
 
@@ -188,16 +209,16 @@ class Profiler:
 #--------------------------------------------------------------------------------
 if __name__== '__main__':
   debug = 1
- #rundir = '/work/noaa/gsienkf/weihuang/jedi/run'
- #file1 = rundir + '/n24m10_wei/stdoutNerr/std.out.0000'
- #file2 = rundir + '/n240m10/stdoutNerr/std.out.0000'
-  rundir = '/work/noaa/gsienkf/weihuang/jedi/intelcase0/omp1'
-  file1 = rundir + '/n24m10o1/log.run.np24_nens10'
-  file2 = rundir + '/n240m10o1/log.run.np240_nens10'
-  filelist = [file1, file2]
   linear = 1
-  corelist = [24, 240]
+  tpn = 20
   show = 1
+
+  rundir = '/work2/noaa/gsienkf/weihuang/ufs/soca/new-soca-solver'
+  tasklist = [20, 24, 30, 36, 40]
+ #tasklist = [20]
+  nodelist = [2, 4, 6, 8, 10, 12]
+  filelist = []
+  corelist = []
 
   opts, args = getopt.getopt(sys.argv[1:], '', ['debug=', 'corelist=', 'filelist='])
 
@@ -210,17 +231,33 @@ if __name__== '__main__':
       filelist = a
     elif o in ('--linear'):
       linear = int(a)
+    elif o in ('--tpn'):
+      tpn = int(a)
     elif o in ('--show'):
       show = int(a)
     else:
       assert False, 'unhandled option'
 
-  pr = Profiler(debug=debug, corelist=corelist, filelist=filelist, show=show)
-  pr.process()
- #for show in [1, 0]:
-  for show in [0]:
-    pr.set_show(show=show)
-    for linear in [1, 0]:
-      pr.set_linear(linear=linear)
-      pr.plot()
+  pr = Profiler(debug=debug, corelist=corelist, filelist=filelist, tpn=tpn, show=show)
+
+  for task in tasklist:
+    filelist = []
+    corelist = []
+    for node in nodelist:
+      totalcpus = task*node
+      workdir = '%s/soca_solver.%dt%dn_%dp' %(rundir, task, node, totalcpus)
+      workdir = '%s/stdoutNerr/stdout.00000000' %(workdir)
+      filelist.append(workdir)
+      corelist.append(totalcpus)
+
+    pr.set_core_file(corelist=corelist, filelist=filelist)
+    pr.process()
+    pr.set_tpn(tpn=task)
+
+    for show in [1, 0]:
+   #for show in [0]:
+      pr.set_show(show=show)
+      for linear in [1, 0]:
+        pr.set_linear(linear=linear)
+        pr.plot()
 

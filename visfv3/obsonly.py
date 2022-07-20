@@ -17,7 +17,7 @@ from readIODA2Obs import ReadIODA2Obs
 
 #------------------------------------------------------------------------------
 if __name__ == '__main__':
-  filename = '/work/noaa/gsienkf/weihuang/jedi/case_study/sondes/ioda_v2_data/obs/ncdiag.oper.ob.PT6H.sondes.2021-01-08T21:00:00Z.nc4'
+  filename = '/work2/noaa/gsienkf/weihuang/jedi/case_study/sfc-ship/ioda_v2_data/sfcship_ps_obs_2020011006.nc4'
   debug = 1
   output = 0
 
